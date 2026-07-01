@@ -40,8 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude / tooling
-.claude
+# claude / tooling (vendored kit — .claude/rules is hand-authored, keep it tracked)
+.claude/*
+!.claude/rules
+!.claude/rules/**
 resources
 mise.toml
 release-manifest.json
