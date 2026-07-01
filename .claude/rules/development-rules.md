@@ -27,12 +27,6 @@
 - Wrap risky paths in try/catch and keep security standards in view.
 - Hand finished work to the `reviewer` agent after every implementation.
 
-## Branch Naming
-- Format: `type/slug` — e.g. `feature/add-gitignore`, `fix/login-redirect`, `chore/update-deps`.
-- `type` matches the conventional-commit types: `feature`, `fix`, `chore`, `refactor`, `docs`, `test`.
-- `slug` is kebab-case and states what the branch does, not who's doing it or when.
-- **DO NOT** name a branch after a milestone or the task itself (e.g. `init-project`) — name it after the actual change, since that's what the PR title and diff will be about.
-
 ## Pre-commit/Push Rules
 - Lint before you commit.
 - Run the tests before you push — and DO NOT wave through failing tests just to make the build or GitHub Actions green.
