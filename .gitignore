@@ -48,3 +48,6 @@ next-env.d.ts
 resources
 mise.toml
 release-manifest.json
+
+# takumi working artifacts (plan drafts, specs, evidence, debug screenshots)
+/plans
