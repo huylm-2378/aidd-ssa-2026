@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-07-02T02:58:44Z",
+  "plan": "260702-0930-homepage-saa",
+  "features": [
+    {
+      "fcode": "F001",
+      "name": "Homepage SAA",
+      "slug": "F001_HomepageSaa",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [],
+        "user_stories": [
+          "US001",
+          "US002",
+          "US003",
+          "US004",
+          "US005"
+        ],
+        "routes": [
+          "/",
+          "/awards-information",
+          "/sun-kudos"
+        ],
+        "models": [],
+        "bl": [
+          "BR001",
+          "BR002",
+          "BR003",
+          "BR004",
+          "BR005",
+          "BR006",
+          "BR007"
+        ],
+        "perms": []
+      }
+    }
+  ]
+}
