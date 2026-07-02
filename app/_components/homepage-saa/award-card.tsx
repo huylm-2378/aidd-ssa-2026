@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { AwardCategory } from "../../_lib/award-categories";
+import {
+  AWARD_FRAME_SIZE,
+  AWARD_FRAME_SRC,
+  type AwardCategory,
+} from "../../_lib/award-categories";
 
 interface AwardCardProps {
   award: AwardCategory;
@@ -26,14 +30,25 @@ export default function AwardCard({ award }: AwardCardProps) {
     <article className="flex flex-col items-start gap-6">
       <Link
         href={href}
-        className="group block aspect-square w-full overflow-hidden rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287] transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e]"
+        className="group relative block aspect-square w-full overflow-hidden rounded-[24px] border border-[#ffea9e] shadow-[0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287] transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e]"
       >
+        {/* mm:MM_MEDIA_Award BG -- shared glowing frame */}
         <Image
-          src={award.imageSrc}
-          alt={award.title}
-          width={336}
-          height={336}
+          src={AWARD_FRAME_SRC}
+          alt=""
+          width={AWARD_FRAME_SIZE}
+          height={AWARD_FRAME_SIZE}
+          aria-hidden
           className="h-full w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+        />
+        {/* mm:Awards-Name -- award-name logotype centered in the frame, scaled to its Figma proportion */}
+        <Image
+          src={award.nameSrc}
+          alt={award.title}
+          width={award.nameWidth}
+          height={award.nameHeight}
+          style={{ width: `${(award.nameWidth / AWARD_FRAME_SIZE) * 100}%` }}
+          className="absolute left-1/2 top-1/2 h-auto -translate-x-1/2 -translate-y-1/2"
         />
       </Link>
 
