@@ -14,11 +14,35 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3002](http://localhost:3002) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and adjust as needed:
+
+- `NEXT_PUBLIC_SAA_EVENT_START` — ISO-8601 datetime the Homepage countdown counts down to. It's
+  `NEXT_PUBLIC_`-prefixed, so it's inlined at build time and readable client-side. If missing or
+  malformed, the countdown safely renders its elapsed state (all tiles `00`, no crash).
+
+## Testing
+
+Unit/component tests (Vitest + Testing Library):
+
+```bash
+npm test              # run once
+npm run test:watch    # watch mode
+npm run test:coverage # with coverage report
+```
+
+End-to-end tests (Playwright):
+
+```bash
+npm run test:e2e
+```
 
 ## Learn More
 
