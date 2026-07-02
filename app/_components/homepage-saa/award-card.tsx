@@ -1,0 +1,62 @@
+import Image from "next/image";
+import Link from "next/link";
+import type { AwardCategory } from "../../_lib/award-categories";
+
+interface AwardCardProps {
+  award: AwardCategory;
+}
+
+/**
+ * A single award card. Image, title, and "Chi tiết" link all navigate to the
+ * same Awards Information anchor (BR-006).
+ *
+ * Renders one of 6 award background images cropped from the design screenshot
+ * (see plans/260702-0952-homepage-saa/data/assets.md).
+ */
+/* mm:I2167:9075;214:1019;81:2442 */
+/* mm:I2167:9076;214:1019;81:2442 */
+/* mm:I2167:9077;214:1019;81:2442 */
+/* mm:I2167:9079;214:1019;81:2442 */
+/* mm:I2167:9080;214:1019;81:2442 */
+/* mm:I2167:9081;214:1019;81:2442 */
+export default function AwardCard({ award }: AwardCardProps) {
+  const href = `/awards-information#${award.slug}`;
+
+  return (
+    <article className="flex flex-col items-start gap-6">
+      <Link
+        href={href}
+        className="group block aspect-square w-full overflow-hidden rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287] transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e]"
+      >
+        <Image
+          src={award.imageSrc}
+          alt={award.title}
+          width={336}
+          height={336}
+          className="h-full w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+        />
+      </Link>
+
+      <div className="flex flex-col items-start gap-1">
+        <Link
+          href={href}
+          className="font-montserrat text-2xl leading-8 text-[#ffea9e] transition-colors hover:text-white focus-visible:outline-none focus-visible:underline"
+        >
+          {award.title}
+        </Link>
+        <p className="line-clamp-2 font-montserrat text-base leading-6 tracking-[0.5px] text-white">
+          {award.description}
+        </p>
+        <Link
+          href={href}
+          className="flex items-center gap-1 py-4 font-montserrat text-base font-medium leading-6 tracking-[0.15px] text-white transition-colors hover:text-[#ffea9e] focus-visible:outline-none focus-visible:underline"
+        >
+          Chi tiết
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" aria-hidden>
+            <path d="M7 17L17 7M17 7H8M17 7v9" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+      </div>
+    </article>
+  );
+}
