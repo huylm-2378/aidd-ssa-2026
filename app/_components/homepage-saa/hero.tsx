@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import CountdownTile from "./countdown-tile";
 import { useCountdown } from "../../_lib/use-countdown";
@@ -16,21 +17,23 @@ export default function Hero() {
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-[#00101a] px-6 pb-16 pt-24 sm:px-12 lg:px-[144px] lg:pb-24 lg:pt-24"
+      className="relative px-6 pb-16 pt-24 sm:px-12 lg:px-[144px] lg:pb-0 lg:pt-24"
       aria-label="Event hero"
     >
-      {/* mm:2167:9028 */}
-      <div
-        className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden bg-contain bg-right-top bg-no-repeat opacity-90 [mask-image:linear-gradient(to_right,transparent,black_18%)] sm:block sm:w-3/4 lg:w-3/5"
-        style={{ backgroundImage: "url(/homepage-saa/keyvisual-bg.png)" }}
-        aria-hidden
-      />
-
+      {/* The keyvisual artwork (mm:2167:9028) + Cover scrim (mm:2167:9029) are rendered once in
+          page.tsx as a shared background spanning this hero AND the Root Further content section,
+          matching the Figma Keyvisual BG (1512x1392) that ends partway into the content. */}
       <div className="flex max-w-[1224px] flex-col items-start gap-10">
-        <h1 className="font-montserrat text-6xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-7xl lg:text-8xl">
-          Root
-          <br />
-          Further
+        {/* mm:2788:12911 -- design's exact "Root Further" logotype (custom lettering, interlocking OO) */}
+        <h1>
+          <Image
+            src="/homepage-saa/root-further-logo.png"
+            alt="Root Further"
+            width={451}
+            height={200}
+            priority
+            className="h-auto w-[220px] sm:w-[300px] lg:w-[451px]"
+          />
         </h1>
 
         <div className="flex flex-col items-start gap-4">
