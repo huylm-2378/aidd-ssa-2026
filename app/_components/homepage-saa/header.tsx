@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 interface NavLink {
@@ -25,6 +26,7 @@ function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
 }
 
 export default function Header() {
+  const pathname = usePathname();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<"VN" | "EN">("VN");
@@ -50,16 +52,27 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href + link.label}
-              href={link.href}
-              onClick={link.scrollTop ? handleLogoClick : undefined}
-              className="rounded px-2 py-4 font-montserrat text-sm font-bold tracking-[0.1px] text-white transition-colors hover:text-[#ffea9e] focus-visible:text-[#ffea9e] focus-visible:outline-none"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            // mm:I2167:9091;186:1579 -- the active route uses the Figma "Selected state":
+            // gold text (#FFEA9E) + 1px gold bottom border + soft glow. Inactive links stay white
+            // with a transparent border so toggling selection causes no layout shift.
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href + link.label}
+                href={link.href}
+                onClick={link.scrollTop ? handleLogoClick : undefined}
+                aria-current={isActive ? "page" : undefined}
+                className={`border-b px-2 py-4 font-montserrat text-sm font-bold tracking-[0.1px] transition-colors focus-visible:text-[#ffea9e] focus-visible:outline-none ${
+                  isActive
+                    ? "border-[#ffea9e] text-[#ffea9e] [text-shadow:0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287]"
+                    : "border-transparent text-white hover:text-[#ffea9e]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
