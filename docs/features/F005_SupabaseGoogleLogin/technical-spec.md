@@ -48,7 +48,7 @@ app/auth/callback/route.ts (GET)                         ▼
   exchangeCodeForSession(code) → sets HttpOnly cookies
   sanitizeNext(next) open-redirect guard → redirect '/'  (or /auth/auth-code-error on failure)
                                                          |
-middleware.ts (every matched request)                    ▼
+proxy.ts (every matched request)                         ▼
   updateSession() → getUser() refreshes the access-token cookie before Server Components read it
                                                          |
 AccountMenu (Client Component)                           ▼
@@ -63,7 +63,7 @@ AccountMenu (Client Component)                           ▼
 | `app/_lib/supabase/client.ts` | browser | `createBrowserClient` — Client Components only. No cookie adapter. |
 | `app/_lib/supabase/server.ts` | server (async) | `createServerClient` + `await cookies()`; `getAll`/`setAll` adapter; new instance per request. |
 | `app/_lib/supabase/middleware.ts` | edge helper | `updateSession(request)` — refresh-only; `getUser()` immediately after client creation. |
-| `middleware.ts` (repo root) | Next entry | delegates to `updateSession`; `matcher` excludes static assets. |
+| `proxy.ts` (repo root) | Next entry (Next 16 renamed `middleware`→`proxy`) | delegates to `updateSession`; `matcher` excludes static assets. |
 
 Import alias: `@/app/_lib/supabase/...` (tsconfig `@/*` → `./*`). Cookie adapter is **`getAll()`/`setAll()`
 ONLY** — the legacy `get`/`set`/`remove` trio is disallowed by current `@supabase/ssr`.
@@ -73,7 +73,8 @@ ONLY** — the legacy `get`/`set`/`remove` trio is disallowed by current `@supab
 - **FR-001 — Supabase client modules.** Create browser (`client.ts`), server (`server.ts`, async,
   `await cookies()`), and middleware helper (`middleware.ts`) per the research report. Each file < 200
   lines. Server client is instantiated per request (never a singleton).
-- **FR-002 — Token-refresh middleware.** Root `middleware.ts` delegates to `updateSession()`, which
+- **FR-002 — Token-refresh middleware.** Root `proxy.ts` (Next 16's renamed `middleware` convention)
+  delegates to `updateSession()`, which
   calls `getUser()` right after `createServerClient` (no code between them) and returns
   `supabaseResponse` unmodified. `matcher` excludes `_next/static`, `_next/image`, `favicon.ico`, and
   image assets. **Refresh-only — no `if (!user) redirect(...)` gating.**
@@ -194,7 +195,8 @@ tuning; internationalising the auth copy (language switcher stays visual-only pe
   asymmetric.
 - **Dashboard middleware snippet drift (from researcher Q3).** The `@supabase/ssr` middleware shape has
   changed across versions; sanity-check against this project's Dashboard "Connect" snippet at implement
-  time before finalising `middleware.ts`.
+  time before finalising the `updateSession` helper (`app/_lib/supabase/middleware.ts`), which the root
+  `proxy.ts` delegates to.
 - **Google Cloud OAuth client (from researcher Q4) — RESOLVED.** User confirmed the Google Cloud OAuth
   client + Supabase Google provider setup is complete (Supabase project ref's `/auth/v1/callback`
   registered in Google Cloud Console). No longer a blocker for the manual round-trip.

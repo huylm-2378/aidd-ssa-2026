@@ -11,7 +11,7 @@ without changing that public posture: it introduces a Supabase session, but no p
 
 ```
 Next.js App Router
-├── middleware.ts (root)  ── refresh-only ──▶ app/_lib/supabase/middleware.ts → updateSession()
+├── proxy.ts (root)  ── refresh-only ──▶ app/_lib/supabase/middleware.ts → updateSession()
 ├── app/
 │   ├── (marketing pages — public, unchanged)
 │   ├── login/page.tsx  ── renders ──▶ _components/login/google-login-button.tsx (client trigger)

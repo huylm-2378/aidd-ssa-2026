@@ -2,7 +2,8 @@ import { type NextRequest } from "next/server";
 import { updateSession } from "@/app/_lib/supabase/middleware";
 
 // F005: refresh the Supabase auth session on every matched request. Refresh-only — no route gating.
-export async function middleware(request: NextRequest) {
+// Next 16 renamed the `middleware` file convention to `proxy` (same signature; config.matcher unchanged).
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 
