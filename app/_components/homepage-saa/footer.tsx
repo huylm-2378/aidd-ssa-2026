@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const FOOTER_NAV_LINKS: readonly { label: string; href: string }[] = [
   { label: "About SAA 2025", href: "/" },
@@ -8,6 +11,8 @@ const FOOTER_NAV_LINKS: readonly { label: string; href: string }[] = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+
   return (
     <footer className="flex flex-col items-center gap-6 border-t border-[#2e3940] bg-[#00101a] px-6 py-10 sm:flex-row sm:justify-between sm:px-12 lg:px-[90px]">
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-20">
@@ -27,15 +32,26 @@ export default function Footer() {
         </Link>
 
         <nav className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-          {FOOTER_NAV_LINKS.map((link) => (
-            <Link
-              key={link.href + link.label}
-              href={link.href}
-              className="rounded px-4 py-4 font-montserrat text-base font-bold text-white transition-colors hover:text-[#ffea9e] focus-visible:outline-none focus-visible:text-[#ffea9e]"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {FOOTER_NAV_LINKS.map((link) => {
+            // Active route mirrors the header's gold "Selected state": gold text
+            // + gold bottom border + aria-current. Inactive links keep a
+            // transparent border so toggling selection causes no layout shift.
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href + link.label}
+                href={link.href}
+                aria-current={isActive ? "page" : undefined}
+                className={`rounded-none border-b-2 px-4 py-4 font-montserrat text-base font-bold transition-colors focus-visible:text-[#ffea9e] focus-visible:outline-none ${
+                  isActive
+                    ? "border-[#ffea9e] text-[#ffea9e]"
+                    : "border-transparent text-white hover:text-[#ffea9e]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 

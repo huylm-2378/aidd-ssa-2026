@@ -5,6 +5,8 @@
 | # | Feature | Priority | Type | Status |
 |---|---------|----------|------|--------|
 | 1 | F001 — Homepage SAA | P1 | ui | implemented |
+| 2 | F002 — Awards Information | P1 | ui | implemented |
+| 3 | F003 — Sun* Kudos | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -17,3 +19,24 @@ theme) with a live event countdown, a 6-card award grid, a Sun* Kudos promo bann
 routes for Awards Information / Sun* Kudos.
 
 **Related:** screens: — | routes: /, /awards-information, /sun-kudos | models: —
+
+### F002 — Awards Information
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F002_AwardsInformation
+
+Public, unauthenticated Awards Information page detailing the six SAA 2025 award categories, with a
+sticky anchor-nav sidebar; deep-link target for the homepage award cards, header nav, and hero CTA.
+Static/client-rendered, reuses the homepage Header, Footer, and Kudos banner.
+
+**Related:** screens: — | routes: /awards-information | models: AwardCategory
+
+### F003 — Sun* Kudos
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F003_SunKudos
+
+Public Sun* Kudos recognition-and-thanks wall: hero + Sunner search, a Highlight Kudos carousel with
+Hashtag/Phòng ban filters, a Spotlight Board name word-cloud, and an All Kudos feed alongside a
+personal-stats + Secret Box sidebar. Static/client-rendered, mock data only, replaces the former
+placeholder route. Reuses the homepage Header and Footer.
+
+**Related:** screens: — | routes: /sun-kudos | models: KudoCard, SunnerStat, SpotlightName, RecentGiftSunner
