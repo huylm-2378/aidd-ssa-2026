@@ -7,6 +7,7 @@
 | 1 | F001 — Homepage SAA | P1 | ui | implemented |
 | 2 | F002 — Awards Information | P1 | ui | implemented |
 | 3 | F003 — Sun* Kudos | P1 | ui | implemented |
+| 4 | F004 — Login | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -40,3 +41,14 @@ personal-stats + Secret Box sidebar. Static/client-rendered, mock data only, rep
 placeholder route. Reuses the homepage Header and Footer.
 
 **Related:** screens: — | routes: /sun-kudos | models: KudoCard, SunnerStat, SpotlightName, RecentGiftSunner
+
+### F004 — Login
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F004_Login
+
+Public, unauthenticated static clone of the MoMorph "Login" frame: full-bleed keyvisual, minimal
+header (logo + language only), "ROOT FURTHER" logotype, two-line Vietnamese welcome copy, and a gold
+"LOGIN With Google" button that mock-navigates to `/`. No auth backend. Reuses the homepage Header
+and Footer via new opt-in `minimal` props (default-off elsewhere).
+
+**Related:** screens: — | routes: /login | models: —

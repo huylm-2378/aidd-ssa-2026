@@ -25,7 +25,10 @@ function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
   }
 }
 
-export default function Header() {
+// `minimal` (default false) renders the Login-screen header variant: logo + language switcher only,
+// with no nav links, notification bell, or account button. Default keeps the full header for all
+// other routes byte-for-byte unchanged.
+export default function Header({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -51,6 +54,7 @@ export default function Header() {
           />
         </Link>
 
+        {!minimal && (
         <nav className="hidden items-center gap-6 md:flex">
           {NAV_LINKS.map((link) => {
             // mm:I2167:9091;186:1579 -- the active route uses the Figma "Selected state":
@@ -74,6 +78,7 @@ export default function Header() {
             );
           })}
         </nav>
+        )}
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
@@ -123,6 +128,8 @@ export default function Header() {
           )}
         </div>
 
+        {!minimal && (
+        <>
         <button
           type="button"
           aria-label="Notifications"
@@ -167,6 +174,8 @@ export default function Header() {
             </ul>
           )}
         </div>
+        </>
+        )}
       </div>
     </header>
   );

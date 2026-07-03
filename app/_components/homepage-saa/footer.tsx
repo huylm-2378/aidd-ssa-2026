@@ -10,11 +10,18 @@ const FOOTER_NAV_LINKS: readonly { label: string; href: string }[] = [
   { label: "Sun* Kudos", href: "/sun-kudos" },
 ];
 
-export default function Footer() {
+// `minimal` (default false) renders the Login-screen footer variant: the centered copyright line
+// only, with no logo or nav links. Default keeps the full footer for all other routes unchanged.
+export default function Footer({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <footer className="flex flex-col items-center gap-6 border-t border-[#2e3940] bg-[#00101a] px-6 py-10 sm:flex-row sm:justify-between sm:px-12 lg:px-[90px]">
+    <footer
+      className={`flex flex-col items-center gap-6 border-t border-[#2e3940] bg-[#00101a] px-6 py-10 sm:px-12 lg:px-[90px] ${
+        minimal ? "sm:justify-center" : "sm:flex-row sm:justify-between"
+      }`}
+    >
+      {!minimal && (
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-20">
         <Link
           href="/"
@@ -54,6 +61,7 @@ export default function Footer() {
           })}
         </nav>
       </div>
+      )}
 
       <p className="font-montserrat-alt text-sm font-bold text-white">
         Bản quyền thuộc về Sun* © 2025
