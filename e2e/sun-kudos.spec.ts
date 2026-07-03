@@ -47,11 +47,17 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(hero.locator("h1")).toHaveText("KUDOS");
   });
 
-  test("search bar has both fields with the exact placeholders", async ({ page }) => {
+  test("search bar has both functional fields labelled with the exact copy", async ({ page }) => {
+    const prompt = page.getByRole("textbox", {
+      name: "Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?",
+    });
+    await expect(prompt).toBeVisible();
+    await prompt.fill("cảm ơn");
+    await expect(prompt).toHaveValue("cảm ơn");
+
     await expect(
-      page.getByPlaceholder("Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?"),
+      page.getByRole("searchbox", { name: "Tìm kiếm profile Sunner" }),
     ).toBeVisible();
-    await expect(page.getByPlaceholder("Tìm kiếm profile Sunner")).toBeVisible();
   });
 
   test("all section headings render", async ({ page }) => {
