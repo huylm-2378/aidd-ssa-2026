@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import AccountMenu from "./account-menu";
 
 interface NavLink {
   label: string;
@@ -31,7 +32,6 @@ function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
 export default function Header({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<"VN" | "EN">("VN");
 
   return (
@@ -146,34 +146,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#d4271d]" aria-hidden />
         </button>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setIsAccountOpen((open) => !open)}
-            aria-label="Account menu"
-            aria-haspopup="menu"
-            aria-expanded={isAccountOpen}
-            className="flex h-10 w-10 items-center justify-center rounded border border-[#998c5f] bg-transparent transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
-          >
-            <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" aria-hidden>
-              <circle cx="12" cy="8" r="3.5" strokeWidth={1.5} />
-              <path d="M4.5 19.5a7.5 7.5 0 0 1 15 0" strokeWidth={1.5} strokeLinecap="round" />
-            </svg>
-          </button>
-          {isAccountOpen && (
-            <ul
-              role="menu"
-              className="absolute right-0 top-full mt-2 min-w-[160px] overflow-hidden rounded-md border border-[#998c5f] bg-[#101417] shadow-lg"
-            >
-              <li>
-                <span className="block px-4 py-2 text-sm text-white/50">Profile</span>
-              </li>
-              <li>
-                <span className="block px-4 py-2 text-sm text-white/50">Sign out</span>
-              </li>
-            </ul>
-          )}
-        </div>
+        <AccountMenu />
         </>
         )}
       </div>

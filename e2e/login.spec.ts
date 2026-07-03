@@ -14,22 +14,28 @@ test.describe("Login page (F004)", () => {
     ).toBeVisible();
     await expect(page.getByText("Đăng nhập để khám phá!")).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "LOGIN With Google" }),
+      page.getByRole("button", { name: "LOGIN With Google" }),
     ).toBeVisible();
     await expect(
       page.locator("footer").getByText("Bản quyền thuộc về Sun* © 2025"),
     ).toBeVisible();
   });
 
-  test("the Google login button is a gold pill that navigates to '/' (SC-002)", async ({ page }) => {
-    const button = page.getByRole("link", { name: "LOGIN With Google" });
-    await expect(button).toHaveAttribute("href", "/");
+  test("the Google login button is a gold pill that triggers Google OAuth (F005 SC-001)", async ({
+    page,
+  }) => {
+    // F005: the button is now a real OAuth trigger (no longer a <Link href="/">). It must render as
+    // a gold pill and, on click, issue a request toward the Supabase authorize endpoint.
+    const button = page.getByRole("button", { name: "LOGIN With Google" });
+    await expect(button).toBeVisible();
 
     const bg = await button.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg).toBe("rgb(255, 234, 158)");
 
+    const authRequest = page.waitForRequest(/supabase\.co\/auth\/v1\/authorize/, { timeout: 15000 });
     await button.click();
-    await expect(page).toHaveURL(/\/$/);
+    const req = await authRequest;
+    expect(req.url()).toContain("provider=google");
   });
 
   test("header is minimal: logo + language only, no nav / bell / account (SC-003)", async ({

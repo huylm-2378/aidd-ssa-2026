@@ -8,6 +8,7 @@
 | 2 | F002 — Awards Information | P1 | ui | implemented |
 | 3 | F003 — Sun* Kudos | P1 | ui | implemented |
 | 4 | F004 — Login | P1 | ui | implemented |
+| 5 | F005 — Google login with Supabase | P1 | auth | implemented |
 
 ## Feature Details
 
@@ -52,3 +53,15 @@ header (logo + language only), "ROOT FURTHER" logotype, two-line Vietnamese welc
 and Footer via new opt-in `minimal` props (default-off elsewhere).
 
 **Related:** screens: — | routes: /login | models: —
+
+### F005 — Google login with Supabase
+
+**Priority:** P1 | **Type:** auth | **Status:** implemented | **Slug:** F005_SupabaseGoogleLogin
+
+Wires real Google OAuth (via Supabase `@supabase/ssr`, PKCE) behind the existing F004 `/login` screen:
+a token-refresh-only root middleware, a callback route that exchanges the code for a session, an
+auth-code-error failure page, a sign-out Server Action, and a real signed-in user (name/email/avatar)
+in the shared Header account menu. Session-only — no `profiles` table, no RLS, no route protection; all
+F001–F004 pages stay fully public. Continues F004 (modifies `google-login-button.tsx` and `header.tsx`).
+
+**Related:** screens: — | routes: /login, /auth/callback, /auth/auth-code-error | models: —
