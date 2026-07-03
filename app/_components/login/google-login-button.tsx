@@ -1,18 +1,36 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { createClient } from "@/app/_lib/supabase/client";
 import { LOGIN_CONTENT } from "../../_lib/login-content";
 
-// mms_B.3_Login (662:14425) — gold pill "LOGIN With Google" with the multicolor Google "G".
-// No auth backend: this mock-navigates to LOGIN_CONTENT.loginHref ("/"). Gold CTA styling mirrors
-// the homepage kudos-banner CTA for visual consistency.
+// F005: real Google OAuth trigger. Clicking starts Supabase `signInWithOAuth` (PKCE), which redirects
+// the browser to Google via Supabase, then back to our /auth/callback route. Gold pill styling +
+// label + Google glyph kept byte-for-byte from the F004 button.
 export default function GoogleLoginButton() {
+  const [isPending, setIsPending] = useState(false);
+
+  async function handleSignIn() {
+    setIsPending(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${location.origin}/auth/callback` },
+    });
+    // On success the browser is already navigating away; only re-enable if the call itself failed.
+    if (error) setIsPending(false);
+  }
+
   return (
-    <Link
-      href={LOGIN_CONTENT.loginHref}
-      className="inline-flex h-[60px] items-center gap-3 rounded bg-[#ffea9e] px-6 font-montserrat text-lg font-bold text-[#00101a] transition-all duration-200 hover:bg-[#fff8e1] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-[0.98]"
+    <button
+      type="button"
+      onClick={handleSignIn}
+      disabled={isPending}
+      className="inline-flex h-[60px] items-center gap-3 rounded bg-[#ffea9e] px-6 font-montserrat text-lg font-bold text-[#00101a] transition-all duration-200 hover:bg-[#fff8e1] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
     >
       <span>{LOGIN_CONTENT.loginLabel}</span>
       <GoogleGlyph />
-    </Link>
+    </button>
   );
 }
 

@@ -1,6 +1,7 @@
 {
-  "generated_at": "2026-07-02T02:58:44Z",
-  "plan": "260702-0930-homepage-saa",
+  "generated_at": "2026-07-03T15:56:52Z",
+  "plan": "260703-1719-supabase-google-login",
+  "note": "Hand-reconciled from docs/generated/feature-list.md + docs/features/F00x specs (forward-engineered repo; narrow sync, not a full rebuild-spec pass). user_stories/bl/perms populated only where already recorded; empty arrays mean not-yet-catalogued, not none.",
   "features": [
     {
       "fcode": "F001",
@@ -10,28 +11,70 @@
       "type": "ui",
       "related": {
         "screens": [],
-        "user_stories": [
-          "US001",
-          "US002",
-          "US003",
-          "US004",
-          "US005"
-        ],
-        "routes": [
-          "/",
-          "/awards-information",
-          "/sun-kudos"
-        ],
+        "user_stories": ["US001", "US002", "US003", "US004", "US005"],
+        "routes": ["/", "/awards-information", "/sun-kudos"],
         "models": [],
-        "bl": [
-          "BR001",
-          "BR002",
-          "BR003",
-          "BR004",
-          "BR005",
-          "BR006",
-          "BR007"
-        ],
+        "bl": ["BR001", "BR002", "BR003", "BR004", "BR005", "BR006", "BR007"],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F002",
+      "name": "Awards Information",
+      "slug": "F002_AwardsInformation",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [],
+        "user_stories": [],
+        "routes": ["/awards-information"],
+        "models": ["AwardCategory"],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F003",
+      "name": "Sun* Kudos",
+      "slug": "F003_SunKudos",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [],
+        "user_stories": [],
+        "routes": ["/sun-kudos"],
+        "models": ["KudoCard", "SunnerStat", "SpotlightName", "RecentGiftSunner"],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F004",
+      "name": "Login",
+      "slug": "F004_Login",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [],
+        "user_stories": [],
+        "routes": ["/login"],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F005",
+      "name": "Google login with Supabase",
+      "slug": "F005_SupabaseGoogleLogin",
+      "priority": "P1",
+      "type": "auth",
+      "related": {
+        "screens": [],
+        "user_stories": [],
+        "routes": ["/login", "/auth/callback", "/auth/auth-code-error"],
+        "models": [],
+        "bl": [],
         "perms": []
       }
     }
