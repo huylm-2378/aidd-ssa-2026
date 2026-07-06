@@ -32,7 +32,7 @@ test.describe("Write Kudo composer modal (F006)", () => {
     expect(overflow).toBe("hidden");
   });
 
-  test("recipient dropdown auto-opens on modal open and stays open (no blur-close race)", async ({
+  test("recipient dropdown does NOT auto-open; opens on user click and then stays open", async ({
     page,
   }) => {
     // Recipient options come from Supabase (F007) — needs seeded sunners.
@@ -40,11 +40,13 @@ test.describe("Write Kudo composer modal (F006)", () => {
     await page.locator("#kudos-prompt").click();
     const dialog = page.getByRole("dialog");
     const combo = dialog.getByRole("combobox", { name: /Người nhận/ });
-    // The dialog focus-trap focuses the recipient field → the list opens. It must
-    // STILL be open past the old 150ms blur-close timeout (the reported bug).
+    // The focus-trap focuses the field, but the list must NOT auto-drop over the form.
+    await expect(combo).toHaveAttribute("aria-expanded", "false");
+    await expect(dialog.getByRole("listbox")).toHaveCount(0);
+    // Opens on a real user click, and stays open past the old 150ms blur-close window.
+    await combo.click();
     await expect(combo).toHaveAttribute("aria-expanded", "true");
     await page.waitForTimeout(400);
-    await expect(combo).toHaveAttribute("aria-expanded", "true");
     await expect(dialog.getByRole("listbox")).toBeVisible();
   });
 

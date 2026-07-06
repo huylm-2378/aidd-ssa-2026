@@ -81,7 +81,10 @@ export default function RecipientSelect({
           placeholder={WRITE_KUDO_COPY.recipientPlaceholder}
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => setOpen(true)}
+          // Open on user click or typing — NOT on focus: the dialog focus-trap
+          // programmatically focuses this field when the modal opens, and opening
+          // on that would auto-drop the list over the form. Click-outside closes.
+          onClick={() => setOpen(true)}
           className="h-14 w-full rounded-lg border border-[#998c5f] bg-white px-6 py-4 font-montserrat text-base font-bold text-[#00101a] focus-visible:outline-none"
         />
         <DownIcon open={open} />

@@ -52,23 +52,21 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(hero.locator("h1")).toHaveText("KUDOS");
   });
 
-  test("search bar prompt opens the Viết Kudo composer; profile field is labelled and fillable (F006 FR-001)", async ({
+  test("search bar prompt/profile are pill buttons; prompt opens the Viết Kudo composer (F006 FR-001)", async ({
     page,
   }) => {
-    const prompt = page.getByRole("textbox", {
+    // Both pills are real buttons (the label is baked into the pill image → aria-label).
+    const prompt = page.getByRole("button", {
       name: "Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?",
     });
     await expect(prompt).toBeVisible();
-    // The prompt is now a readOnly trigger for the Viết Kudo modal (F006), not a free-text field.
     await prompt.click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
 
-    const profileSearch = page.getByRole("searchbox", { name: "Tìm kiếm profile Sunner" });
-    await expect(profileSearch).toBeVisible();
-    await profileSearch.fill("sunner");
-    await expect(profileSearch).toHaveValue("sunner");
+    const profileButton = page.getByRole("button", { name: "Tìm kiếm profile Sunner" });
+    await expect(profileButton).toBeVisible();
   });
 
   test("all section headings render", async ({ page }) => {
