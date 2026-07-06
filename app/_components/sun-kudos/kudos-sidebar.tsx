@@ -1,8 +1,8 @@
 import {
-  RECENT_GIFT_SUNNERS,
   RECENT_GIFTS_HEADING,
   SECRET_BOX_LABEL,
-  SUNNER_STATS,
+  type RecentGiftSunner,
+  type SunnerStat,
 } from "../../_lib/sun-kudos-content";
 import KudoAvatar from "./kudos-avatar";
 
@@ -10,13 +10,20 @@ import KudoAvatar from "./kudos-avatar";
  * All Kudos sidebar (MoMorph `Frame 502` right column): a personal-stats panel
  * (5 rows), a visual-only "Mở Secret Box" CTA, and the "10 Sunner nhận quà mới
  * nhất" list. Sticky on desktop; stacks full-width beneath the feed below `lg`.
+ * Stats + recent-gifts come from the server (F007, Supabase) via props.
  */
-export default function KudosSidebar() {
+export default function KudosSidebar({
+  stats,
+  recentGifts,
+}: {
+  stats: readonly SunnerStat[];
+  recentGifts: readonly RecentGiftSunner[];
+}) {
   return (
     <aside className="flex w-full flex-col gap-6 font-montserrat lg:sticky lg:top-24 lg:w-[360px] lg:shrink-0">
       <div className="flex flex-col gap-4 rounded-2xl border border-[#2e3940] bg-[#101417] p-6">
         <ul className="flex flex-col gap-3">
-          {SUNNER_STATS.map((stat) => (
+          {stats.map((stat) => (
             <li key={stat.label} className="flex items-center justify-between gap-3">
               <span className="text-sm font-bold text-white sm:text-base">
                 {stat.label}
@@ -44,7 +51,7 @@ export default function KudosSidebar() {
           {RECENT_GIFTS_HEADING}
         </h3>
         <ul className="flex flex-col gap-4">
-          {RECENT_GIFT_SUNNERS.map((sunner, index) => (
+          {recentGifts.map((sunner, index) => (
             <li key={`${sunner.name}-${index}`} className="flex items-center gap-3">
               <KudoAvatar name={sunner.name} src={sunner.avatar} size={40} />
               <div className="flex flex-col">

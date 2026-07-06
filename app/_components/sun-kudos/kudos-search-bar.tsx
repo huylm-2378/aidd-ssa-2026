@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { KUDOS_SEARCH } from "../../_lib/sun-kudos-content";
+import type { SunnerOption } from "../../_lib/write-kudo-content";
 import WriteKudoModal from "./write-kudo-modal";
 
 /**
@@ -15,7 +16,11 @@ import WriteKudoModal from "./write-kudo-modal";
  * "Viết Kudo" composer modal (F006 FR-001) — it is `readOnly` and opens the
  * modal on focus/click rather than accepting free text.
  */
-export default function KudosSearchBar() {
+export default function KudosSearchBar({
+  sunnerOptions,
+}: {
+  sunnerOptions?: readonly SunnerOption[];
+}) {
   const [profileQuery, setProfileQuery] = useState("");
   const [composerOpen, setComposerOpen] = useState(false);
   const promptRef = useRef<HTMLInputElement>(null);
@@ -90,6 +95,7 @@ export default function KudosSearchBar() {
         open={composerOpen}
         onClose={() => setComposerOpen(false)}
         triggerRef={promptRef}
+        sunnerOptions={sunnerOptions}
       />
     </>
   );

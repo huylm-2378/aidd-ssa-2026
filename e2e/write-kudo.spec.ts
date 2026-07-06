@@ -35,6 +35,8 @@ test.describe("Write Kudo composer modal (F006)", () => {
   test("Gửi is disabled until recipient, danh hiệu, content, and >=1 hashtag are filled (FR-011, SC-002)", async ({
     page,
   }) => {
+    // Recipient options come from Supabase (F007) — needs seeded data.
+    test.skip(!process.env.KUDOS_DB_SEEDED, "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)");
     await page.locator("#kudos-prompt").click();
     const dialog = page.getByRole("dialog");
     const submit = dialog.getByRole("button", { name: "Gửi" });
@@ -60,6 +62,8 @@ test.describe("Write Kudo composer modal (F006)", () => {
   });
 
   test("submitting an enabled Gửi closes the modal (FR-012)", async ({ page }) => {
+    // Persists to Supabase (F007) via Server Action — needs seeded recipients.
+    test.skip(!process.env.KUDOS_DB_SEEDED, "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)");
     await page.locator("#kudos-prompt").click();
     const dialog = page.getByRole("dialog");
 

@@ -1,8 +1,4 @@
-import {
-  SPOTLIGHT_ACTIVITY,
-  SPOTLIGHT_NAMES,
-  SPOTLIGHT_TOTAL,
-} from "../../_lib/kudos-spotlight-names";
+import { SPOTLIGHT_ACTIVITY } from "../../_lib/kudos-spotlight-names";
 import { SECTION_EYEBROW } from "../../_lib/sun-kudos-content";
 
 /** weight (1-5) → font-size scale in the cloud. */
@@ -21,14 +17,25 @@ function toneOf(weight: number): string {
   return "text-white/50";
 }
 
+/** Deterministic 1-5 weight from a name's index, so the cloud varies stably. */
+function weightOf(index: number): number {
+  return ((index * 7 + 3) % 5) + 1;
+}
+
 /**
  * Spotlight Board (MoMorph `Frame 552`, node `2940:14170`): the shared title
- * band + a dark rounded panel headed "388 KUDOS" holding a name word-cloud
- * (representative ~60-name sample sized by `weight`) and a horizontally
- * scrolling activity-log strip. The search field and expand control are
- * decorative (visual-only). A thin renderer — the names live in `_lib`.
+ * band + a dark rounded panel headed "<count> KUDOS" holding a name word-cloud
+ * and a horizontally scrolling activity-log strip. The count + names come from
+ * the server (F007, Supabase) via props; the activity strip is decorative.
+ * The search field and expand control are visual-only.
  */
-export default function SpotlightBoard() {
+export default function SpotlightBoard({
+  count,
+  names,
+}: {
+  count: number;
+  names: readonly string[];
+}) {
   return (
     <section
       className="mx-auto flex max-w-[1512px] flex-col gap-10 px-6 py-16 sm:px-12 lg:px-[144px] lg:py-24"
@@ -63,19 +70,22 @@ export default function SpotlightBoard() {
         </div>
 
         <p className="text-center font-montserrat text-4xl font-bold leading-tight sm:text-5xl">
-          <span className="text-[#ffea9e]">{SPOTLIGHT_TOTAL}</span>{" "}
+          <span className="text-[#ffea9e]">{count}</span>{" "}
           <span className="text-white">KUDOS</span>
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          {SPOTLIGHT_NAMES.map((entry, index) => (
-            <span
-              key={`${entry.name}-${index}`}
-              className={`font-montserrat font-bold leading-tight ${SIZE_SCALE[entry.weight] ?? "text-base"} ${toneOf(entry.weight)}`}
-            >
-              {entry.name}
-            </span>
-          ))}
+          {names.map((name, index) => {
+            const weight = weightOf(index);
+            return (
+              <span
+                key={`${name}-${index}`}
+                className={`font-montserrat font-bold leading-tight ${SIZE_SCALE[weight] ?? "text-base"} ${toneOf(weight)}`}
+              >
+                {name}
+              </span>
+            );
+          })}
         </div>
 
         <div className="mt-8 flex gap-8 overflow-x-auto border-t border-[#2e3940] pt-4" aria-label="Hoạt động gần đây">

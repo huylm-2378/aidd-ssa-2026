@@ -6,22 +6,28 @@ import { SUNNER_OPTIONS, WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/w
 interface RecipientSelectProps {
   value: SunnerOption | null;
   onChange: (sunner: SunnerOption | null) => void;
+  /** Recipient directory (F007: from Supabase). Falls back to the mock list. */
+  options?: readonly SunnerOption[];
 }
 
 /**
  * "Người nhận *" — recipient autocomplete (FR-005, MoMorph `mms_B.2_Search`).
  * Controlled: parent owns `value`; this field only reports the selection.
- * Typing filters the static `SUNNER_OPTIONS` mock list (case-insensitive,
- * contains); picking a result fills the field and closes the list.
+ * Typing filters `options` (case-insensitive, contains); picking a result fills
+ * the field and closes the list. Defaults to the static mock list.
  */
-export default function RecipientSelect({ value, onChange }: RecipientSelectProps) {
+export default function RecipientSelect({
+  value,
+  onChange,
+  options = SUNNER_OPTIONS,
+}: RecipientSelectProps) {
   const [query, setQuery] = useState(value?.name ?? "");
   const [open, setOpen] = useState(false);
 
   const matches =
     query.trim().length === 0
-      ? SUNNER_OPTIONS
-      : SUNNER_OPTIONS.filter((sunner) =>
+      ? options
+      : options.filter((sunner) =>
           sunner.name.toLowerCase().includes(query.trim().toLowerCase()),
         );
 

@@ -7,6 +7,13 @@ import KudosHero from "../_components/sun-kudos/kudos-hero";
 import KudosKeyvisualBg from "../_components/sun-kudos/kudos-keyvisual-bg";
 import KudosSearchBar from "../_components/sun-kudos/kudos-search-bar";
 import SpotlightBoard from "../_components/sun-kudos/spotlight-board";
+import {
+  getAllKudos,
+  getRecentGifts,
+  getSidebarStats,
+  getSpotlight,
+  getSunnerOptions,
+} from "../_lib/kudos/queries";
 
 export const metadata: Metadata = {
   title: "Sun* Kudos — Sun* Annual Awards 2025",
@@ -14,30 +21,34 @@ export const metadata: Metadata = {
 };
 
 /**
- * Faithful static clone of the MoMorph frame "Sun* Kudos - Live board"
- * (screenId `MaZUn5xHXZ`, node `2940:13431`): keyvisual hero + "KUDOS"
- * wordmark, a Sunner search bar, a Highlight Kudos carousel, a Spotlight Board
- * word-cloud, and an All Kudos feed alongside a personal-stats sidebar. Reuses
- * the homepage Header + Footer (both auto-light "Sun* Kudos" via `usePathname`).
- * Mock data only, light client-only interactivity — no backend, no persistence.
+ * Sun* Kudos board (F003) — now data-driven from Supabase (F007). This Server
+ * Component fetches every section's data in parallel via the anon server client
+ * and passes it down to the (mostly unchanged) presentational sections. The
+ * Highlight filter/sort + carousel stay client-side over the fetched set. All
+ * queries fail safe (empty view shape) so the page never crashes on a DB error
+ * — sections render their own empty states. Reuses the homepage Header + Footer.
  */
-export default function SunKudosPage() {
+export default async function SunKudosPage() {
+  const [allKudos, spotlight, stats, recentGifts, sunnerOptions] = await Promise.all([
+    getAllKudos(),
+    getSpotlight(),
+    getSidebarStats(),
+    getRecentGifts(),
+    getSunnerOptions(),
+  ]);
+
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-[#00101a]">
       <Header />
       <main className="flex-1">
-        {/* mm:2940:13432 -- the Keyvisual banner (frame y=0..512) spans the hero + search band and
-            extends ~32px past the search row (search ends y=480), so it bleeds a little into the gap
-            before the Highlight section. The wrapper's bottom padding sets that overhang; the KV is
-            clipped to it. */}
         <div className="relative isolate overflow-hidden pb-8">
           <KudosKeyvisualBg />
           <KudosHero />
-          <KudosSearchBar />
+          <KudosSearchBar sunnerOptions={sunnerOptions} />
         </div>
-        <HighlightKudosSection />
-        <SpotlightBoard />
-        <AllKudosSection />
+        <HighlightKudosSection kudos={allKudos} />
+        <SpotlightBoard count={spotlight.count} names={spotlight.names} />
+        <AllKudosSection kudos={allKudos} stats={stats} recentGifts={recentGifts} />
       </main>
       <Footer />
     </div>

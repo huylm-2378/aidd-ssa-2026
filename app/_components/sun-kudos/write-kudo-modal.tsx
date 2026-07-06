@@ -3,7 +3,8 @@
 import { useCallback, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { EMPTY_FORM, canSubmit, type WriteKudoForm } from "../../_lib/write-kudo-form";
-import { WRITE_KUDO_COPY } from "../../_lib/write-kudo-content";
+import { WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
+import { createKudo } from "../../sun-kudos/actions";
 import RecipientSelect from "./recipient-select";
 import KudoEditor from "./kudo-editor";
 import HashtagField from "./hashtag-field";
@@ -14,6 +15,8 @@ interface WriteKudoModalProps {
   open: boolean;
   onClose: () => void;
   triggerRef?: RefObject<HTMLElement | null>;
+  /** Recipient directory (F007: from Supabase). Falls back to the mock list. */
+  sunnerOptions?: readonly SunnerOption[];
 }
 
 const TITLE_ID = "write-kudo-title";
@@ -30,7 +33,7 @@ function useMounted(): boolean {
  * persistence. Portals to `document.body` so it escapes the search bar's
  * `overflow-hidden`/`backdrop-blur` ancestor stacking context (Risk in plan).
  */
-export default function WriteKudoModal({ open, onClose, triggerRef }: WriteKudoModalProps) {
+export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOptions }: WriteKudoModalProps) {
   const mounted = useMounted();
   const [form, setForm] = useState<WriteKudoForm>(EMPTY_FORM);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,9 +56,19 @@ export default function WriteKudoModal({ open, onClose, triggerRef }: WriteKudoM
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit() {
-    if (!canSubmit(form)) return;
-    handleClose();
+  async function handleSubmit() {
+    if (!canSubmit(form) || !form.recipient) return;
+    const result = await createKudo({
+      receiverId: form.recipient.id,
+      title: form.award,
+      body: form.body,
+      hashtags: [...form.hashtags],
+      imageCount: form.images.length,
+      isAnonymous: form.anonymous,
+    });
+    // On success the board is revalidated server-side; close + reset. On error
+    // keep the modal open so the user can retry (no data lost).
+    if (result.ok) handleClose();
   }
 
   return createPortal(
@@ -80,6 +93,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef }: WriteKudoM
         <RecipientSelect
           value={form.recipient}
           onChange={(recipient) => updateForm("recipient", recipient)}
+          options={sunnerOptions}
         />
 
         <div className="flex w-full flex-col gap-4">

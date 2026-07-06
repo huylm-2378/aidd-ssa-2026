@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { filterKudos, getHighlightKudos, HIGHLIGHT_KUDOS } from "../../_lib/kudos-cards";
+import { filterKudos, getHighlightKudos } from "../../_lib/kudos-cards";
+import type { KudoCard } from "../../_lib/kudos-shared";
 import {
   DEPARTMENT_FILTERS,
   HASHTAG_FILTERS,
@@ -13,18 +14,23 @@ import HighlightCarousel from "./highlight-carousel";
 /**
  * Highlight Kudos section (MoMorph `B_Highlight`, node `2940:13451`): the
  * shared title band, Hashtag + Phòng ban filter dropdowns, and the
- * `HighlightCarousel`. Owns the filter state (FIX 3) and `pageIndex`; filters
- * narrow `HIGHLIGHT_KUDOS` (AND-combined) before the top-5-most-liked sort
- * (FIX 2), and changing either filter resets the carousel to page 0.
+ * `HighlightCarousel`. Kudos come from the server (F007, Supabase) via the
+ * `kudos` prop. Owns the filter state (FIX 3) and `pageIndex`; filters narrow
+ * the set (AND-combined) before the top-5-most-liked sort (FIX 2), and changing
+ * either filter resets the carousel to page 0.
  */
-export default function HighlightKudosSection() {
+export default function HighlightKudosSection({
+  kudos,
+}: {
+  kudos: readonly KudoCard[];
+}) {
   const [hashtag, setHashtag] = useState<string | null>(null);
   const [department, setDepartment] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
 
   const visibleKudos = useMemo(
-    () => getHighlightKudos(filterKudos(HIGHLIGHT_KUDOS, { hashtag, department })),
-    [hashtag, department],
+    () => getHighlightKudos(filterKudos(kudos, { hashtag, department })),
+    [kudos, hashtag, department],
   );
 
   const handleHashtagChange = (value: string | null) => {

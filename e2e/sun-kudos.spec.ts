@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+// The board is data-driven from Supabase (F007). Tests that assert seeded rows
+// skip unless KUDOS_DB_SEEDED=1 (set it after running supabase/migrations +
+// seed.sql). Structural tests (nav, hero, headings) run unconditionally.
+const SEED_GUARD = "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)";
+
 test.describe("Sun* Kudos page (F003)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/sun-kudos");
@@ -71,14 +76,15 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(page.getByRole("heading", { name: "SPOTLIGHT BOARD" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "ALL KUDOS" })).toBeVisible();
 
+    // Spotlight shows a "<count> KUDOS" heading; the count is data-driven.
     const board = page.locator("section[aria-label='Spotlight Board']");
-    await expect(board.getByText("388", { exact: true })).toBeVisible();
     await expect(board.getByText("KUDOS", { exact: true })).toBeVisible();
   });
 
   test("a Kudo card shows sender+receiver, title, hashtags, like count, and actions", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
     // At pageIndex 0, the carousel shows: current card (visible) + next peek (hidden).
     // The first article in the section is the current card.
@@ -95,6 +101,7 @@ test.describe("Sun* Kudos page (F003)", () => {
   });
 
   test("carousel prev/next advances the 'n/N' indicator (SC-004)", async ({ page }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
     const indicator = highlight.getByText(/^\d+\/\d+$/);
     await expect(indicator).toHaveText("1/5");
@@ -109,6 +116,7 @@ test.describe("Sun* Kudos page (F003)", () => {
   test("selecting a Phòng ban filter narrows the highlight feed and resets the carousel to page 1 (FIX 3)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
     const indicator = highlight.getByText(/^\d+\/\d+$/);
 
@@ -116,22 +124,24 @@ test.describe("Sun* Kudos page (F003)", () => {
     await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
     await expect(indicator).toHaveText("2/5");
 
-    // "Design" matches exactly one highlight card → count shrinks to 1, page resets.
+    // Seed: "Marketing" has exactly one kudo → count shrinks to 1, page resets.
     await highlight.getByRole("button", { name: "Phòng ban" }).click();
-    await highlight.getByRole("option", { name: "Design" }).click();
+    await highlight.getByRole("option", { name: "Marketing" }).click();
     await expect(indicator).toHaveText("1/1");
   });
 
   test("a filter combination with no matches shows the empty state, announced politely (FIX 3)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
 
-    // Design card has #Leadership/#Trust, so Design + #Creative matches nothing.
+    // Seed: the sole Marketing kudo has #Dedicated/#Customer, so Marketing +
+    // #Teamwork matches nothing.
     await highlight.getByRole("button", { name: "Phòng ban" }).click();
-    await highlight.getByRole("option", { name: "Design" }).click();
+    await highlight.getByRole("option", { name: "Marketing" }).click();
     await highlight.getByRole("button", { name: "Hashtag" }).click();
-    await highlight.getByRole("option", { name: "#Creative" }).click();
+    await highlight.getByRole("option", { name: "#Teamwork" }).click();
 
     const empty = highlight.getByRole("status");
     await expect(empty).toHaveText("Không có Kudo phù hợp");
@@ -142,6 +152,7 @@ test.describe("Sun* Kudos page (F003)", () => {
   test("sidebar shows 5 stat rows, a Secret Box button, and 10 recent-gift entries (FR-009)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const all = page.locator("section[aria-label='All Kudos']");
     for (const label of [
       "Số Kudos bạn nhận được:",
@@ -160,6 +171,7 @@ test.describe("Sun* Kudos page (F003)", () => {
   test("feed + sidebar are side by side at 1512px and stack with no overflow at 375px (SC-003)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     await page.setViewportSize({ width: 1512, height: 900 });
     const all = page.locator("section[aria-label='All Kudos']");
     const feed = all.locator("article").first();
