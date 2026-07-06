@@ -29,7 +29,7 @@ homepage Header and Footer.
 | FR-002 | Render keyvisual background banner behind the hero (reusing the homepage keyvisual asset/approach) | `KudosHero` | yes |
 | FR-003 | Render hero: "Hệ thống ghi nhận và cảm ơn" label + "KUDOS" logotype/title | `KudosHero` | yes |
 | FR-004 | Render search bar: prompt input ("Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?") + "Tìm kiếm profile Sunner" search field with icons | `KudosSearchBar` | yes |
-| FR-005 | Render Highlight Kudos section: "Sun* Annual Awards 2025" eyebrow + "HIGHLIGHT KUDOS" title + Hashtag & Phòng ban filter dropdowns + horizontal card carousel with prev/next arrows + page indicator ("2/5") | `HighlightKudosSection` | yes |
+| FR-005 | Render Highlight Kudos section: "Sun* Annual Awards 2025" eyebrow + "HIGHLIGHT KUDOS" title + functional Hashtag & Phòng ban filter dropdowns (AND-combined, reset carousel to page 1 on change, empty state "Không có Kudo phù hợp" when nothing matches) + multi-card peek carousel (center card + partially-visible neighbors, single-card fallback below `lg`) with prev/next arrows + page indicator, showing the top-5 most-liked kudos sorted by `likeCount` descending (`getHighlightKudos`) | `HighlightKudosSection` | yes |
 | FR-006 | Render Kudo card: sender & receiver avatars + names + role code + hero-tier badge, timestamp range, title, body text, hashtags, like count (`♥ 1.000`), "Copy Link", "Xem chi tiết" | `KudoCard` | yes |
 | FR-007 | Render Spotlight Board: "Sun* Annual Awards 2025" eyebrow + "SPOTLIGHT BOARD" title + dark board panel headed "388 KUDOS" showing a name word-cloud (representative mock sample of names, varied sizes) + a scrolling activity-log strip | `SpotlightBoard` | yes |
 | FR-008 | Render All Kudos section: "Sun* Annual Awards 2025" eyebrow + "ALL KUDOS" title + a vertical feed of Kudo cards (left column) | `AllKudosSection` | yes |
@@ -40,7 +40,7 @@ homepage Header and Footer.
 ## Key entities
 
 - `KudoCard`: `id, senderName, senderRole, senderTier, senderAvatar, receiverName, receiverRole,
-  receiverTier, receiverAvatar, timeRange, title, body, hashtags[], likeCount, photos[]`.
+  receiverTier, receiverAvatar, timeRange, title, body, hashtags[], likeCount, photos[], department`.
 - `SunnerStat`: `label, value`.
 - `SpotlightName`: `name, weight` (weight drives font size in the cloud).
 - `RecentGiftSunner`: `name, note, avatar`.
@@ -62,12 +62,15 @@ Mock data lives in a dedicated `app/_lib/*` module (following `award-categories.
 - Faithful static clone with mock data (matches F001/F002 pattern) — no backend, no persistence.
 - Spotlight Board renders a representative sample of names (not all 118 design nodes); the "388
   KUDOS" and activity-log figures are static mock content.
-- Interactivity is light/client-only: carousel paging and (optionally) client-side filter/search
-  narrowing over mock data; "Mở Secret Box" and profile search are visual-only (no real action).
+- Interactivity is light/client-only: carousel paging plus real client-side Hashtag/Phòng ban
+  filter narrowing (AND-combined) over mock data; "Mở Secret Box" and profile search remain
+  visual-only (no real action).
 - Avatars/photos use available Figma-exported assets or neutral placeholders where unavailable.
 
 ## Out of scope
 
-- Real Kudos submission ("Viết Kudo" / "Gửi lời chúc Kudos"), Kudo detail view, Secret Box open flow,
-  profile pages, notifications, authentication, and any backend/persistence.
-- The separate `D1_Sunkudos`, `Viết Kudo`, `View Kudo`, `Thể lệ` frames (future features).
+- Real Kudos submission ("Gửi lời chúc Kudos" backend persistence — the composer UI itself now ships
+  as F006_WriteKudo), Kudo detail view, Secret Box open flow, profile pages, notifications,
+  authentication, and any backend/persistence.
+- The separate `D1_Sunkudos`, `View Kudo`, `Thể lệ` frames (future features; `Viết Kudo` shipped as
+  F006_WriteKudo).

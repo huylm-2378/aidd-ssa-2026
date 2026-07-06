@@ -47,17 +47,23 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(hero.locator("h1")).toHaveText("KUDOS");
   });
 
-  test("search bar has both functional fields labelled with the exact copy", async ({ page }) => {
+  test("search bar prompt opens the Viết Kudo composer; profile field is labelled and fillable (F006 FR-001)", async ({
+    page,
+  }) => {
     const prompt = page.getByRole("textbox", {
       name: "Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?",
     });
     await expect(prompt).toBeVisible();
-    await prompt.fill("cảm ơn");
-    await expect(prompt).toHaveValue("cảm ơn");
+    // The prompt is now a readOnly trigger for the Viết Kudo modal (F006), not a free-text field.
+    await prompt.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
 
-    await expect(
-      page.getByRole("searchbox", { name: "Tìm kiếm profile Sunner" }),
-    ).toBeVisible();
+    const profileSearch = page.getByRole("searchbox", { name: "Tìm kiếm profile Sunner" });
+    await expect(profileSearch).toBeVisible();
+    await profileSearch.fill("sunner");
+    await expect(profileSearch).toHaveValue("sunner");
   });
 
   test("all section headings render", async ({ page }) => {
@@ -74,12 +80,16 @@ test.describe("Sun* Kudos page (F003)", () => {
     page,
   }) => {
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
+    // At pageIndex 0, the carousel shows: current card (visible) + next peek (hidden).
+    // The first article in the section is the current card.
+    // The highlight shows the TOP-5 by likeCount desc. The first card (index 0) is now
+    // hl-3 (1520 likes) "CHỖ DỰA CỦA TEAM", not hl-1 (1000 likes) "IDOL GIỚI TRẺ".
     const card = highlight.locator("article").first();
-    await expect(card.getByText("Huỳnh Dương Xuân Nhật")).toBeVisible();
-    await expect(card.getByText("Trần Minh Anh")).toBeVisible();
-    await expect(card.getByText("IDOL GIỚI TRẺ")).toBeVisible();
-    await expect(card.getByText("#Dedicated #Inspring")).toBeVisible();
-    await expect(card.getByText("1.000")).toBeVisible();
+    await expect(card.getByText("Lê Quốc Bảo")).toBeVisible();
+    await expect(card.getByText("Đỗ Khánh Chi")).toBeVisible();
+    await expect(card.getByText("CHỖ DỰA CỦA TEAM")).toBeVisible();
+    await expect(card.getByText("#Leadership #Trust")).toBeVisible();
+    await expect(card.getByText("1.520")).toBeVisible();
     await expect(card.getByRole("button", { name: "Copy Link" })).toBeVisible();
     await expect(card.getByRole("button", { name: "Xem chi tiết" })).toBeVisible();
   });
@@ -94,6 +104,39 @@ test.describe("Sun* Kudos page (F003)", () => {
 
     await highlight.getByRole("button", { name: "Kudo trước" }).click();
     await expect(indicator).toHaveText("1/5");
+  });
+
+  test("selecting a Phòng ban filter narrows the highlight feed and resets the carousel to page 1 (FIX 3)", async ({
+    page,
+  }) => {
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+    const indicator = highlight.getByText(/^\d+\/\d+$/);
+
+    // Advance to a non-zero page first, so we can prove the filter resets it.
+    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
+    await expect(indicator).toHaveText("2/5");
+
+    // "Design" matches exactly one highlight card → count shrinks to 1, page resets.
+    await highlight.getByRole("button", { name: "Phòng ban" }).click();
+    await highlight.getByRole("option", { name: "Design" }).click();
+    await expect(indicator).toHaveText("1/1");
+  });
+
+  test("a filter combination with no matches shows the empty state, announced politely (FIX 3)", async ({
+    page,
+  }) => {
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+
+    // Design card has #Leadership/#Trust, so Design + #Creative matches nothing.
+    await highlight.getByRole("button", { name: "Phòng ban" }).click();
+    await highlight.getByRole("option", { name: "Design" }).click();
+    await highlight.getByRole("button", { name: "Hashtag" }).click();
+    await highlight.getByRole("option", { name: "#Creative" }).click();
+
+    const empty = highlight.getByRole("status");
+    await expect(empty).toHaveText("Không có Kudo phù hợp");
+    // No carousel indicator while empty.
+    await expect(highlight.getByText(/^\d+\/\d+$/)).toHaveCount(0);
   });
 
   test("sidebar shows 5 stat rows, a Secret Box button, and 10 recent-gift entries (FR-009)", async ({
