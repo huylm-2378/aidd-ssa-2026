@@ -38,7 +38,7 @@ export default function KudosSearchBar({
           aria-haspopup="dialog"
           aria-label={KUDOS_SEARCH.promptPlaceholder}
           onClick={() => setComposerOpen(true)}
-          className={`${pillClass} lg:flex-1`}
+          className={`${pillClass} lg:w-[738px] lg:shrink-0`}
         >
           <Image
             src="/sun-kudos/search-prompt-pill.png"
