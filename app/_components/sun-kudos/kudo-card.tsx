@@ -20,14 +20,20 @@ function Person({
         <p className="font-montserrat text-base font-bold leading-6 tracking-[0.15px] text-[#00101a]">
           {name}
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="font-montserrat text-sm font-bold leading-5 tracking-[0.1px] text-[#999]">
-            {role}
-          </span>
-          <span className="rounded-full border-[0.5px] border-[#ffea9e] bg-[#ffea9e]/20 px-2 py-0.5 font-montserrat text-xs font-bold text-[#8a6d1a]">
-            {tier}
-          </span>
-        </div>
+        {(role || tier) && (
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {role && (
+              <span className="font-montserrat text-sm font-bold leading-5 tracking-[0.1px] text-[#999]">
+                {role}
+              </span>
+            )}
+            {tier && (
+              <span className="rounded-full border-[0.5px] border-[#ffea9e] bg-[#ffea9e]/20 px-2 py-0.5 font-montserrat text-xs font-bold text-[#8a6d1a]">
+                {tier}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

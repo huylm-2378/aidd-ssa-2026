@@ -1,73 +1,84 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { KUDOS_SEARCH } from "../../_lib/sun-kudos-content";
+import type { SunnerOption } from "../../_lib/write-kudo-content";
+import WriteKudoModal from "./write-kudo-modal";
 
 /**
  * Search bar for `/sun-kudos` (MoMorph `Button chuc nang`, node `2940:13448`):
- * two real search fields whose BACKGROUND is the exported pill image
- * (`mms_A.1_Button ghi nhận` 738x72 / `Tìm kiếm sunner` 381x72 — each bakes in
- * the frosted fill, gold border, icon, and resting label). A transparent
- * `<input>` overlays the image so the field stays functional (local state
- * only, no submit — visual per FR-004); an sr-only label carries the copy.
+ * two pill BUTTONS whose face is the exported pill image (each bakes in the
+ * frosted fill, gold border, icon, and label). The prompt pill opens the "Viết
+ * Kudo" composer (F006 FR-001); the profile pill is a visual-only entry point.
+ * As real `<button>`s they get native Enter/Space activation — the label lives
+ * in the image, so each carries an `aria-label`.
  */
-export default function KudosSearchBar() {
-  const [prompt, setPrompt] = useState("");
-  const [profileQuery, setProfileQuery] = useState("");
+export default function KudosSearchBar({
+  sunnerOptions,
+}: {
+  sunnerOptions?: readonly SunnerOption[];
+}) {
+  const [composerOpen, setComposerOpen] = useState(false);
+  const promptRef = useRef<HTMLButtonElement>(null);
 
-  // Transparent input laid over the pill image; left padding clears the baked-in icon.
-  const inputClass =
-    "absolute inset-0 h-full w-full rounded-full bg-transparent pl-14 pr-5 font-montserrat text-sm font-bold text-white caret-[#ffea9e] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e] sm:text-base";
+  // The pill image bakes the spec's 10% translucent gold fill (rgba(255,234,158,0.10))
+  // + gold border + icon + label, so the keyvisual shows THROUGH it — no opaque
+  // background here, and no heavy backdrop-blur (the Figma node has none; a strong
+  // blur muddied the see-through effect). A light blur keeps text legible over the
+  // busy keyvisual without hiding it.
+  const pillClass =
+    "relative block overflow-hidden rounded-full backdrop-blur-[2px] transition-transform duration-200 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a]";
 
   return (
-    <section
-      className="mx-auto flex max-w-[1512px] flex-col gap-4 px-6 sm:px-12 lg:flex-row lg:gap-8 lg:px-[144px]"
-      aria-label="Sun* Kudos search"
-    >
-      <div className="relative overflow-hidden rounded-full backdrop-blur-2xl lg:flex-1">
-        <Image
-          src="/sun-kudos/search-prompt-pill.png"
-          alt=""
-          aria-hidden
-          width={738}
-          height={72}
-          priority
-          className="h-auto w-full"
-        />
-        <label htmlFor="kudos-prompt" className="sr-only">
-          {KUDOS_SEARCH.promptPlaceholder}
-        </label>
-        <input
+    <>
+      <section
+        className="mx-auto flex max-w-[1512px] flex-col gap-4 px-6 sm:px-12 lg:flex-row lg:gap-8 lg:px-[144px]"
+        aria-label="Sun* Kudos search"
+      >
+        <button
           id="kudos-prompt"
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          className={inputClass}
-        />
-      </div>
+          ref={promptRef}
+          type="button"
+          aria-haspopup="dialog"
+          aria-label={KUDOS_SEARCH.promptPlaceholder}
+          onClick={() => setComposerOpen(true)}
+          className={`${pillClass} lg:w-[738px] lg:shrink-0`}
+        >
+          <Image
+            src="/sun-kudos/search-prompt-pill.png"
+            alt=""
+            aria-hidden
+            width={738}
+            height={72}
+            priority
+            className="pointer-events-none h-auto w-full"
+          />
+        </button>
 
-      <div className="relative overflow-hidden rounded-full backdrop-blur-2xl lg:w-[381px] lg:shrink-0">
-        <Image
-          src="/sun-kudos/search-profile-pill.png"
-          alt=""
-          aria-hidden
-          width={381}
-          height={72}
-          priority
-          className="h-auto w-full"
-        />
-        <label htmlFor="kudos-profile-search" className="sr-only">
-          {KUDOS_SEARCH.profilePlaceholder}
-        </label>
-        <input
+        <button
           id="kudos-profile-search"
-          type="search"
-          value={profileQuery}
-          onChange={(e) => setProfileQuery(e.target.value)}
-          className={inputClass}
-        />
-      </div>
-    </section>
+          type="button"
+          aria-label={KUDOS_SEARCH.profilePlaceholder}
+          className={`${pillClass} lg:w-[381px] lg:shrink-0`}
+        >
+          <Image
+            src="/sun-kudos/search-profile-pill.png"
+            alt=""
+            aria-hidden
+            width={381}
+            height={72}
+            priority
+            className="pointer-events-none h-auto w-full"
+          />
+        </button>
+      </section>
+      <WriteKudoModal
+        open={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        triggerRef={promptRef}
+        sunnerOptions={sunnerOptions}
+      />
+    </>
   );
 }

@@ -94,5 +94,38 @@ where the project uses asymmetric JWT signing — a candidate follow-up, not ado
 
 ## Boundaries / non-goals
 
-No persisted user schema (`auth.users` is authoritative), no RLS, no migrations, no protected routes,
-no multi-provider auth. Adding any of those is a separate feature and would revisit this document.
+No persisted user schema (`auth.users` is authoritative), no protected routes, no multi-provider auth.
+Adding any of those is a separate feature. **RLS + migrations were introduced by F007** (below).
+
+---
+
+# Kudos data layer (F007)
+
+> Promoted from the F007 forward-draft. The first application-owned Postgres schema (previously only
+> `auth.users` existed). Moves the Sun* Kudos board (F003) + composer (F006) from static TS mocks to
+> Supabase reads/writes.
+
+## Schema (Supabase `public`)
+`sunners`, `kudos` (arrays for `hashtags` / `image_urls`, denormalized `department` + `like_count`),
+`recent_gifts`, and a single-row `kudos_stats` backing the sidebar. Delivered as
+`supabase/migrations/0001_kudos_schema.sql` + `supabase/seed.sql` — **applied by the operator in the
+Dashboard SQL Editor** (this environment has only the anon key: no DDL, no CLI, no psql).
+
+## RLS
+First use of Row-Level Security in the project. Public **SELECT** on all board tables (public
+recognition wall). Kudos **INSERT** is restricted to **`authenticated`** (migration `0002`): a Kudo must
+have a real sender, so the composer's `createKudo` Server Action reads `auth.getUser()` and refuses
+without a session. The sender's display name + avatar are denormalized onto `kudos`
+(`sender_name`/`sender_avatar`) since the logged-in user isn't in the seeded `sunners` directory;
+anonymous submissions hide them at render.
+
+## Data access
+Server Components read via the existing async server client (`app/_lib/supabase/server.ts`) through a
+typed query module (`app/_lib/kudos/queries.ts`, pure mappers in `map.ts`, row types in `types.ts`).
+`app/sun-kudos/page.tsx` fetches all sections in parallel and passes data down as props; the Highlight
+filter/sort + carousel stay client-side over the fetched set. Writes go through the Server Action
+`app/sun-kudos/actions.ts` (`createKudo`) then `revalidatePath('/sun-kudos')`.
+
+## Failure posture
+Every board query fails safe — a DB/network error or empty result returns an empty view shape and the
+sections render a graceful empty state, never a crash (mirrors the countdown's "safe empty state").

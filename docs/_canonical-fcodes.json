@@ -77,6 +77,36 @@
         "bl": [],
         "perms": []
       }
+    },
+    {
+      "fcode": "F006",
+      "name": "Write Kudo",
+      "slug": "F006_WriteKudo",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": ["ihQ26W78P2"],
+        "user_stories": [],
+        "routes": ["/sun-kudos"],
+        "models": ["SunnerOption", "WriteKudoForm"],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F007",
+      "name": "Kudos Data (Supabase)",
+      "slug": "F007_KudosData",
+      "priority": "P1",
+      "type": "data",
+      "related": {
+        "screens": ["MaZUn5xHXZ", "ihQ26W78P2"],
+        "user_stories": [],
+        "routes": ["/sun-kudos"],
+        "models": ["sunners", "kudos", "recent_gifts", "kudos_stats"],
+        "bl": [],
+        "perms": ["public read (RLS)", "demo insert kudos (RLS)"]
+      }
     }
   ]
 }

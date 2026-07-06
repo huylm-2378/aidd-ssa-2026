@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+// The board is data-driven from Supabase (F007). Tests that assert seeded rows
+// skip unless KUDOS_DB_SEEDED=1 (set it after running supabase/migrations +
+// seed.sql). Structural tests (nav, hero, headings) run unconditionally.
+const SEED_GUARD = "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)";
+
 test.describe("Sun* Kudos page (F003)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/sun-kudos");
@@ -47,17 +52,21 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(hero.locator("h1")).toHaveText("KUDOS");
   });
 
-  test("search bar has both functional fields labelled with the exact copy", async ({ page }) => {
-    const prompt = page.getByRole("textbox", {
+  test("search bar prompt/profile are pill buttons; prompt opens the Viết Kudo composer (F006 FR-001)", async ({
+    page,
+  }) => {
+    // Both pills are real buttons (the label is baked into the pill image → aria-label).
+    const prompt = page.getByRole("button", {
       name: "Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?",
     });
     await expect(prompt).toBeVisible();
-    await prompt.fill("cảm ơn");
-    await expect(prompt).toHaveValue("cảm ơn");
+    await prompt.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
 
-    await expect(
-      page.getByRole("searchbox", { name: "Tìm kiếm profile Sunner" }),
-    ).toBeVisible();
+    const profileButton = page.getByRole("button", { name: "Tìm kiếm profile Sunner" });
+    await expect(profileButton).toBeVisible();
   });
 
   test("all section headings render", async ({ page }) => {
@@ -65,26 +74,32 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(page.getByRole("heading", { name: "SPOTLIGHT BOARD" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "ALL KUDOS" })).toBeVisible();
 
+    // Spotlight shows a "<count> KUDOS" heading; the count is data-driven.
     const board = page.locator("section[aria-label='Spotlight Board']");
-    await expect(board.getByText("388", { exact: true })).toBeVisible();
     await expect(board.getByText("KUDOS", { exact: true })).toBeVisible();
   });
 
   test("a Kudo card shows sender+receiver, title, hashtags, like count, and actions", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
+    // At pageIndex 0, the carousel shows: current card (visible) + next peek (hidden).
+    // The first article in the section is the current card.
+    // The highlight shows the TOP-5 by likeCount desc. The first card (index 0) is now
+    // hl-3 (1520 likes) "CHỖ DỰA CỦA TEAM", not hl-1 (1000 likes) "IDOL GIỚI TRẺ".
     const card = highlight.locator("article").first();
-    await expect(card.getByText("Huỳnh Dương Xuân Nhật")).toBeVisible();
-    await expect(card.getByText("Trần Minh Anh")).toBeVisible();
-    await expect(card.getByText("IDOL GIỚI TRẺ")).toBeVisible();
-    await expect(card.getByText("#Dedicated #Inspring")).toBeVisible();
-    await expect(card.getByText("1.000")).toBeVisible();
+    await expect(card.getByText("Lê Quốc Bảo")).toBeVisible();
+    await expect(card.getByText("Đỗ Khánh Chi")).toBeVisible();
+    await expect(card.getByText("CHỖ DỰA CỦA TEAM")).toBeVisible();
+    await expect(card.getByText("#Leadership #Trust")).toBeVisible();
+    await expect(card.getByText("1.520")).toBeVisible();
     await expect(card.getByRole("button", { name: "Copy Link" })).toBeVisible();
     await expect(card.getByRole("button", { name: "Xem chi tiết" })).toBeVisible();
   });
 
   test("carousel prev/next advances the 'n/N' indicator (SC-004)", async ({ page }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
     const indicator = highlight.getByText(/^\d+\/\d+$/);
     await expect(indicator).toHaveText("1/5");
@@ -96,9 +111,46 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(indicator).toHaveText("1/5");
   });
 
+  test("selecting a Phòng ban filter narrows the highlight feed and resets the carousel to page 1 (FIX 3)", async ({
+    page,
+  }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+    const indicator = highlight.getByText(/^\d+\/\d+$/);
+
+    // Advance to a non-zero page first, so we can prove the filter resets it.
+    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
+    await expect(indicator).toHaveText("2/5");
+
+    // Seed: "Marketing" has exactly one kudo → count shrinks to 1, page resets.
+    await highlight.getByRole("button", { name: "Phòng ban" }).click();
+    await highlight.getByRole("option", { name: "Marketing" }).click();
+    await expect(indicator).toHaveText("1/1");
+  });
+
+  test("a filter combination with no matches shows the empty state, announced politely (FIX 3)", async ({
+    page,
+  }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+
+    // Seed: the sole Marketing kudo has #Dedicated/#Customer, so Marketing +
+    // #Teamwork matches nothing.
+    await highlight.getByRole("button", { name: "Phòng ban" }).click();
+    await highlight.getByRole("option", { name: "Marketing" }).click();
+    await highlight.getByRole("button", { name: "Hashtag" }).click();
+    await highlight.getByRole("option", { name: "#Teamwork" }).click();
+
+    const empty = highlight.getByRole("status");
+    await expect(empty).toHaveText("Không có Kudo phù hợp");
+    // No carousel indicator while empty.
+    await expect(highlight.getByText(/^\d+\/\d+$/)).toHaveCount(0);
+  });
+
   test("sidebar shows 5 stat rows, a Secret Box button, and 10 recent-gift entries (FR-009)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const all = page.locator("section[aria-label='All Kudos']");
     for (const label of [
       "Số Kudos bạn nhận được:",
@@ -117,6 +169,7 @@ test.describe("Sun* Kudos page (F003)", () => {
   test("feed + sidebar are side by side at 1512px and stack with no overflow at 375px (SC-003)", async ({
     page,
   }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     await page.setViewportSize({ width: 1512, height: 900 });
     const all = page.locator("section[aria-label='All Kudos']");
     const feed = all.locator("article").first();

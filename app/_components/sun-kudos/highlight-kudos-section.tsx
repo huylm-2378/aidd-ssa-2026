@@ -1,78 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { HIGHLIGHT_KUDOS } from "../../_lib/kudos-cards";
+import { useMemo, useState } from "react";
+import { filterKudos, getHighlightKudos } from "../../_lib/kudos-cards";
+import type { KudoCard } from "../../_lib/kudos-shared";
 import {
   DEPARTMENT_FILTERS,
   HASHTAG_FILTERS,
   SECTION_EYEBROW,
 } from "../../_lib/sun-kudos-content";
-import KudoCard from "./kudo-card";
-
-/** Visual-only filter dropdown (selection does not narrow the mock feed). */
-function FilterDropdown({
-  label,
-  options,
-}: {
-  label: string;
-  options: readonly string[];
-}) {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className="flex items-center gap-2 rounded-lg border border-[#998c5f] bg-[#ffea9e]/10 px-4 py-2 font-montserrat text-sm font-bold text-white transition-colors hover:bg-[#ffea9e]/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
-      >
-        {selected ?? label}
-        <svg viewBox="0 0 24 24" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" aria-hidden>
-          <path d="M6 9l6 6 6-6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute right-0 top-full z-10 mt-2 min-w-[160px] overflow-hidden rounded-md border border-[#998c5f] bg-[#101417] shadow-lg"
-        >
-          {options.map((option) => (
-            <li key={option}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={selected === option}
-                onClick={() => {
-                  setSelected(option);
-                  setOpen(false);
-                }}
-                className="block w-full px-4 py-2 text-left font-montserrat text-sm text-white transition-colors hover:bg-white/10"
-              >
-                {option}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+import FilterDropdown from "./filter-dropdown";
+import HighlightCarousel from "./highlight-carousel";
 
 /**
- * Highlight Kudos section (MoMorph `B_Highlight`, node `2940:13451`): the shared
- * title band, Hashtag + Phòng ban filter dropdowns, and a one-card-per-page
- * carousel driven by prev/next arrows with an "n/N" indicator. Filters are
- * visual-only (per spec assumption); only the carousel holds real state.
+ * Highlight Kudos section (MoMorph `B_Highlight`, node `2940:13451`): the
+ * shared title band, Hashtag + Phòng ban filter dropdowns, and the
+ * `HighlightCarousel`. Kudos come from the server (F007, Supabase) via the
+ * `kudos` prop. Owns the filter state (FIX 3) and `pageIndex`; filters narrow
+ * the set (AND-combined) before the top-5-most-liked sort (FIX 2), and changing
+ * either filter resets the carousel to page 0.
  */
-export default function HighlightKudosSection() {
+export default function HighlightKudosSection({
+  kudos,
+}: {
+  kudos: readonly KudoCard[];
+}) {
+  const [hashtag, setHashtag] = useState<string | null>(null);
+  const [department, setDepartment] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
-  const pageCount = HIGHLIGHT_KUDOS.length;
+
+  const visibleKudos = useMemo(
+    () => getHighlightKudos(filterKudos(kudos, { hashtag, department })),
+    [kudos, hashtag, department],
+  );
+
+  const handleHashtagChange = (value: string | null) => {
+    setHashtag(value);
+    setPageIndex(0);
+  };
+
+  const handleDepartmentChange = (value: string | null) => {
+    setDepartment(value);
+    setPageIndex(0);
+  };
+
   const goPrev = () => setPageIndex((i) => Math.max(0, i - 1));
-  const goNext = () => setPageIndex((i) => Math.min(pageCount - 1, i + 1));
-  const current = HIGHLIGHT_KUDOS[pageIndex];
+  const goNext = () =>
+    setPageIndex((i) => Math.min(visibleKudos.length - 1, i + 1));
 
   return (
     <section
@@ -89,48 +62,28 @@ export default function HighlightKudosSection() {
             HIGHLIGHT KUDOS
           </h2>
           <div className="flex items-center gap-2">
-            <FilterDropdown label="Hashtag" options={HASHTAG_FILTERS} />
-            <FilterDropdown label="Phòng ban" options={DEPARTMENT_FILTERS} />
+            <FilterDropdown
+              label="Hashtag"
+              options={HASHTAG_FILTERS}
+              selected={hashtag}
+              onChange={handleHashtagChange}
+            />
+            <FilterDropdown
+              label="Phòng ban"
+              options={DEPARTMENT_FILTERS}
+              selected={department}
+              onChange={handleDepartmentChange}
+            />
           </div>
         </div>
       </header>
 
-      <div className="flex items-center justify-center gap-4 sm:gap-8">
-        <button
-          type="button"
-          onClick={goPrev}
-          disabled={pageIndex === 0}
-          aria-label="Kudo trước"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
-        >
-          <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" aria-hidden>
-            <path d="M15 6l-6 6 6 6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
-        <div className="w-full min-w-0 max-w-[528px]">
-          <KudoCard kudo={current} />
-        </div>
-
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={pageIndex === pageCount - 1}
-          aria-label="Kudo tiếp theo"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
-        >
-          <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" aria-hidden>
-            <path d="M9 6l6 6-6 6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
-
-      <p
-        className="text-center font-montserrat text-[28px] font-bold leading-9 text-[#999]"
-        aria-label={`Trang ${pageIndex + 1} trên ${pageCount}`}
-      >
-        {pageIndex + 1}/{pageCount}
-      </p>
+      <HighlightCarousel
+        kudos={visibleKudos}
+        pageIndex={pageIndex}
+        onPrev={goPrev}
+        onNext={goNext}
+      />
     </section>
   );
 }

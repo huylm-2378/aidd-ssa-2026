@@ -32,7 +32,7 @@ export const KUDOS_SEARCH = {
 /** Shared eyebrow above each gold section title. */
 export const SECTION_EYEBROW = "Sun* Annual Awards 2025";
 
-/** Highlight-section filter dropdown options (visual-only). */
+/** Highlight-section filter dropdown options — wired to real filtering (FIX 3). */
 export const HASHTAG_FILTERS: readonly string[] = [
   "#Dedicated",
   "#Inspring",
@@ -48,6 +48,9 @@ export const DEPARTMENT_FILTERS: readonly string[] = [
   "Marketing",
   "Operation",
 ];
+
+/** Shown when the Highlight filter combination matches no Kudo. */
+export const HIGHLIGHT_EMPTY = "Không có Kudo phù hợp";
 
 /** Sidebar personal-stats panel — 5 rows (label + gold value). */
 export const SUNNER_STATS: readonly SunnerStat[] = [

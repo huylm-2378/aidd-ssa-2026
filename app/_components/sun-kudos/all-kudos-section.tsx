@@ -1,15 +1,26 @@
-import { ALL_KUDOS } from "../../_lib/kudos-cards";
+import type { KudoCard as KudoCardData } from "../../_lib/kudos-shared";
+import type { SunnerStat, RecentGiftSunner } from "../../_lib/sun-kudos-content";
 import { SECTION_EYEBROW } from "../../_lib/sun-kudos-content";
 import KudoCard from "./kudo-card";
 import KudosSidebar from "./kudos-sidebar";
+import { HIGHLIGHT_EMPTY } from "../../_lib/sun-kudos-content";
 
 /**
  * All Kudos section (MoMorph `C_All kudos`, node `2940:13475`): the shared
  * title band above a two-column body — a vertical feed of `KudoCard`s (left)
  * beside the stats + Secret Box + recent-gifts `KudosSidebar` (right). Columns
  * sit side by side at `lg+` and stack (sidebar under the feed) below `lg`.
+ * All data comes from the server (F007, Supabase) via props.
  */
-export default function AllKudosSection() {
+export default function AllKudosSection({
+  kudos,
+  stats,
+  recentGifts,
+}: {
+  kudos: readonly KudoCardData[];
+  stats: readonly SunnerStat[];
+  recentGifts: readonly RecentGiftSunner[];
+}) {
   return (
     <section
       className="mx-auto flex max-w-[1512px] flex-col gap-10 px-6 py-16 sm:px-12 lg:px-[144px] lg:py-24"
@@ -27,11 +38,18 @@ export default function AllKudosSection() {
 
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
         <div className="flex flex-1 flex-col gap-8">
-          {ALL_KUDOS.map((kudo) => (
-            <KudoCard key={kudo.id} kudo={kudo} />
-          ))}
+          {kudos.length === 0 ? (
+            <p
+              role="status"
+              className="py-12 text-center font-montserrat text-lg font-bold text-[#999]"
+            >
+              {HIGHLIGHT_EMPTY}
+            </p>
+          ) : (
+            kudos.map((kudo) => <KudoCard key={kudo.id} kudo={kudo} />)
+          )}
         </div>
-        <KudosSidebar />
+        <KudosSidebar stats={stats} recentGifts={recentGifts} />
       </div>
     </section>
   );
