@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SUNNER_OPTIONS, WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
 
 interface RecipientSelectProps {
@@ -23,6 +23,22 @@ export default function RecipientSelect({
 }: RecipientSelectProps) {
   const [query, setQuery] = useState(value?.name ?? "");
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Close on a real outside click — NOT on blur. A blur-timeout close races
+  // with focus churn (the dialog focus-trap / React StrictMode focus-bounce)
+  // and would auto-close the list right after the modal auto-focuses this field,
+  // making it look like the dropdown never loads until you click it.
+  useEffect(() => {
+    if (!open) return;
+    function onDocMouseDown(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [open]);
 
   const matches =
     query.trim().length === 0
@@ -44,7 +60,7 @@ export default function RecipientSelect({
   }
 
   return (
-    <div className="flex w-full items-center gap-4">
+    <div ref={rootRef} className="flex w-full items-center gap-4">
       <label
         htmlFor="write-kudo-recipient"
         className="flex w-[146px] shrink-0 items-center gap-0.5 font-montserrat text-base font-bold text-[#00101a]"
@@ -66,7 +82,6 @@ export default function RecipientSelect({
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)}
           className="h-14 w-full rounded-lg border border-[#998c5f] bg-white px-6 py-4 font-montserrat text-base font-bold text-[#00101a] focus-visible:outline-none"
         />
         <DownIcon open={open} />

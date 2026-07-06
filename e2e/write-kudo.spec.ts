@@ -32,6 +32,22 @@ test.describe("Write Kudo composer modal (F006)", () => {
     expect(overflow).toBe("hidden");
   });
 
+  test("recipient dropdown auto-opens on modal open and stays open (no blur-close race)", async ({
+    page,
+  }) => {
+    // Recipient options come from Supabase (F007) — needs seeded sunners.
+    test.skip(!process.env.KUDOS_DB_SEEDED, "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)");
+    await page.locator("#kudos-prompt").click();
+    const dialog = page.getByRole("dialog");
+    const combo = dialog.getByRole("combobox", { name: /Người nhận/ });
+    // The dialog focus-trap focuses the recipient field → the list opens. It must
+    // STILL be open past the old 150ms blur-close timeout (the reported bug).
+    await expect(combo).toHaveAttribute("aria-expanded", "true");
+    await page.waitForTimeout(400);
+    await expect(combo).toHaveAttribute("aria-expanded", "true");
+    await expect(dialog.getByRole("listbox")).toBeVisible();
+  });
+
   test("an incomplete form shows which required fields are still missing (FR-011 UX)", async ({
     page,
   }) => {
