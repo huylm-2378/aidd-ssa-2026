@@ -9,6 +9,7 @@
 | 3 | F003 — Sun* Kudos | P1 | ui | implemented |
 | 4 | F004 — Login | P1 | ui | implemented |
 | 5 | F005 — Google login with Supabase | P1 | auth | implemented |
+| 6 | F006 — Write Kudo | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -65,3 +66,15 @@ in the shared Header account menu. Session-only — no `profiles` table, no RLS,
 F001–F004 pages stay fully public. Continues F004 (modifies `google-login-button.tsx` and `header.tsx`).
 
 **Related:** screens: — | routes: /login, /auth/callback, /auth/auth-code-error | models: —
+
+### F006 — Write Kudo
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F006_WriteKudo
+
+The "Viết Kudo" composer: a centered modal opened from the `/sun-kudos` hero prompt search bar (no new
+route), implementing MoMorph frame "Viết Kudo" (`ihQ26W78P2`). Lets a Sunner pick a recipient, give an
+award title, write a body via a visual rich-text toolbar over a textarea, tag up to 5 hashtags, attach
+up to 5 images, and optionally send anonymously; Gửi is gated on required fields. Client-only, mock
+recipient data, no backend/persistence. Previously deferred as a future feature in F003_SunKudos.
+
+**Related:** screens: ihQ26W78P2 | routes: /sun-kudos | models: SunnerOption, WriteKudoForm

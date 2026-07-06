@@ -77,6 +77,21 @@
         "bl": [],
         "perms": []
       }
+    },
+    {
+      "fcode": "F006",
+      "name": "Write Kudo",
+      "slug": "F006_WriteKudo",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": ["ihQ26W78P2"],
+        "user_stories": [],
+        "routes": ["/sun-kudos"],
+        "models": ["SunnerOption", "WriteKudoForm"],
+        "bl": [],
+        "perms": []
+      }
     }
   ]
 }
