@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { EMPTY_FORM, canSubmit, type WriteKudoForm } from "../../_lib/write-kudo-form";
+import { EMPTY_FORM, canSubmit, missingRequired, type WriteKudoForm } from "../../_lib/write-kudo-form";
 import { WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
 import { createKudo } from "../../sun-kudos/actions";
 import RecipientSelect from "./recipient-select";
@@ -36,6 +36,7 @@ function useMounted(): boolean {
 export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOptions }: WriteKudoModalProps) {
   const mounted = useMounted();
   const [form, setForm] = useState<WriteKudoForm>(EMPTY_FORM);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Memoized so the a11y hook's Escape listener isn't torn down/re-added on
@@ -45,6 +46,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
       current.images.forEach((image) => URL.revokeObjectURL(image.url));
       return EMPTY_FORM;
     });
+    setError(null);
     onClose();
   }, [onClose]);
 
@@ -52,12 +54,15 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
 
   if (!mounted || !open) return null;
 
+  const missingFields = missingRequired(form);
+
   function updateForm<K extends keyof WriteKudoForm>(key: K, value: WriteKudoForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
   async function handleSubmit() {
     if (!canSubmit(form) || !form.recipient) return;
+    setError(null);
     const result = await createKudo({
       receiverId: form.recipient.id,
       title: form.award,
@@ -67,8 +72,9 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
       isAnonymous: form.anonymous,
     });
     // On success the board is revalidated server-side; close + reset. On error
-    // keep the modal open so the user can retry (no data lost).
+    // (e.g. not logged in) keep the modal open and show why (no data lost).
     if (result.ok) handleClose();
+    else setError(result.error ?? "Không gửi được Kudo. Vui lòng thử lại.");
   }
 
   return createPortal(
@@ -132,6 +138,18 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
           />
           {WRITE_KUDO_COPY.anonymousLabel}
         </label>
+
+        {error && (
+          <p role="alert" className="w-full font-montserrat text-sm font-bold text-[#e46060]">
+            {error}
+          </p>
+        )}
+
+        {!error && missingFields.length > 0 && (
+          <p className="w-full font-montserrat text-sm font-bold text-[#998c5f]">
+            Cần điền để gửi: {missingFields.join(", ")}
+          </p>
+        )}
 
         <div className="flex w-full items-center gap-6">
           <button

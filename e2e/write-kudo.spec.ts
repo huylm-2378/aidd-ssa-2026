@@ -32,6 +32,20 @@ test.describe("Write Kudo composer modal (F006)", () => {
     expect(overflow).toBe("hidden");
   });
 
+  test("an incomplete form shows which required fields are still missing (FR-011 UX)", async ({
+    page,
+  }) => {
+    await page.locator("#kudos-prompt").click();
+    const dialog = page.getByRole("dialog");
+    // Fresh modal: Gửi disabled + hint lists every required field, incl. Hashtag
+    // (the reported confusion — user didn't know Hashtag was required).
+    await expect(dialog.getByRole("button", { name: "Gửi" })).toBeDisabled();
+    const hint = dialog.getByText(/^Cần điền để gửi:/);
+    await expect(hint).toBeVisible();
+    await expect(hint).toContainText("Hashtag");
+    await expect(hint).toContainText("Người nhận");
+  });
+
   test("Gửi is disabled until recipient, danh hiệu, content, and >=1 hashtag are filled (FR-011, SC-002)", async ({
     page,
   }) => {
@@ -61,8 +75,12 @@ test.describe("Write Kudo composer modal (F006)", () => {
     await expect(submit).toBeEnabled();
   });
 
-  test("submitting an enabled Gửi closes the modal (FR-012)", async ({ page }) => {
-    // Persists to Supabase (F007) via Server Action — needs seeded recipients.
+  test("submitting without a session shows the login-required error and keeps the modal open (FR-012, auth)", async ({
+    page,
+  }) => {
+    // Sender must be the logged-in user (F007 fix). Persist requires a Supabase
+    // session; e2e runs unauthenticated, so Gửi must surface the login error and
+    // keep the form open (no data lost). Recipient options need seeded data.
     test.skip(!process.env.KUDOS_DB_SEEDED, "requires seeded Supabase (set KUDOS_DB_SEEDED=1 after running supabase/migrations + seed.sql)");
     await page.locator("#kudos-prompt").click();
     const dialog = page.getByRole("dialog");
@@ -78,7 +96,8 @@ test.describe("Write Kudo composer modal (F006)", () => {
     await page.keyboard.press("Enter");
 
     await dialog.getByRole("button", { name: "Gửi" }).click();
-    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(dialog.getByRole("alert")).toContainText("đăng nhập");
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 
   test("Hủy, backdrop, and Escape all dismiss and discard input (FR-003, SC-003)", async ({ page }) => {

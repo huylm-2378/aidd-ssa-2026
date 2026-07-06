@@ -33,6 +33,9 @@ export interface KudoRow {
   like_count: number;
   is_anonymous: boolean;
   created_at: string;
+  /** Denormalized sender for user-created Kudos (logged-in user); null for seeded rows. */
+  sender_name: string | null;
+  sender_avatar: string | null;
   sender: KudoPersonRow | null;
   receiver: KudoPersonRow | null;
 }

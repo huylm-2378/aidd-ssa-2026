@@ -12,6 +12,8 @@ const baseRow: KudoRow = {
   like_count: 1000,
   is_anonymous: false,
   created_at: "2025-10-30T03:00:00Z", // 10:00 in Asia/Ho_Chi_Minh (+07)
+  sender_name: null,
+  sender_avatar: null,
   sender: { name: "Huỳnh Dương Xuân Nhật", role_code: "CEVC10", tier: "New Hero", avatar_url: null },
   receiver: { name: "Trần Minh Anh", role_code: "CEVC19", tier: "Legend Hero", avatar_url: null },
 };
@@ -28,6 +30,25 @@ describe("mapKudoRow", () => {
     expect(card.likeCount).toBe(1000);
     expect(card.department).toBe("CEVC");
     expect(card.photos).toHaveLength(2);
+  });
+
+  it("uses the logged-in user (sender_name/avatar) over the sunner join, without role/tier", () => {
+    const card = mapKudoRow({
+      ...baseRow,
+      sender_name: "Lê Minh Huy",
+      sender_avatar: "https://example.com/a.png",
+    });
+    expect(card.senderName).toBe("Lê Minh Huy");
+    expect(card.senderAvatar).toBe("https://example.com/a.png");
+    // A logged-in sender isn't in the sunner directory → no role/tier badge.
+    expect(card.senderRole).toBe("");
+    expect(card.senderTier).toBe("");
+  });
+
+  it("anonymous overrides the logged-in sender name", () => {
+    const card = mapKudoRow({ ...baseRow, sender_name: "Lê Minh Huy", is_anonymous: true });
+    expect(card.senderName).toBe("Người ẩn danh");
+    expect(card.senderAvatar).toBeUndefined();
   });
 
   it("hides the sender when anonymous", () => {

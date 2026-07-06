@@ -37,12 +37,20 @@ export function formatTimeRange(iso: string): string {
 /** One `kudos` row (sender/receiver embedded) → a `KudoCard`. */
 export function mapKudoRow(row: KudoRow): KudoCard {
   const images = row.image_urls ?? [];
+  // Sender precedence: anonymous → hidden; else the logged-in user who created
+  // it (denormalized sender_name/avatar, no directory role/tier); else the
+  // seeded sunner via the FK join; else a neutral fallback.
+  const isUserSender = !row.is_anonymous && !!row.sender_name;
   return {
     id: row.id,
-    senderName: row.is_anonymous ? ANON_NAME : row.sender?.name ?? "Sunner",
-    senderRole: row.is_anonymous ? "" : row.sender?.role_code ?? "",
-    senderTier: row.sender?.tier ?? "New Hero",
-    senderAvatar: row.is_anonymous ? undefined : row.sender?.avatar_url ?? undefined,
+    senderName: row.is_anonymous
+      ? ANON_NAME
+      : row.sender_name ?? row.sender?.name ?? "Sunner",
+    senderRole: isUserSender ? "" : row.is_anonymous ? "" : row.sender?.role_code ?? "",
+    senderTier: isUserSender ? "" : row.sender?.tier ?? "New Hero",
+    senderAvatar: row.is_anonymous
+      ? undefined
+      : row.sender_avatar ?? row.sender?.avatar_url ?? undefined,
     receiverName: row.receiver?.name ?? "Sunner",
     receiverRole: row.receiver?.role_code ?? "",
     receiverTier: row.receiver?.tier ?? "New Hero",

@@ -22,9 +22,11 @@ export interface CreateKudoResult {
 
 /**
  * Insert a Kudo and revalidate the board so it appears in All Kudos.
- * Sender is left null (no current-user→sunner mapping in this scope); the
- * card falls back to a neutral sender name. `department` is copied from the
- * receiver so the Highlight filters keep working on real rows.
+ * The sender is the CURRENTLY LOGGED-IN user (auth.users) — a Kudo must have a
+ * real sender, so this requires a session. The user's display name + avatar are
+ * denormalized onto the row (they aren't in the `sunners` directory); anonymous
+ * submissions hide them at render time. `department` is copied from the receiver
+ * so the Highlight filters keep working on real rows.
  */
 export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResult> {
   const title = input.title?.trim();
@@ -35,6 +37,22 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
 
   try {
     const supabase = await createClient();
+
+    // Sender = logged-in user. No session → cannot attribute the Kudo.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { ok: false, error: "Bạn cần đăng nhập để gửi Kudo." };
+    }
+    const meta = user.user_metadata ?? {};
+    const senderName =
+      (meta.full_name as string) ||
+      (meta.name as string) ||
+      user.email ||
+      "Sunner";
+    const senderAvatar =
+      (meta.avatar_url as string) || (meta.picture as string) || null;
 
     // Copy the receiver's department onto the kudo (used by filters).
     const { data: receiver } = await supabase
@@ -50,6 +68,8 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
 
     const { error } = await supabase.from("kudos").insert({
       receiver_id: input.receiverId,
+      sender_name: senderName,
+      sender_avatar: senderAvatar,
       title,
       body,
       hashtags: input.hashtags,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { canSubmit, EMPTY_FORM, MAX_HASHTAGS, MAX_IMAGES, type WriteKudoForm } from "./write-kudo-form";
+import { canSubmit, missingRequired, EMPTY_FORM, MAX_HASHTAGS, MAX_IMAGES, type WriteKudoForm } from "./write-kudo-form";
 
 const RECIPIENT = { id: "sunner-1", name: "Trần Minh Anh", role: "CEVC19" };
 
@@ -41,6 +41,26 @@ describe("canSubmit (F006 FR-011, SC-002)", () => {
   it("is true when recipient, award, body, and >=1 hashtag are all set", () => {
     expect(canSubmit(fullForm())).toBe(true);
     expect(canSubmit(fullForm({ hashtags: ["#A", "#B"] }))).toBe(true);
+  });
+});
+
+describe("missingRequired (drives the 'what's missing' hint)", () => {
+  it("lists every required field for the empty form, in order", () => {
+    expect(missingRequired(EMPTY_FORM)).toEqual([
+      "Người nhận",
+      "Danh hiệu",
+      "Nội dung",
+      "ít nhất 1 Hashtag",
+    ]);
+  });
+
+  it("reports only Hashtag when recipient + award + body are filled (the reported bug)", () => {
+    expect(missingRequired(fullForm({ hashtags: [] }))).toEqual(["ít nhất 1 Hashtag"]);
+  });
+
+  it("is empty exactly when canSubmit is true", () => {
+    expect(missingRequired(fullForm())).toEqual([]);
+    expect(canSubmit(fullForm())).toBe(true);
   });
 });
 

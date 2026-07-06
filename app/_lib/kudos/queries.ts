@@ -16,6 +16,7 @@ import { mapKudoRow, mapStats, mapRecentGift, mapSunnerOption } from "./map";
 
 const KUDO_SELECT =
   "id,title,body,hashtags,image_urls,department,like_count,is_anonymous,created_at," +
+  "sender_name,sender_avatar," +
   "sender:sunners!sender_id(name,role_code,tier,avatar_url)," +
   "receiver:sunners!receiver_id(name,role_code,tier,avatar_url)";
 

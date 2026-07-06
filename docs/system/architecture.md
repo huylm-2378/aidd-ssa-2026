@@ -113,8 +113,11 @@ Dashboard SQL Editor** (this environment has only the anon key: no DDL, no CLI, 
 
 ## RLS
 First use of Row-Level Security in the project. Public **SELECT** on all board tables (public
-recognition wall). Kudos **INSERT** is demo-permissive (anon) so "Gửi" works without a login wall —
-documented as production hardening (should become `authenticated`-only, leveraging the F005 session).
+recognition wall). Kudos **INSERT** is restricted to **`authenticated`** (migration `0002`): a Kudo must
+have a real sender, so the composer's `createKudo` Server Action reads `auth.getUser()` and refuses
+without a session. The sender's display name + avatar are denormalized onto `kudos`
+(`sender_name`/`sender_avatar`) since the logged-in user isn't in the seeded `sunners` directory;
+anonymous submissions hide them at render.
 
 ## Data access
 Server Components read via the existing async server client (`app/_lib/supabase/server.ts`) through a

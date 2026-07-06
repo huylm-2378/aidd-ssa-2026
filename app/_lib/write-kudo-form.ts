@@ -33,15 +33,21 @@ export const EMPTY_FORM: WriteKudoForm = {
 };
 
 /**
- * "Gửi" is enabled iff recipient, danh hiệu, content, and at least one
- * hashtag are all set (FR-006, FR-007, FR-008, FR-011). Whitespace-only
+ * Labels of the required fields still missing, in form order. Empty → the form
+ * is submittable. Drives both the "Gửi" gate and the "what's missing" hint so
+ * the two never disagree (FR-006, FR-007, FR-008, FR-011). Whitespace-only
  * award/body text does not count as filled.
  */
+export function missingRequired(form: WriteKudoForm): string[] {
+  const missing: string[] = [];
+  if (form.recipient === null) missing.push("Người nhận");
+  if (form.award.trim().length === 0) missing.push("Danh hiệu");
+  if (form.body.trim().length === 0) missing.push("Nội dung");
+  if (form.hashtags.length < 1) missing.push("ít nhất 1 Hashtag");
+  return missing;
+}
+
+/** "Gửi" is enabled iff no required field is missing. */
 export function canSubmit(form: WriteKudoForm): boolean {
-  return (
-    form.recipient !== null &&
-    form.award.trim().length > 0 &&
-    form.body.trim().length > 0 &&
-    form.hashtags.length >= 1
-  );
+  return missingRequired(form).length === 0;
 }

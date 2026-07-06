@@ -28,7 +28,8 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 | Code | Description | Handler | Verifiable |
 |------|-------------|---------|------------|
 | FR-001 | Define schema: `sunners`, `kudos` (with `hashtags text[]`, `image_urls text[]`, `department`, `like_count`, `is_anonymous`, `created_at`, sender/receiver FKs), plus small `recent_gifts` + `secret_box_stats` (or a `kudos_stats` view) to back the sidebar | `supabase/migrations/0001_kudos_schema.sql` | yes |
-| FR-002 | Enable RLS; public (anon) **SELECT** on all read tables (public board); **INSERT** on `kudos` permitted for the demo (documented tradeoff — see Assumptions) | migration RLS policies | yes |
+| FR-002 | Enable RLS; public (anon) **SELECT** on all read tables (public board); **INSERT** on `kudos` restricted to `authenticated` (migration `0002`) — a Kudo must have a real sender | migration RLS policies | yes |
+| FR-002a | Sender of a Kudo is the **logged-in user**: `createKudo` reads `auth.getUser()` (refuses without a session) and denormalizes `sender_name`/`sender_avatar` from the user metadata; the composer surfaces the "cần đăng nhập" error | `app/sun-kudos/actions.ts` + migration `0002` | yes |
 | FR-003 | Seed sample data: ≥9 sunners (from `SUNNER_OPTIONS`), ≥8 kudos across departments/hashtags/like counts, 10 recent-gift rows, spotlight-supporting rows, stats | `supabase/seed.sql` | yes |
 | FR-004 | Server data-access module: typed query fns — `getHighlightKudos` (top-5 by like_count), `getAllKudos` (recent), `getSpotlight` (count + names), `getSidebarStats`, `getRecentGifts`, `getSunnerOptions`, with optional `{hashtag, department}` filter | `app/_lib/kudos/queries.ts` (+ `types.ts`) | yes |
 | FR-005 | `/sun-kudos` page fetches from Supabase (Server Component) and passes data into the existing section components; on DB error, render a safe empty/fallback state (no crash) | `app/sun-kudos/page.tsx` + sections | yes |
