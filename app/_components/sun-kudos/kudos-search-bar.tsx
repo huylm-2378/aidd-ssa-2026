@@ -22,8 +22,13 @@ export default function KudosSearchBar({
   const [composerOpen, setComposerOpen] = useState(false);
   const promptRef = useRef<HTMLButtonElement>(null);
 
+  // The pill image bakes the spec's 10% translucent gold fill (rgba(255,234,158,0.10))
+  // + gold border + icon + label, so the keyvisual shows THROUGH it — no opaque
+  // background here, and no heavy backdrop-blur (the Figma node has none; a strong
+  // blur muddied the see-through effect). A light blur keeps text legible over the
+  // busy keyvisual without hiding it.
   const pillClass =
-    "relative block overflow-hidden rounded-full backdrop-blur-2xl transition-transform duration-200 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a]";
+    "relative block overflow-hidden rounded-full backdrop-blur-[2px] transition-transform duration-200 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a]";
 
   return (
     <>
