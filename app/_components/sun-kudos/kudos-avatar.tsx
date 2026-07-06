@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 interface KudoAvatarProps {
   name: string;
   /** Optional avatar image; falls back to initials when omitted. */
@@ -29,11 +27,17 @@ export default function KudoAvatar({ name, src, size = 64 }: KudoAvatarProps) {
 
   if (src) {
     return (
-      <Image
+      // Plain <img>, not next/image: avatars come from arbitrary hosts (Google
+      // `lh3.googleusercontent.com` for the logged-in sender), which next/image
+      // would reject unless every host is whitelisted in next.config. Same KISS
+      // choice as the header AccountMenu.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
         src={src}
         alt={name}
         width={size}
         height={size}
+        style={dimension}
         className="shrink-0 rounded-full border-2 border-white object-cover"
       />
     );
