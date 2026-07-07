@@ -21,6 +21,25 @@ insert into public.sunners (id, name, role_code, tier, department) values
   ('00000000-0000-0000-0000-000000000011', 'Bùi Thanh Sơn',         'CEVC02', 'Legend Hero', 'Marketing'),
   ('00000000-0000-0000-0000-000000000012', 'Trịnh Bảo Ngọc',        'CEVC09', 'Rising Hero', 'Operation');
 
+-- + 50 generated sunners (ids 13-62) so the Spotlight constellation has ~62
+-- distinct names. Deterministic 3-part Vietnamese names from fixed component
+-- arrays indexed by g (different multipliers → varied combos, collisions rare).
+insert into public.sunners (id, name, role_code, tier, department)
+select
+  ('00000000-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  (array['Nguyễn','Trần','Lê','Phạm','Hoàng','Huỳnh','Phan','Vũ','Đặng','Bùi',
+         'Đỗ','Ngô','Dương','Lý','Mai','Đinh'])[(g % 16) + 1]
+    || ' ' ||
+  (array['Minh','Ngọc','Thanh','Quang','Hải','Thu','Gia','Khánh','Phương','Tuấn',
+         'Bảo','Hữu','Đức','Kim','Hồng','Xuân'])[((g * 3) % 16) + 1]
+    || ' ' ||
+  (array['An','Bình','Cường','Dũng','Hà','Hùng','Khoa','Lan','Mai','Nam',
+         'Phúc','Quân','Sơn','Trang','Uyên','Vy','Yến','Đạt','Linh','Thảo'])[((g * 7) % 20) + 1],
+  'CEVC' || lpad(((g % 40) + 13)::text, 2, '0'),
+  (array['New Hero','Rising Hero','Legend Hero'])[(g % 3) + 1],
+  (array['CEVC','Design','Product','Marketing','Operation'])[(g % 5) + 1]
+from generate_series(13, 62) as g;
+
 -- ============================================================================
 -- Kudos (varied like_count so the Highlight top-5 is meaningful; created_at
 -- descending so the All Kudos "recent" feed order matches the current design)
@@ -59,6 +78,38 @@ insert into public.kudos
    'ĐỒNG ĐỘI TUYỆT VỜI',
    'Cảm ơn anh đã luôn kiên nhẫn review từng dòng code và chỉ cho em những điểm cần cải thiện. Em học được rất nhiều từ cách anh làm việc mỗi ngày.',
    '{#Teamwork,#Dedicated}', '{}', 'Design', 1000, false, '2025-10-14 09:45:00+07');
+
+-- + 92 generated kudos so the board + Spotlight count are well-populated (~100
+-- total). Deterministic (no random()): sender/receiver cycle through all 62
+-- sunners (so each becomes a Spotlight node); title/body/hashtags/department
+-- cycle through fixed sets; like_count
+-- and created_at spread for variety. Re-runnable via the truncate at the top.
+insert into public.kudos
+  (sender_id, receiver_id, title, body, hashtags, image_urls, department, like_count, is_anonymous, created_at)
+select
+  ('00000000-0000-0000-0000-0000000000' || lpad((((g * 5) % 62) + 1)::text, 2, '0'))::uuid,
+  ('00000000-0000-0000-0000-0000000000' || lpad((((g * 7 + 3) % 62) + 1)::text, 2, '0'))::uuid,
+  (array['NGƯỜI TRUYỀN CẢM HỨNG','ĐỒNG ĐỘI ĂN Ý','CHIẾN BINH THẦM LẶNG','NGÔI SAO SÁNG',
+         'TRÁI TIM ẤM ÁP','BỘ ÓC SÁNG TẠO','NGƯỜI HÙNG DỰ ÁN','NĂNG LƯỢNG TÍCH CỰC',
+         'TẬN TÂM HẾT MÌNH','LÃNH ĐẠO TRUYỀN LỬA'])[(g % 10) + 1],
+  (array['Cảm ơn bạn đã luôn hỗ trợ team hết mình!',
+         'Sự tận tâm của bạn là nguồn cảm hứng cho tất cả mọi người.',
+         'Cảm ơn vì đã luôn sẵn sàng giúp đỡ đồng đội khi cần.',
+         'Bạn đã làm việc thật tuyệt vời trong dự án vừa qua!'])[(g % 4) + 1],
+  case g % 6
+    when 0 then '{#Teamwork,#Support}'::text[]
+    when 1 then '{#Leadership,#Trust}'::text[]
+    when 2 then '{#Creative,#Inspring}'::text[]
+    when 3 then '{#Dedicated,#Customer}'::text[]
+    when 4 then '{#Positive,#Energy}'::text[]
+    else '{#GoFast,#Wasshoi}'::text[]
+  end,
+  case when g % 3 = 0 then '{ph1,ph2,ph3}'::text[] else '{}'::text[] end,
+  (array['CEVC','Design','Product','Marketing','Operation'])[(g % 5) + 1],
+  (50 + (g * 37) % 1500),
+  (g % 7 = 0),
+  '2025-10-13 20:00:00+07'::timestamptz - (g * interval '71 minutes')
+from generate_series(1, 92) as g;
 
 -- ============================================================================
 -- Recent gifts — "10 Sunner nhận quà mới nhất" (created_at descending)
