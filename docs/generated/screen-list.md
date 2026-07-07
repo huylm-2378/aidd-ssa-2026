@@ -12,7 +12,7 @@ deferred to REG###._
 |-----|--------|-------|----------------|-------|
 | SCR001 | Homepage SAA | `/` | F001 | Countdown, 6-card award grid, Kudos banner |
 | SCR002 | Awards Information | `/awards-information` | F002 | Six award categories + sticky anchor-nav sidebar |
-| SCR003 | Sun* Kudos | `/sun-kudos` | F003 | Hero + search, Highlight carousel, Spotlight board, All Kudos feed + sidebar |
+| SCR003 | Sun* Kudos (a.k.a. "Sun* Kudos - Live board", MoMorph `MaZUn5xHXZ`) | `/sun-kudos` | F003, F008 | Hero + search, Highlight carousel, Spotlight board (F008: real-time pan/zoom constellation + live search + activity ticker), All Kudos feed + sidebar |
 | SCR004 | Login | `/login` | F004, F005 | Keyvisual + minimal header/footer + Google OAuth button (F005 makes the button a real `signInWithOAuth` trigger) |
 | SCR005 | Auth Code Error | `/auth/auth-code-error` | F005 | OAuth failure fallback; message + link back to `/login` |
 | SCR006 | Viết Kudo (composer modal) | `/sun-kudos` (modal, no dedicated route) | F006 | Recipient autocomplete, danh hiệu, content editor, hashtags (max 5), images (max 5), anonymous toggle; opened from the hero prompt search bar, closes via Hủy/backdrop/Escape/Gửi |

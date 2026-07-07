@@ -129,3 +129,51 @@ filter/sort + carousel stay client-side over the fetched set. Writes go through 
 ## Failure posture
 Every board query fails safe — a DB/network error or empty result returns an empty view shape and the
 sections render a graceful empty state, never a crash (mirrors the countdown's "safe empty state").
+
+---
+
+# Live Spotlight Board realtime channel (F008)
+
+> Promoted from the F008 forward-draft. Scope: the one new architectural element this feature
+> introduces — a client-side Supabase Realtime channel layered over the existing server snapshot
+> read path. Everything else (server read path, RLS, fail-safe) is unchanged from F007 above.
+
+## New data-flow: server snapshot + client realtime overlay
+
+Until F008, all Kudos data flowed **server → RSC → HTML** (one-shot reads through the anon
+`@supabase/ssr` server client, RLS `public read`). The Live Board adds a **second, client-side
+channel** layered on top of that same initial snapshot:
+
+```
+                 initial render (unchanged)
+  Supabase ──(anon server client, RLS SELECT)──▶ getSpotlight() ──▶ <SpotlightBoard> (RSC shell)
+                                                                          │ props: count, sunners[], activity[]
+                                                                          ▼
+                                                              <SpotlightBoard client island>
+  Supabase Realtime ──(browser client singleton)──▶ channel('kudos-live-board')
+      .on('postgres_changes', INSERT public.kudos) ──▶ count++, prepend activity, (names live)
+```
+
+- **Initial state**: server-fetched (fail-safe preserved — DB down → empty board, no crash).
+- **Live overlay**: a Client Component subscribes in `useEffect` via the existing browser client
+  singleton (`app/_lib/supabase/client.ts`), cleans up with `supabase.removeChannel(channel)`.
+- **Boundary**: the browser client uses only `NEXT_PUBLIC_*` env vars (already present). No secrets
+  cross to the client; realtime reads are gated by the same `"public read kudos"` RLS SELECT policy
+  from F007.
+
+## DB change
+
+`public.kudos` is added to the `supabase_realtime` publication (migration `0003_kudos_realtime.sql`,
+idempotent). INSERT-only use → no `REPLICA IDENTITY` change needed. RLS unchanged.
+
+## Payload limitation (design consequence)
+
+`postgres_changes` delivers the **raw row** (`payload.new`) — no PostgREST embedded joins. The
+Kudos row has `receiver_id` but no `receiver_name`, so the client resolves names via an id→name map
+built from the server-fetched `sunners` list (why `getSpotlight()` now selects `id,name`).
+
+## Risks
+
+- Postgres Changes broadcasts to every subscriber (no server-side row filtering); acceptable at this
+  scale. Broadcast-from-DB is the higher-volume alternative (YAGNI now).
+- No reconnect/backoff logic (v1). A dropped socket degrades to the static server snapshot.
