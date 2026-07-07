@@ -26,6 +26,23 @@ export const SUNNER_OPTIONS: readonly SunnerOption[] = [
   { id: "sunner-9", name: "Đặng Hải Đăng", role: "CEVC26" },
 ];
 
+/**
+ * Fixed catalog of selectable hashtags for the composer dropdown (FR-008,
+ * MoMorph "Dropdown list hashtag" `p9zO-c4a4x`). These are the Sun* company
+ * values — a stable set, so a static constant (not a DB table) is the KISS
+ * source. ("#High-performing" corrects the design's "#High-perorming" typo.)
+ */
+export const HASHTAG_OPTIONS: readonly string[] = [
+  "#High-performing",
+  "#BE PROFESSIONAL",
+  "#BE OPTIMISTIC",
+  "#BE A TEAM",
+  "#THINK OUTSIDE THE BOX",
+  "#GET RISKY",
+  "#GO FAST",
+  "#WASSHOI",
+];
+
 /** Verbatim copy for every field in the composer (FR-004..011). */
 export const WRITE_KUDO_COPY = {
   title: "Gửi lời cám ơn và ghi nhận đến đồng đội",
@@ -42,7 +59,7 @@ export const WRITE_KUDO_COPY = {
   communityStandards: "Tiêu chuẩn cộng đồng",
   hashtagLabel: "Hashtag",
   addHashtag: "+ Hashtag",
-  maxNote: "Tối đa 5",
+  maxNote: "Tối đa 5", // keep in sync with MAX_HASHTAGS in write-kudo-form.ts (kept literal to avoid a circular import)
   imageLabel: "Image",
   addImage: "+ Image",
   anonymousLabel: "Gửi lời cám ơn và ghi nhận ẩn danh",
