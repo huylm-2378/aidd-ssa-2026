@@ -47,7 +47,7 @@ export default async function SunKudosPage() {
           <KudosSearchBar sunnerOptions={sunnerOptions} />
         </div>
         <HighlightKudosSection kudos={allKudos} />
-        <SpotlightBoard count={spotlight.count} names={spotlight.names} />
+        <SpotlightBoard count={spotlight.count} nodes={spotlight.nodes} roster={spotlight.roster} />
         <AllKudosSection kudos={allKudos} stats={stats} recentGifts={recentGifts} />
       </main>
       <Footer />

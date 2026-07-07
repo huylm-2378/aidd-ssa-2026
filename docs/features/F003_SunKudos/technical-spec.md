@@ -21,6 +21,10 @@ with Hashtag/Phòng ban filters, a Spotlight Board name word-cloud, and an All K
 personal-stats + Secret Box sidebar. Static/client-rendered, mock data only, no backend. Reuses the
 homepage Header and Footer.
 
+> **Note (2026-07-07):** the Spotlight Board (FR-007) described below as a static word-cloud was
+> superseded by a real-time, interactive pan/zoom constellation — see
+> [F008 — Sun* Kudos Live Spotlight Board](../F008_KudosLiveBoard/technical-spec.md).
+
 ## Requirements
 
 | Code | Description | Handler | Verifiable |

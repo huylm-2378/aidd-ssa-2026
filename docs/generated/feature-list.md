@@ -10,6 +10,7 @@
 | 4 | F004 — Login | P1 | ui | implemented |
 | 5 | F005 — Google login with Supabase | P1 | auth | implemented |
 | 6 | F006 — Write Kudo | P1 | ui | implemented |
+| 7 | F008 — Sun* Kudos Live Spotlight Board | P1 | ui/realtime | implemented |
 
 ## Feature Details
 
@@ -78,3 +79,13 @@ up to 5 images, and optionally send anonymously; Gửi is gated on required fiel
 recipient data, no backend/persistence. Previously deferred as a future feature in F003_SunKudos.
 
 **Related:** screens: ihQ26W78P2 | routes: /sun-kudos | models: SunnerOption, WriteKudoForm
+
+### F008 — Sun* Kudos Live Spotlight Board
+
+**Priority:** P1 | **Type:** ui/realtime | **Status:** implemented | **Slug:** F008_KudosLiveBoard
+
+Upgrades the `/sun-kudos` Spotlight Board from a static word-cloud (F003) into a real-time,
+interactive pan/zoom constellation with a diacritic-insensitive Sunner search and a live activity
+ticker, powered by a client-side Supabase Realtime subscription on `public.kudos` INSERT.
+
+**Related:** screens: MaZUn5xHXZ | routes: /sun-kudos | models: kudos, sunners

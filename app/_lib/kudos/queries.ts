@@ -56,18 +56,51 @@ export async function getAllKudos(filter?: KudoFilter): Promise<KudoCard[]> {
   }
 }
 
-/** Spotlight Board: total kudo count + the sunner name cloud. */
-export async function getSpotlight(): Promise<{ count: number; names: string[] }> {
+/**
+ * Spotlight Board data (F008 Live Board): total kudo count, the constellation
+ * `nodes`, and the `roster`. Nodes are the DISTINCT recent kudo receivers
+ * (deduped by id — one node per name, no repeats), resolved client-side from
+ * the roster map (avoids a PostgREST embed). `roster` (all sunners) also backs
+ * the live activity ticker's realtime `receiver_id → name` lookup.
+ */
+const SPOTLIGHT_NODE_CAP = 250;
+
+export async function getSpotlight(): Promise<{
+  count: number;
+  nodes: { id: string; name: string }[];
+  roster: { id: string; name: string }[];
+}> {
   try {
     const supabase = await createClient();
-    const [{ count }, { data }] = await Promise.all([
+    const [countRes, kudosRes, rosterRes] = await Promise.all([
       supabase.from("kudos").select("*", { count: "exact", head: true }),
-      supabase.from("sunners").select("name"),
+      supabase
+        .from("kudos")
+        .select("receiver_id")
+        .order("created_at", { ascending: false })
+        .limit(SPOTLIGHT_NODE_CAP),
+      supabase.from("sunners").select("id,name"),
     ]);
-    const names = (data ?? []).map((r: { name: string }) => r.name);
-    return { count: count ?? 0, names };
+    const roster = (rosterRes.data ?? []).map((r: { id: string; name: string }) => ({
+      id: r.id,
+      name: r.name,
+    }));
+    const nameById = new Map(roster.map((r) => [r.id, r.name]));
+    // Distinct receivers (dedupe by id, most-recent first) — one node per name,
+    // no repeats. Only people who actually received a kudo become nodes.
+    const seen = new Set<string>();
+    const nodes: { id: string; name: string }[] = [];
+    for (const r of (kudosRes.data ?? []) as { receiver_id: string | null }[]) {
+      const id = r.receiver_id;
+      if (!id || seen.has(id)) continue;
+      const name = nameById.get(id);
+      if (!name) continue;
+      seen.add(id);
+      nodes.push({ id, name });
+    }
+    return { count: countRes.count ?? 0, nodes, roster };
   } catch {
-    return { count: 0, names: [] };
+    return { count: 0, nodes: [], roster: [] };
   }
 }
 
