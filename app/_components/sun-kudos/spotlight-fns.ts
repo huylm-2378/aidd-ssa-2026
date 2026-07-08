@@ -30,14 +30,24 @@ export function weightOf(index: number): number {
 /**
  * Deterministic scatter position for constellation node `index`, expressed as
  * a percent of the canvas box, inset into a 5-95% safe band so names never
- * touch the viewport edge. Uses two different irrational multipliers (the
- * fractional part of `index * constant`) so consecutive indices land in
- * visually distinct spots instead of a grid, while the same index always
- * yields the same spot (deterministic + testable).
+ * touch the viewport edge.
+ *
+ * Uses the **R2 low-discrepancy sequence** (the 2D generalisation of the golden
+ * ratio, built on the plastic number). Unlike the naive `(index * k) % 1` — which
+ * pins `index 0` to `(0,0)` (a name stuck in the top-left corner) and, because
+ * both axes are linear multiples of the same index, smears points along diagonal
+ * stripes rather than filling the plane — R2 spreads points EVENLY across the box
+ * with no clustering and no empty gutters. The `0.5 +` offset seats `index 0` at
+ * the centre, so no index ever lands in a corner. Same index → same spot
+ * (deterministic + testable).
  */
+// Plastic number and its powers: a1 = 1/g, a2 = 1/g² (Martin Roberts' R2).
+const R2_A1 = 0.7548776662466927;
+const R2_A2 = 0.5698402909980532;
+
 export function positionOf(index: number): { leftPct: number; topPct: number } {
-  const fracX = (index * 12.9898) % 1;
-  const fracY = (index * 78.233) % 1;
+  const fracX = (0.5 + R2_A1 * index) % 1;
+  const fracY = (0.5 + R2_A2 * index) % 1;
   return { leftPct: 5 + fracX * 90, topPct: 5 + fracY * 90 };
 }
 

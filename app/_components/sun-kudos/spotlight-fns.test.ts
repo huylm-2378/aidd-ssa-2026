@@ -38,6 +38,31 @@ describe("positionOf", () => {
       expect(topPct).toBeLessThan(95);
     }
   });
+
+  it("does not pin index 0 to the top-left corner (regression: seats it at centre)", () => {
+    const { leftPct, topPct } = positionOf(0);
+    expect(leftPct).toBeCloseTo(50, 1);
+    expect(topPct).toBeCloseTo(50, 1);
+  });
+
+  it("distributes names evenly across all four quadrants (regression: no empty left gutter)", () => {
+    const quadrants = { tl: 0, tr: 0, bl: 0, br: 0 };
+    const N = 60;
+    for (let i = 0; i < N; i++) {
+      const { leftPct, topPct } = positionOf(i);
+      const left = leftPct < 50;
+      const top = topPct < 50;
+      if (top && left) quadrants.tl++;
+      else if (top && !left) quadrants.tr++;
+      else if (!top && left) quadrants.bl++;
+      else quadrants.br++;
+    }
+    // Even coverage: every quadrant populated, none hogging (< 40% of the total).
+    for (const count of Object.values(quadrants)) {
+      expect(count).toBeGreaterThan(0);
+      expect(count).toBeLessThan(N * 0.4);
+    }
+  });
 });
 
 describe("toneOf", () => {

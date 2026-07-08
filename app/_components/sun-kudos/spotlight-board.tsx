@@ -20,7 +20,7 @@ export default function SpotlightBoard({
 }) {
   return (
     <section
-      className="mx-auto flex max-w-[1512px] flex-col gap-10 px-6 py-16 sm:px-12 lg:px-[144px] lg:py-24"
+      className="mx-auto flex max-w-[1512px] flex-col gap-10 px-6 py-16 sm:px-8 lg:px-16 lg:py-24"
       aria-label="Spotlight Board"
     >
       <header className="flex flex-col gap-4">
