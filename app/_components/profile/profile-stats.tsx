@@ -4,6 +4,9 @@ interface ProfileStatsProps {
   stats: SunnerStat[];
 }
 
+/** Figma gift icon for the "Mở Secret Box" button (space encoded for the path). */
+const SECRET_BOX_ICON_SRC = "/profiles/Vector%20(3).png";
+
 /** Index of the first row (Secret Box opened) that gets a divider above it. */
 const SECRET_BOX_DIVIDER_INDEX = 3;
 
@@ -29,9 +32,11 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
       ))}
       <button
         type="button"
-        className="w-full rounded-lg bg-[#ffea9e] p-4 font-montserrat font-bold text-[#00101a]"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ffea9e] p-4 font-montserrat font-bold text-[#00101a]"
       >
         Mở Secret Box
+        {/* eslint-disable-next-line @next/next/no-img-element -- static local icon, not a remote-optimised image */}
+        <img src={SECRET_BOX_ICON_SRC} alt="" aria-hidden className="h-5 w-5" />
       </button>
     </div>
   );
