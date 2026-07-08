@@ -27,9 +27,11 @@ Treat any of these as possibly missing (fallback chain above); never assume `use
 
 - **No roles / permissions / tiers.** Every authenticated user is equivalent. There is nothing to
   authorize *for* — no gated page, no privileged action.
-- **No route protection.** `/`, `/awards-information`, `/sun-kudos`, `/login`, `/profile` (F009), and
-  all `/auth/*` routes are reachable without a session. The middleware refreshes tokens but never
-  redirects on auth state. `/profile` is nominally "the logged-in Sunner's own profile" but is not
+- **No route protection.** `/`, `/awards-information`, `/sun-kudos`, `/login`, `/profile` (F009),
+  `/prelaunch` (F011), and all `/auth/*` routes are reachable without a session. The middleware
+  refreshes tokens but never redirects on auth state. `/prelaunch` is a static countdown page with no
+  identity read at all — no `getUser()` call, no session dependency. `/profile` is nominally "the
+  logged-in Sunner's own profile" but is not
   auth-gated: a logged-out visitor renders it with an empty identity block instead of a redirect. Its
   reads are RLS-backed public data (`kudos_stats`, `kudos`, both from F007) plus, when a session exists,
   the caller's own `auth.getUser()` metadata — no new permission or RLS policy introduced.

@@ -13,6 +13,7 @@
 | 7 | F008 — Sun* Kudos Live Spotlight Board | P1 | ui/realtime | implemented |
 | 8 | F009 — User Profile | P1 | ui | implemented |
 | 9 | F010 — Floating Action Button | P1 | ui | implemented |
+| 10 | F011 — Countdown / Prelaunch Page | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -116,3 +117,17 @@ prior homepage stub `floating-widget-button.tsx` into the real widget. No new ro
 change, no auth change — pure client UI reusing F002's route and F006's modal.
 
 **Related:** screens: Sv7DFwBw1h | routes: (homepage; links to /awards-information) | models: —
+
+### F011 — Countdown / Prelaunch Page
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F011_CountdownPrelaunch
+
+Standalone full-screen prelaunch route at `/prelaunch` (MoMorph frame "Countdown - Prelaunch page"):
+Root-further keyvisual background, centered "Sự kiện sẽ bắt đầu sau" heading, and a live DAYS/HOURS/
+MINUTES countdown. No site Header/Footer. Almost entirely an assembly of existing pieces — reuses
+`useCountdown` and `CountdownTile` from the homepage hero plus `NEXT_PUBLIC_SAA_EVENT_START` (no new
+config), and the login page's full-bleed keyvisual pattern. Extracted a shared `app/_lib/use-mounted.ts`
+hook (previously private to `write-kudo-modal.tsx`, F006) to gate hydration-sensitive live digits. No
+DB/schema change, no auth change.
+
+**Related:** screens: 8PJQswPZmU | routes: /prelaunch | models: —

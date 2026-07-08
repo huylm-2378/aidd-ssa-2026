@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { EMPTY_FORM, canSubmit, missingRequired, type WriteKudoForm } from "../../_lib/write-kudo-form";
 import { WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
+import { useMounted } from "../../_lib/use-mounted";
 import { createKudo } from "../../sun-kudos/actions";
 import RecipientSelect from "./recipient-select";
 import KudoEditor from "./kudo-editor";
@@ -20,12 +21,6 @@ interface WriteKudoModalProps {
 }
 
 const TITLE_ID = "write-kudo-title";
-
-const noopSubscribe = () => () => {};
-/** True only once mounted on the client — avoids a portal/SSR hydration mismatch (Risk in plan). */
-function useMounted(): boolean {
-  return useSyncExternalStore(noopSubscribe, () => true, () => false);
-}
 
 /**
  * "Viết Kudo" composer modal (F006, MoMorph `ihQ26W78P2` / instance
