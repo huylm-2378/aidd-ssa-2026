@@ -65,11 +65,13 @@ export default function FloatingWidgetButton() {
               onClick={() => setIsOpen(false)}
               className={PILL_CLASSES}
             >
-              <SunSparkIcon />
+              {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
+              <img src="/float-action-button/MM_MEDIA_LOGO.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
               Thể lệ
             </Link>
             <button type="button" onClick={handleWriteKudos} className={PILL_CLASSES}>
-              <PenIcon />
+              {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
+              <img src="/float-action-button/MM_MEDIA_Pen.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
               Viết KUDOS
             </button>
           </div>
@@ -110,24 +112,3 @@ function PlusIcon({ open }: { open: boolean }) {
   );
 }
 
-function PenIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-[#00101a]" fill="none" stroke="currentColor" aria-hidden>
-      <path
-        d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** Sun* spark mark (mm:I313:9140;214:3799;186:1763 "MM_MEDIA_LOGO"). */
-function SunSparkIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="#d4271d" aria-hidden>
-      <path d="M14.2 2 5.6 13.4h4.7l-1.6 8.6 9.7-12.6h-5.1z" />
-    </svg>
-  );
-}
