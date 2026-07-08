@@ -1,5 +1,6 @@
 import type { KudoCard as KudoCardData } from "../../_lib/kudos-cards";
 import KudoAvatar from "./kudos-avatar";
+import TierBadge from "./tier-badge";
 
 /** Sender/receiver identity block: avatar + name + role code + hero-tier badge. */
 function Person({
@@ -27,11 +28,7 @@ function Person({
                 {role}
               </span>
             )}
-            {tier && (
-              <span className="rounded-full border-[0.5px] border-[#ffea9e] bg-[#ffea9e]/20 px-2 py-0.5 font-montserrat text-xs font-bold text-[#8a6d1a]">
-                {tier}
-              </span>
-            )}
+            <TierBadge tier={tier} />
           </div>
         )}
       </div>
@@ -47,10 +44,24 @@ const DIVIDER = "h-px w-full bg-[#ffea9e]";
  * border: a sender → receiver header, a timestamp, a centered title, the body
  * in a gold-tinted box, an optional photo strip, red hashtags, and a footer
  * with the like count + visual-only "Copy Link" / "Xem chi tiết" actions.
+ *
+ * `isSpam` is a visual-only flag (F009 profile moderation view): it overlays
+ * a red "Spam" pill top-right of the card and carries no data-layer meaning.
  */
-export default function KudoCard({ kudo }: { kudo: KudoCardData }) {
+export default function KudoCard({
+  kudo,
+  isSpam,
+}: {
+  kudo: KudoCardData;
+  isSpam?: boolean;
+}) {
   return (
-    <article className="flex w-full flex-col gap-4 rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
+    <article className="relative flex w-full flex-col gap-4 rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
+      {isSpam && (
+        <span className="absolute right-4 top-4 rounded-full bg-[#d4271d] px-2 py-0.5 font-montserrat text-xs font-bold text-white">
+          Spam
+        </span>
+      )}
       {/* mm:335:9442 -- sender → arrow → receiver */}
       <div className="flex items-start justify-between gap-4">
         <Person

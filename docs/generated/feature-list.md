@@ -11,6 +11,7 @@
 | 5 | F005 — Google login with Supabase | P1 | auth | implemented |
 | 6 | F006 — Write Kudo | P1 | ui | implemented |
 | 7 | F008 — Sun* Kudos Live Spotlight Board | P1 | ui/realtime | implemented |
+| 8 | F009 — User Profile | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -89,3 +90,16 @@ interactive pan/zoom constellation with a diacritic-insensitive Sunner search an
 ticker, powered by a client-side Supabase Realtime subscription on `public.kudos` INSERT.
 
 **Related:** screens: MaZUn5xHXZ | routes: /sun-kudos | models: kudos, sunners
+
+### F009 — User Profile
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F009_UserProfile
+
+The logged-in Sunner's own profile page at `/profile`: keyvisual banner, identity block (avatar,
+name, department + tier — the latter two are design-faithful placeholders, no auth-metadata source),
+a personal stats panel (Kudos received/sent, hearts received, Secret Box opened/unopened) sourced
+from the existing `kudos_stats` singleton, and a Sent/Received Kudos feed reusing `KudoCard`. No new
+DB schema/migration — reuses the F007 data layer and F005 identity read wholesale. Not auth-gated:
+a logged-out visitor sees an empty identity block rather than a redirect.
+
+**Related:** screens: 3FoIx6ALVb | routes: /profile | models: kudos_stats, KudoCard
