@@ -47,7 +47,10 @@ export function useDialogA11y({ open, onClose, containerRef, triggerRef }: UseDi
 
     const focusables = container?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
     const first = focusables?.[0];
-    first?.focus();
+    // preventScroll: a dialog whose only focusable elements sit below the fold
+    // (e.g. the rules drawer's footer buttons) would otherwise scroll its panel
+    // to the footer on open, hiding the title. Focus without scrolling.
+    first?.focus({ preventScroll: true });
 
     function handleTab(e: KeyboardEvent) {
       if (e.key !== "Tab" || !container) return;
