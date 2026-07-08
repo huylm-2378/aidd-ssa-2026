@@ -2,10 +2,9 @@
 
 import { matchesQuery, positionOf, SIZE_SCALE, weightOf } from "./spotlight-fns";
 import { usePanZoom } from "./use-pan-zoom";
+import type { LiveNote } from "./use-live-notes";
 
 const ZOOM_STEP = 0.2;
-
-type Live = { id: string | null; name: string; tick: number } | null;
 
 const CTRL_BTN =
   "flex h-7 w-7 items-center justify-center rounded border border-[#2e3940] bg-black/40 text-white/70 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]";
@@ -16,22 +15,24 @@ const CTRL_BTN =
  * positions, sized by weight, inside a drag/wheel/keyboard pan+zoom viewport
  * (`usePanZoom` — CSS `transform`, no dependency). `query` (FR-005) dims
  * non-matching nodes and keeps matches at full gold prominence without
- * unmounting/reflowing. The most-recent live recipient (`live`, FR-007) pulses
- * its node and surfaces a top-left "LIVE" badge (fixed to the viewport, outside
- * the pan/zoom transform).
+ * unmounting/reflowing. Live recipients (`liveNotes`, FR-011) each pulse their
+ * node and surface a stacked top-left toast (newest on top, older pushed down),
+ * fixed to the viewport outside the pan/zoom transform; each toast clears
+ * itself after ~15s (see `useLiveNotes`).
  */
 export default function SpotlightCanvas({
   nodes,
   query,
-  live,
+  liveNotes = [],
 }: {
   nodes: readonly { id: string; name: string }[];
   query: string;
-  live?: Live;
+  liveNotes?: readonly LiveNote[];
 }) {
   const { containerRef, transform, onPointerDown, onPointerMove, onPointerUp, onKeyDown, zoomBy, reset } =
     usePanZoom();
   const isFiltering = query.trim() !== "";
+  const liveIds = new Set(liveNotes.map((n) => n.id).filter((id): id is string => id != null));
 
   return (
     <div className="relative">
@@ -56,7 +57,7 @@ export default function SpotlightCanvas({
             const { leftPct, topPct } = positionOf(index);
             const hit = matchesQuery(node.name, query);
             const dim = isFiltering && !hit;
-            const isLive = live?.id != null && node.id === live.id;
+            const isLive = liveIds.has(node.id);
             // Gold ONLY for a search match. Default names stay white shades
             // (varied by weight); the live recipient is brightest white + pulse.
             const tone =
@@ -79,22 +80,21 @@ export default function SpotlightCanvas({
           })}
         </div>
 
-        {live && (
-          <div
-            key={live.tick}
-            className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2 rounded-full border border-[#ffea9e]/40 bg-black/70 px-3 py-1.5 backdrop-blur-sm"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-2 w-2 rounded-full bg-[#e46060] motion-safe:animate-ping" />
-              <span className="relative h-2 w-2 rounded-full bg-[#e46060]" />
-            </span>
-            <span className="font-montserrat text-[11px] font-bold uppercase tracking-wider text-[#ffea9e]">
-              Live
-            </span>
-            <span className="max-w-[180px] truncate font-montserrat text-xs font-bold text-white">
-              {live.name}
-            </span>
-            <span className="hidden font-montserrat text-xs text-white/60 sm:inline">vừa nhận Kudos</span>
+        {liveNotes.length > 0 && (
+          <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
+            {liveNotes.map((note) => (
+              <div
+                key={note.key}
+                className="flex items-center gap-2 rounded-full border border-[#ffea9e]/40 bg-black/70 px-3 py-1.5 backdrop-blur-sm"
+              >
+                <span className="max-w-[180px] truncate font-montserrat text-xs font-bold text-white">
+                  {note.name}
+                </span>
+                <span className="hidden font-montserrat text-xs text-white/60 sm:inline">
+                  vừa nhận Kudos
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>

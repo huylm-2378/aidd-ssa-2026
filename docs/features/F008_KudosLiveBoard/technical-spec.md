@@ -42,7 +42,7 @@ view live.
 | FR-008 | **Fail-safe**: initial server fetch errors → empty board renders gracefully (no crash); realtime subscription failure degrades to the static server snapshot (no error surfaced to user) | `queries.getSpotlight` + client | yes |
 | FR-009 | Realtime enabled on `public.kudos` via an idempotent migration adding the table to the `supabase_realtime` publication; existing "public read kudos" RLS SELECT already gates anon realtime reads | `supabase/migrations/0003_*.sql` | yes |
 | FR-010 | Board background faithful to Figma (B.7_Spotlight `image 24/25` + `Root further mo rong 1`): the Root Further keyvisual dimmed under a ~80% dark scrim + a screen-blended particle/star field with a motion-safe twinkle; rounded panel with a gold-toned border; purely decorative (aria-hidden), never reduces name-cloud readability | `SpotlightBoardBg` | yes |
-| FR-011 | **Live recipient badge**: on a `kudos` INSERT realtime event, a top-left "LIVE" badge (pulsing indicator + recipient name + "vừa nhận Kudos") appears fixed to the canvas viewport, and that recipient's node pulses (radar ping); the badge is absent until the first live event | `SpotlightCanvas` (client) | yes |
+| FR-011 | **Live recipient toasts**: on a `kudos` INSERT realtime event, a top-left toast (recipient name + "vừa nhận Kudos", no "LIVE" icon/label) appears fixed to the canvas viewport and that recipient's node pulses; each toast auto-dismisses ~15s after it appears, and concurrent arrivals **stack** (newest on top, older pushed down) rather than replacing one another; all toasts absent until the first live event | `SpotlightCanvas` + `useLiveNotes` (client) | yes |
 
 ## Key entities
 
