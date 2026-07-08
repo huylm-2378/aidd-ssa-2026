@@ -45,7 +45,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
         >
           {/* mm:I2167:9091;178:1033;178:1030 */}
           <Image
-            src="/homepage-saa/logo.png"
+            src="/header-and-footer/MM_MEDIA_Logo.png"
             alt="Sun* Annual Awards logo"
             width={52}
             height={48}
