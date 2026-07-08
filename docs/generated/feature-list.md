@@ -12,6 +12,7 @@
 | 6 | F006 — Write Kudo | P1 | ui | implemented |
 | 7 | F008 — Sun* Kudos Live Spotlight Board | P1 | ui/realtime | implemented |
 | 8 | F009 — User Profile | P1 | ui | implemented |
+| 9 | F010 — Floating Action Button | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -103,3 +104,15 @@ DB schema/migration — reuses the F007 data layer and F005 identity read wholes
 a logged-out visitor sees an empty identity block rather than a redirect.
 
 **Related:** screens: 3FoIx6ALVb | routes: /profile | models: kudos_stats, KudoCard
+
+### F010 — Floating Action Button
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F010_FloatingActionButton
+
+Homepage-only fixed bottom-right widget (MoMorph frame "Floating Action Button - phim nổi chức
+năng 2"): a round red toggle (`+` rotating into `×`) that reveals two gold pills, "Thể lệ" (link to
+Awards Information) and "Viết KUDOS" (opens the existing `WriteKudoModal` composer). Builds out the
+prior homepage stub `floating-widget-button.tsx` into the real widget. No new route, no data/schema
+change, no auth change — pure client UI reusing F002's route and F006's modal.
+
+**Related:** screens: Sv7DFwBw1h | routes: (homepage; links to /awards-information) | models: —

@@ -6,7 +6,8 @@ are allocated here; composite/region (REG###) breakdown is deferred to a real re
 project ever needs it. `/auth/callback` is a non-visual route handler and is intentionally omitted.
 SCR006 is the one exception: it has its own MoMorph screen ID (a dedicated Figma frame) but renders as a
 client-side modal over `/sun-kudos` rather than a distinct route, so it's listed here rather than
-deferred to REG###._
+deferred to REG###. SCR008 (F010) is the same kind of exception: its own dedicated MoMorph frame, but it
+renders as an overlay widget on `/` rather than a distinct route._
 
 | SCR | Screen | Route | Owning feature | Notes |
 |-----|--------|-------|----------------|-------|
@@ -17,3 +18,4 @@ deferred to REG###._
 | SCR005 | Auth Code Error | `/auth/auth-code-error` | F005 | OAuth failure fallback; message + link back to `/login` |
 | SCR006 | Viết Kudo (composer modal) | `/sun-kudos` (modal, no dedicated route) | F006 | Recipient autocomplete, danh hiệu, content editor, hashtags (max 5), images (max 5), anonymous toggle; opened from the hero prompt search bar, closes via Hủy/backdrop/Escape/Gửi |
 | SCR007 | User Profile (a.k.a. "Profile bản thân", MoMorph `3FoIx6ALVb`) | `/profile` | F009 | Keyvisual banner, identity block (avatar/name/department+tier placeholder, icon-collection strip), stats panel (Kudos/hearts/Secret Box counts, visual-only "Mở Secret Box" button), Sent/Received Kudos feed; own profile only, not auth-gated |
+| SCR008 | Floating Action Button (a.k.a. "phim nổi chức năng 2", MoMorph `Sv7DFwBw1h`) | `/` (fixed overlay widget, no dedicated route) | F010 | Collapsed red `+` toggle rotates into `×`; opens two gold pills, "Thể lệ" (→ `/awards-information`) and "Viết KUDOS" (opens SCR006 modal); closes on toggle/Escape/outside click |
