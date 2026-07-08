@@ -1,5 +1,7 @@
 import KudoAvatar from "../sun-kudos/kudos-avatar";
-import TierBadge from "../sun-kudos/tier-badge";
+
+/** Figma "danh hiệu" badge artwork (space encoded for the static asset path). */
+const TIER_BADGE_SRC = "/profiles/danh%20hi%E1%BB%87u.png";
 
 interface ProfileIdentityProps {
   name: string;
@@ -35,7 +37,8 @@ export default function ProfileIdentity({
         <span className="font-montserrat text-[22px] text-white">
           {department}
         </span>
-        <TierBadge tier={tier} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- static local badge, not a remote-optimised image */}
+        <img src={TIER_BADGE_SRC} alt={tier} className="h-6 w-auto" />
       </div>
       <div className="mt-6 flex w-full flex-col items-center gap-3">
         <span className="font-montserrat text-[22px] text-white">
@@ -47,7 +50,7 @@ export default function ProfileIdentity({
               key={index}
               data-testid="icon-slot"
               aria-hidden
-              className="h-16 w-20 rounded bg-white/5"
+              className="h-16 w-16 rounded-full bg-white/5"
             />
           ))}
         </div>
