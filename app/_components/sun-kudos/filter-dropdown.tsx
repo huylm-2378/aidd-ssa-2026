@@ -8,16 +8,22 @@ const CLEAR_OPTION = "Tất cả";
  * Controlled filter dropdown for the Highlight Kudos section (FIX 3). Renders
  * an explicit "Tất cả" entry above `options` to clear the selection back to
  * "all"; the actual filtering happens in the parent, which owns `selected`.
+ *
+ * `selected` is the match key compared against `options` for `aria-selected`.
+ * Optional `display` overrides only the trigger button's text (e.g. to append
+ * a count) without breaking that option-matching contract.
  */
 export default function FilterDropdown({
   label,
   options,
   selected,
+  display,
   onChange,
 }: {
   label: string;
   options: readonly string[];
   selected: string | null;
+  display?: string;
   onChange: (value: string | null) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -36,7 +42,7 @@ export default function FilterDropdown({
         aria-expanded={open}
         className="flex items-center gap-2 rounded-lg border border-[#998c5f] bg-[#ffea9e]/10 px-4 py-2 font-montserrat text-sm font-bold text-white transition-colors hover:bg-[#ffea9e]/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
       >
-        {selected ?? label}
+        {display ?? selected ?? label}
         <svg viewBox="0 0 24 24" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" aria-hidden>
           <path d="M6 9l6 6 6-6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         </svg>

@@ -16,3 +16,4 @@ deferred to REG###._
 | SCR004 | Login | `/login` | F004, F005 | Keyvisual + minimal header/footer + Google OAuth button (F005 makes the button a real `signInWithOAuth` trigger) |
 | SCR005 | Auth Code Error | `/auth/auth-code-error` | F005 | OAuth failure fallback; message + link back to `/login` |
 | SCR006 | Viết Kudo (composer modal) | `/sun-kudos` (modal, no dedicated route) | F006 | Recipient autocomplete, danh hiệu, content editor, hashtags (max 5), images (max 5), anonymous toggle; opened from the hero prompt search bar, closes via Hủy/backdrop/Escape/Gửi |
+| SCR007 | User Profile (a.k.a. "Profile bản thân", MoMorph `3FoIx6ALVb`) | `/profile` | F009 | Keyvisual banner, identity block (avatar/name/department+tier placeholder, icon-collection strip), stats panel (Kudos/hearts/Secret Box counts, visual-only "Mở Secret Box" button), Sent/Received Kudos feed; own profile only, not auth-gated |

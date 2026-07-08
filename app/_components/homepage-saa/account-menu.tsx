@@ -70,6 +70,15 @@ export default function AccountMenu() {
                 {email && <p className="truncate text-xs text-white/50">{email}</p>}
               </li>
               <li>
+                <Link
+                  href="/profile"
+                  role="menuitem"
+                  className="block w-full px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
+                >
+                  Profile
+                </Link>
+              </li>
+              <li>
                 <form action={signOut}>
                   <button
                     type="submit"
