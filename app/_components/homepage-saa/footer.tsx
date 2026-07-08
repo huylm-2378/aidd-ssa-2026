@@ -30,7 +30,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
         >
           {/* mm:I5001:14800;342:1408;178:1030 */}
           <Image
-            src="/header-and-footer/MM_MEDIA_Logo.png"
+            src="/header-and-footer/MM_MEDIA_Logo%20(1).png"
             alt="Sun* Annual Awards logo"
             width={69}
             height={64}
