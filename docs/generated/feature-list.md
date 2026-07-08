@@ -14,6 +14,7 @@
 | 8 | F009 — User Profile | P1 | ui | implemented |
 | 9 | F010 — Floating Action Button | P1 | ui | implemented |
 | 10 | F011 — Countdown / Prelaunch Page | P1 | ui | implemented |
+| 11 | F012 — Language Dropdown | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -131,3 +132,19 @@ hook (previously private to `write-kudo-modal.tsx`, F006) to gate hydration-sens
 DB/schema change, no auth change.
 
 **Related:** screens: 8PJQswPZmU | routes: /prelaunch | models: —
+
+### F012 — Language Dropdown
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F012_LanguageDropdown
+
+Builds out the header's language switcher (MoMorph "Dropdown-ngôn ngữ", `hUyaaugye2`) from an inline
+emoji + plain-text list into its own `language-switcher.tsx` component: a rounded dark panel listing
+VN/EN flag rows, active-language highlight, and outside-click/Escape dismiss (reuses the
+`hashtag-field.tsx` dismiss pattern). `header.tsx` now renders `<LanguageSwitcher/>` in place of the
+inline markup, unchanged elsewhere; shows in both the full and `minimal` header variants (so it's on
+every header-bearing route, not just `/`). Client-only local state (VN default), no i18n/routing
+wiring, no new route, no DB/schema/auth change.
+
+**Related:** screens: hUyaaugye2 | routes: none — header component present on `/`, `/awards-information`,
+`/sun-kudos`, `/profile`, `/login`, `/auth/auth-code-error` (all pages that render the shared Header;
+`/prelaunch` has no Header by design) | models: —

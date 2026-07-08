@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import AccountMenu from "./account-menu";
+import LanguageSwitcher from "./language-switcher";
 
 interface NavLink {
   label: string;
@@ -31,8 +31,6 @@ function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
 // other routes byte-for-byte unchanged.
 export default function Header({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState<"VN" | "EN">("VN");
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between gap-8 bg-[#101417]/80 px-6 py-3 backdrop-blur-sm sm:px-9 lg:px-[144px]">
@@ -101,51 +99,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
         </button>
         )}
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setIsLangOpen((open) => !open)}
-            className="flex items-center gap-0.5 rounded p-2 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e] sm:p-4"
-            aria-haspopup="menu"
-            aria-expanded={isLangOpen}
-          >
-            <span aria-hidden className="text-base leading-none">
-              🇻🇳
-            </span>
-            <span>{selectedLang}</span>
-            <svg
-              viewBox="0 0 24 24"
-              className={`h-4 w-4 transition-transform ${isLangOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              aria-hidden
-            >
-              <path d="M6 9l6 6 6-6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          {isLangOpen && (
-            <ul
-              role="menu"
-              className="absolute right-0 top-full mt-2 min-w-[96px] overflow-hidden rounded-md border border-[#998c5f] bg-[#101417] shadow-lg"
-            >
-              {(["VN", "EN"] as const).map((lang) => (
-                <li key={lang}>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setSelectedLang(lang);
-                      setIsLangOpen(false);
-                    }}
-                    className="block w-full px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
-                  >
-                    {lang}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <LanguageSwitcher />
 
         {!minimal && <AccountMenu />}
       </div>
