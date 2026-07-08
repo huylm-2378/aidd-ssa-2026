@@ -36,7 +36,7 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
       >
         Mở Secret Box
         {/* eslint-disable-next-line @next/next/no-img-element -- static local icon, not a remote-optimised image */}
-        <img src={SECRET_BOX_ICON_SRC} alt="" aria-hidden className="h-5 w-5" />
+        <img src={SECRET_BOX_ICON_SRC} alt="" aria-hidden className="h-[21px] w-[21px]" />
       </button>
     </div>
   );
