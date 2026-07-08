@@ -45,7 +45,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
         >
           {/* mm:I2167:9091;178:1033;178:1030 */}
           <Image
-            src="/homepage-saa/logo.png"
+            src="/header-and-footer/MM_MEDIA_Logo.png"
             alt="Sun* Annual Awards logo"
             width={52}
             height={48}
@@ -82,6 +82,25 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* Figma order (Frame 482, left→right): notification bell, then language, then avatar. */}
+        {!minimal && (
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="relative flex h-10 w-10 items-center justify-center rounded transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
+        >
+          <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" aria-hidden>
+            <path
+              d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.66V5a2 2 0 1 0-4 0v.34A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#d4271d]" aria-hidden />
+        </button>
+        )}
+
         <div className="relative">
           <button
             type="button"
@@ -128,27 +147,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
           )}
         </div>
 
-        {!minimal && (
-        <>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" aria-hidden>
-            <path
-              d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.66V5a2 2 0 1 0-4 0v.34A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#d4271d]" aria-hidden />
-        </button>
-
-        <AccountMenu />
-        </>
-        )}
+        {!minimal && <AccountMenu />}
       </div>
     </header>
   );
