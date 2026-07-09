@@ -69,6 +69,11 @@ export const LOGIN_CONTENT = {
 } as const;
 ```
 
+> **F014 (round 5) update:** `login-content.ts` above is deleted. Its strings now
+> live as `login.subtitle1`/`login.subtitle2`/`login.googleButton` in the i18n
+> catalog, rendered by the new `login-welcome.tsx` client leaf — see
+> `docs/features/F014_Internationalization/technical-spec.md` FR-014.
+
 ## Success criteria
 
 - **SC-001** — `/login` renders header + keyvisual + logotype + subtitle + button + footer, faithful

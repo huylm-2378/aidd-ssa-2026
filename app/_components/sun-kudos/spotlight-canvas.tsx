@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import { matchesQuery, positionOf, SIZE_SCALE, weightOf } from "./spotlight-fns";
 import { usePanZoom } from "./use-pan-zoom";
 import type { LiveNote } from "./use-live-notes";
@@ -29,6 +30,7 @@ export default function SpotlightCanvas({
   query: string;
   liveNotes?: readonly LiveNote[];
 }) {
+  const { t } = useTranslation();
   const { containerRef, transform, onPointerDown, onPointerMove, onPointerUp, onKeyDown, zoomBy, reset } =
     usePanZoom();
   const isFiltering = query.trim() !== "";
@@ -39,7 +41,7 @@ export default function SpotlightCanvas({
       <div
         ref={containerRef}
         role="application"
-        aria-label="Bảng chòm sao Sunner: kéo hoặc dùng phím mũi tên để di chuyển, phím cộng/trừ để phóng to/thu nhỏ"
+        aria-label={t("spotlight.canvasAria")}
         tabIndex={0}
         className="relative h-[540px] w-full touch-none overflow-hidden rounded-xl border border-[#2e3940]/60 bg-black/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
         onPointerDown={onPointerDown}
@@ -91,7 +93,7 @@ export default function SpotlightCanvas({
                   {note.name}
                 </span>
                 <span className="hidden font-montserrat text-xs text-white/60 sm:inline">
-                  vừa nhận Kudos
+                  {t("spotlight.justReceivedKudos")}
                 </span>
               </div>
             ))}
@@ -100,13 +102,13 @@ export default function SpotlightCanvas({
       </div>
 
       <div className="absolute bottom-3 left-3 flex gap-1.5">
-        <button type="button" aria-label="Thu nhỏ" onClick={() => zoomBy(-ZOOM_STEP)} className={CTRL_BTN}>
+        <button type="button" aria-label={t("spotlight.zoomOut")} onClick={() => zoomBy(-ZOOM_STEP)} className={CTRL_BTN}>
           −
         </button>
-        <button type="button" aria-label="Đặt lại vị trí" onClick={reset} className={CTRL_BTN}>
+        <button type="button" aria-label={t("spotlight.resetPosition")} onClick={reset} className={CTRL_BTN}>
           ⟲
         </button>
-        <button type="button" aria-label="Phóng to" onClick={() => zoomBy(ZOOM_STEP)} className={CTRL_BTN}>
+        <button type="button" aria-label={t("spotlight.zoomIn")} onClick={() => zoomBy(ZOOM_STEP)} className={CTRL_BTN}>
           +
         </button>
       </div>

@@ -15,9 +15,19 @@ export interface CreateKudoInput {
   isAnonymous: boolean;
 }
 
+/** Stable, locale-independent codes for the two known validation failures. */
+export type CreateKudoErrorCode = "missing_fields" | "auth_required" | "unknown";
+
 export interface CreateKudoResult {
   ok: boolean;
-  error?: string;
+  /**
+   * F014 round 4: a server action can't call `t()` (no React context), so
+   * known failures return a stable `CreateKudoErrorCode` for the caller to
+   * translate. Anything else (a Supabase `error.message` or a caught
+   * `Error.message`) is a dynamic, already-human-readable string passed
+   * through as-is — the caller renders it raw.
+   */
+  error?: CreateKudoErrorCode | string;
 }
 
 /**
@@ -32,7 +42,7 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
   const title = input.title?.trim();
   const body = input.body?.trim();
   if (!input.receiverId || !title || !body || input.hashtags.length === 0) {
-    return { ok: false, error: "Thiếu trường bắt buộc." };
+    return { ok: false, error: "missing_fields" };
   }
 
   try {
@@ -43,7 +53,7 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      return { ok: false, error: "Bạn cần đăng nhập để gửi Kudo." };
+      return { ok: false, error: "auth_required" };
     }
     const meta = user.user_metadata ?? {};
     const senderName =
@@ -84,6 +94,6 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
     revalidatePath("/sun-kudos");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Lỗi không xác định." };
+    return { ok: false, error: e instanceof Error ? e.message : "unknown" };
   }
 }

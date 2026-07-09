@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import RulesModal from "../sun-kudos/rules-modal";
 import WriteKudoModal from "../sun-kudos/write-kudo-modal";
 
@@ -20,6 +21,7 @@ const PILL_CLASSES =
  * `hashtag-field.tsx` -- and returns focus to the toggle button.
  */
 export default function FloatingWidgetButton() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -69,12 +71,12 @@ export default function FloatingWidgetButton() {
             <button type="button" onClick={handleOpenRules} className={PILL_CLASSES}>
               {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
               <img src="/float-action-button/MM_MEDIA_LOGO.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
-              Thể lệ
+              {t("fab.rules")}
             </button>
             <button type="button" onClick={handleWriteKudos} className={PILL_CLASSES}>
               {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
               <img src="/float-action-button/MM_MEDIA_Pen.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
-              Viết KUDOS
+              {t("fab.writeKudos")}
             </button>
           </div>
         )}
@@ -85,7 +87,7 @@ export default function FloatingWidgetButton() {
           onClick={() => setIsOpen((open) => !open)}
           aria-haspopup="true"
           aria-expanded={isOpen}
-          aria-label={isOpen ? "Đóng menu thao tác" : "Mở menu thao tác"}
+          aria-label={isOpen ? t("fab.closeMenu") : t("fab.openMenu")}
           className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#d4271d] shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4271d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
         >
           <PlusIcon open={isOpen} />

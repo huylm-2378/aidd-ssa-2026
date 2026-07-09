@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { KUDOS_SEARCH } from "../../_lib/sun-kudos-content";
 import type { SunnerOption } from "../../_lib/write-kudo-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import WriteKudoModal from "./write-kudo-modal";
 
 /**
@@ -19,6 +20,7 @@ export default function KudosSearchBar({
 }: {
   sunnerOptions?: readonly SunnerOption[];
 }) {
+  const { t } = useTranslation();
   const [composerOpen, setComposerOpen] = useState(false);
   const promptRef = useRef<HTMLButtonElement>(null);
 
@@ -41,7 +43,7 @@ export default function KudosSearchBar({
           ref={promptRef}
           type="button"
           aria-haspopup="dialog"
-          aria-label={KUDOS_SEARCH.promptPlaceholder}
+          aria-label={t(KUDOS_SEARCH.promptPlaceholderKey)}
           onClick={() => setComposerOpen(true)}
           className={`${pillClass} lg:w-[738px] lg:shrink-0`}
         >
@@ -59,7 +61,7 @@ export default function KudosSearchBar({
         <button
           id="kudos-profile-search"
           type="button"
-          aria-label={KUDOS_SEARCH.profilePlaceholder}
+          aria-label={t(KUDOS_SEARCH.profilePlaceholderKey)}
           className={`${pillClass} lg:w-[381px] lg:shrink-0`}
         >
           <Image

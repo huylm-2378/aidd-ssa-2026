@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import SpotlightCanvas from "./spotlight-canvas";
 import SpotlightBoardBg from "./spotlight-board-bg";
 import { buildActivityEntry, buildNameById } from "./spotlight-fns";
@@ -29,6 +30,7 @@ export default function SpotlightBoardLive({
   roster: readonly { id: string; name: string }[];
   initialActivity: readonly string[];
 }) {
+  const { t } = useTranslation();
   const [count, setCount] = useState(initialCount);
   const [activity, setActivity] = useState<readonly string[]>(initialActivity);
   const [query, setQuery] = useState("");
@@ -41,11 +43,16 @@ export default function SpotlightBoardLive({
   const onInsert = useCallback(
     (row: KudosInsertRow) => {
       setCount((c) => c + 1);
-      setActivity((prev) => [buildActivityEntry(row, nameById), ...prev].slice(0, ACTIVITY_CAP));
+      setActivity((prev) =>
+        [buildActivityEntry(row, nameById, t("spotlight.receivedKudos")), ...prev].slice(
+          0,
+          ACTIVITY_CAP,
+        ),
+      );
       const name = (row.receiver_id && nameById.get(row.receiver_id)) || "Someone";
       pushLive(row.receiver_id, name);
     },
-    [nameById, pushLive],
+    [nameById, pushLive, t],
   );
 
   useKudosRealtime(onInsert);
@@ -63,14 +70,14 @@ export default function SpotlightBoardLive({
           <path d="m20 20-3.5-3.5" strokeWidth={1.8} strokeLinecap="round" />
         </svg>
         <label htmlFor="spotlight-search" className="sr-only">
-          Tìm kiếm trong Spotlight Board
+          {t("spotlight.searchLabel")}
         </label>
         <input
           id="spotlight-search"
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Tìm kiếm"
+          placeholder={t("spotlight.searchPlaceholder")}
           className="w-full bg-transparent font-montserrat text-xs text-white placeholder:text-white/50 focus-visible:outline-none"
         />
       </div>
@@ -81,7 +88,7 @@ export default function SpotlightBoardLive({
 
       <div
         className="mt-8 flex gap-8 overflow-x-auto border-t border-[#2e3940] pt-4"
-        aria-label="Hoạt động gần đây"
+        aria-label={t("spotlight.recentActivity")}
       >
         {activity.map((line, index) => (
           <p
@@ -95,7 +102,7 @@ export default function SpotlightBoardLive({
 
       <button
         type="button"
-        aria-label="Mở rộng bảng"
+        aria-label={t("spotlight.expandBoard")}
         className="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded text-white/60 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" aria-hidden>

@@ -45,17 +45,17 @@ describe("canSubmit (F006 FR-011, SC-002)", () => {
 });
 
 describe("missingRequired (drives the 'what's missing' hint)", () => {
-  it("lists every required field for the empty form, in order", () => {
+  it("lists every required field (as i18n catalog keys) for the empty form, in order", () => {
     expect(missingRequired(EMPTY_FORM)).toEqual([
-      "Người nhận",
-      "Danh hiệu",
-      "Nội dung",
-      "ít nhất 1 Hashtag",
+      "composer.field.recipient",
+      "composer.field.award",
+      "composer.field.content",
+      "composer.field.hashtag",
     ]);
   });
 
   it("reports only Hashtag when recipient + award + body are filled (the reported bug)", () => {
-    expect(missingRequired(fullForm({ hashtags: [] }))).toEqual(["ít nhất 1 Hashtag"]);
+    expect(missingRequired(fullForm({ hashtags: [] }))).toEqual(["composer.field.hashtag"]);
   });
 
   it("is empty exactly when canSubmit is true", () => {

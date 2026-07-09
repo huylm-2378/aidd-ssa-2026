@@ -124,11 +124,14 @@ describe("buildNameById", () => {
 
 describe("buildActivityEntry", () => {
   const nameById = buildNameById([{ id: "s1", name: "Nguyễn Bá Chức" }]);
+  // Callers pass the phrase pre-translated via t("spotlight.receivedKudos") (F014).
+  const RECEIVED_VI = "đã nhận được một Kudos mới";
 
   it("resolves a known receiver id to a ticker line", () => {
     const entry = buildActivityEntry(
       { receiver_id: "s1", created_at: "2025-10-30T13:30:00Z" },
       nameById,
+      RECEIVED_VI,
     );
     expect(entry).toBe("08:30PM Nguyễn Bá Chức đã nhận được một Kudos mới");
   });
@@ -137,6 +140,7 @@ describe("buildActivityEntry", () => {
     const entry = buildActivityEntry(
       { receiver_id: null, created_at: "2025-10-30T13:30:00Z" },
       nameById,
+      RECEIVED_VI,
     );
     expect(entry).toContain("Someone đã nhận được một Kudos mới");
   });
@@ -145,8 +149,18 @@ describe("buildActivityEntry", () => {
     const entry = buildActivityEntry(
       { receiver_id: "unknown-id", created_at: "2025-10-30T13:30:00Z" },
       nameById,
+      RECEIVED_VI,
     );
     expect(entry).toContain("Someone đã nhận được một Kudos mới");
+  });
+
+  it("renders the ticker line in EN when given the EN phrase", () => {
+    const entry = buildActivityEntry(
+      { receiver_id: "s1", created_at: "2025-10-30T13:30:00Z" },
+      nameById,
+      "received a new Kudos",
+    );
+    expect(entry).toBe("08:30PM Nguyễn Bá Chức received a new Kudos");
   });
 });
 

@@ -93,8 +93,8 @@ describe("mapStats", () => {
       secret_box_unopened: 25,
     });
     expect(rows).toHaveLength(5);
-    expect(rows[0]).toEqual({ label: "Số Kudos bạn nhận được:", value: "25" });
-    expect(rows[4].label).toBe("Số Secret Box chưa mở:");
+    expect(rows[0]).toEqual({ label: "stats.received", value: "25" });
+    expect(rows[4].label).toBe("stats.secretUnopened");
   });
 
   it("defaults to zeros when the stats row is missing", () => {

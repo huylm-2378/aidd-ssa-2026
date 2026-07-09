@@ -3,7 +3,7 @@ import Image from "next/image";
 import Header from "../_components/homepage-saa/header";
 import Footer from "../_components/homepage-saa/footer";
 import GoogleLoginButton from "../_components/login/google-login-button";
-import { LOGIN_CONTENT } from "../_lib/login-content";
+import LoginWelcome from "../_components/login/login-welcome";
 
 export const metadata: Metadata = {
   title: "Đăng nhập — Sun* Annual Awards 2025",
@@ -48,13 +48,7 @@ export default function LoginPage() {
 
           <div className="flex flex-col items-start gap-6">
             {/* mms_B.2_content (662:14753) -- Montserrat 700, ~20px/40px, letter-spacing 0.5px. */}
-            <p className="font-montserrat text-lg font-bold leading-[1.8] tracking-[0.5px] text-white sm:text-xl">
-              {LOGIN_CONTENT.subtitle.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-            </p>
+            <LoginWelcome />
 
             <GoogleLoginButton />
           </div>

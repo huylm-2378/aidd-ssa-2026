@@ -2,6 +2,7 @@
 
 import type { KudoCard as KudoCardData } from "../../_lib/kudos-cards";
 import { HIGHLIGHT_EMPTY } from "../../_lib/sun-kudos-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import KudoCard from "./kudo-card";
 
 const PEEK_CLASS = "hidden w-[140px] shrink-0 overflow-hidden opacity-40 lg:flex";
@@ -49,6 +50,8 @@ export default function HighlightCarousel({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
+
   if (kudos.length === 0) {
     return (
       <p
@@ -56,7 +59,7 @@ export default function HighlightCarousel({
         aria-live="polite"
         className="py-12 text-center font-montserrat text-lg font-bold text-[#999]"
       >
-        {HIGHLIGHT_EMPTY}
+        {t(HIGHLIGHT_EMPTY)}
       </p>
     );
   }
@@ -73,7 +76,7 @@ export default function HighlightCarousel({
           type="button"
           onClick={onPrev}
           disabled={safeIndex === 0}
-          aria-label="Kudo trước"
+          aria-label={t("carousel.prev")}
           className={ARROW_BTN}
         >
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" aria-hidden>
@@ -93,7 +96,7 @@ export default function HighlightCarousel({
           type="button"
           onClick={onNext}
           disabled={safeIndex === kudos.length - 1}
-          aria-label="Kudo tiếp theo"
+          aria-label={t("carousel.next")}
           className={ARROW_BTN}
         >
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" aria-hidden>
@@ -104,7 +107,7 @@ export default function HighlightCarousel({
 
       <p
         className="text-center font-montserrat text-[28px] font-bold leading-9 text-[#999]"
-        aria-label={`Trang ${safeIndex + 1} trên ${kudos.length}`}
+        aria-label={t("carousel.page", { current: safeIndex + 1, total: kudos.length })}
       >
         {safeIndex + 1}/{kudos.length}
       </p>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/app/_lib/supabase/client";
 import { signOut } from "@/app/auth/actions";
+import { useTranslation } from "@/app/_lib/i18n/use-translation";
 
 // F005: header account menu wired to the real Supabase session (FR-007 / FR-008).
 // Client-side identity read (the header is `"use client"` and shared on every route; a server `user`
@@ -14,6 +15,7 @@ export default function AccountMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const supabase = createClient();
@@ -40,7 +42,7 @@ export default function AccountMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        aria-label="Account menu"
+        aria-label={t("accountMenu.trigger")}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#998c5f] bg-transparent transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
@@ -75,7 +77,7 @@ export default function AccountMenu() {
                   role="menuitem"
                   className="block w-full px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
                 >
-                  Profile
+                  {t("accountMenu.profile")}
                 </Link>
               </li>
               <li>
@@ -85,7 +87,7 @@ export default function AccountMenu() {
                     role="menuitem"
                     className="block w-full px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
                   >
-                    Sign out
+                    {t("accountMenu.signOut")}
                   </button>
                 </form>
               </li>
@@ -97,7 +99,7 @@ export default function AccountMenu() {
                 role="menuitem"
                 className="block w-full px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
               >
-                Sign in
+                {t("accountMenu.signIn")}
               </Link>
             </li>
           )}

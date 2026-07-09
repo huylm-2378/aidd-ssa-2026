@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 /**
  * Hero band for `/awards-information`: the design's dedicated keyvisual
@@ -7,6 +10,7 @@ import Image from "next/image";
  * `awards-section.tsx`'s header (label + divider + gold `<h1>`).
  */
 export default function AwardsHero() {
+  const { t } = useTranslation();
   return (
     <section
       className="relative isolate overflow-hidden px-6 pb-16 pt-16 sm:px-12 lg:px-[144px] lg:pb-24 lg:pt-24"
@@ -46,11 +50,11 @@ export default function AwardsHero() {
             frame). The Root Further logo above stays left-aligned per the KV frame. */}
         <header className="flex w-full flex-col gap-4 text-center">
           <p className="font-montserrat text-2xl font-bold leading-8 text-white">
-            Sun* Annual Awards 2025
+            {t("common.sectionEyebrow")}
           </p>
           <hr className="w-full border-t border-[#2e3940]" />
           <h1 className="font-montserrat text-4xl font-bold leading-[1.1] tracking-tight text-[#ffea9e] sm:text-5xl lg:text-[57px] lg:leading-[64px]">
-            Hệ thống giải thưởng SAA 2025
+            {t("awardsHero.title")}
           </h1>
         </header>
       </div>

@@ -3,17 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation, type MessageKey } from "../../_lib/i18n/use-translation";
 
-const FOOTER_NAV_LINKS: readonly { label: string; href: string }[] = [
-  { label: "About SAA 2025", href: "/" },
-  { label: "Award Information", href: "/awards-information" },
-  { label: "Sun* Kudos", href: "/sun-kudos" },
+// Shared with header.tsx (same nav copy, F014 common.*/nav.* namespace -- DRY).
+const FOOTER_NAV_LINKS: readonly { labelKey: MessageKey; href: string }[] = [
+  { labelKey: "nav.about", href: "/" },
+  { labelKey: "nav.awards", href: "/awards-information" },
+  { labelKey: "nav.kudos", href: "/sun-kudos" },
 ];
 
 // `minimal` (default false) renders the Login-screen footer variant: the centered copyright line
 // only, with no logo or nav links. Default keeps the full footer for all other routes unchanged.
 export default function Footer({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <footer
@@ -26,12 +29,12 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
         <Link
           href="/"
           className="block h-16 w-[69px] shrink-0 transition-opacity hover:opacity-80"
-          aria-label="Sun* Annual Awards home"
+          aria-label={t("common.logoHome")}
         >
           {/* mm:I5001:14800;342:1408;178:1030 */}
           <Image
             src="/header-and-footer/MM_MEDIA_Logo%20(1).png"
-            alt="Sun* Annual Awards logo"
+            alt={t("common.logoAlt")}
             width={69}
             height={64}
             className="h-full w-full object-contain"
@@ -46,7 +49,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
             const isActive = pathname === link.href;
             return (
               <Link
-                key={link.href + link.label}
+                key={link.href + link.labelKey}
                 href={link.href}
                 aria-current={isActive ? "page" : undefined}
                 className={`rounded-none border-b-2 px-4 py-4 font-montserrat text-base font-bold transition-colors focus-visible:text-[#ffea9e] focus-visible:outline-none ${
@@ -55,7 +58,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                     : "border-transparent text-white hover:text-[#ffea9e]"
                 }`}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             );
           })}
@@ -64,7 +67,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
       )}
 
       <p className="font-montserrat-alt text-sm font-bold text-white">
-        Bản quyền thuộc về Sun* © 2025
+        {t("footer.copyright")}
       </p>
     </footer>
   );

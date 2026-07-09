@@ -1,10 +1,15 @@
+import type { MessageKey } from "./i18n/use-translation";
+
 /**
  * Static copy + mock recipient list for the "Viết Kudo" composer modal (F006),
  * faithful to the MoMorph frame "Viết Kudo" (`ihQ26W78P2` / node `520:11602`,
- * modal instance `520:11647`). All strings are verbatim per the technical spec
- * (FR-004..011); required-field `*` markers are appended at render time, not
- * baked into these labels. Recipient names are reused from
+ * modal instance `520:11647`). Required-field `*` markers are appended at
+ * render time, not baked into these labels. Recipient names are reused from
  * `sun-kudos-content.ts` / `kudos-cards.ts` to keep the mock world consistent.
+ *
+ * F014 round 4: `WRITE_KUDO_COPY` holds i18n catalog KEYS (`composer.*`),
+ * not raw strings — consumers resolve them via `t()` at render time (same
+ * pattern as `SunnerStat.label` in `sun-kudos-content.ts`).
  */
 export interface SunnerOption {
   id: string;
@@ -43,26 +48,23 @@ export const HASHTAG_OPTIONS: readonly string[] = [
   "#WASSHOI",
 ];
 
-/** Verbatim copy for every field in the composer (FR-004..011). */
+/** Catalog keys for every field in the composer (FR-004..011). */
 export const WRITE_KUDO_COPY = {
-  title: "Gửi lời cám ơn và ghi nhận đến đồng đội",
-  recipientLabel: "Người nhận",
-  recipientPlaceholder: "Tìm kiếm",
-  awardLabel: "Danh hiệu",
-  awardPlaceholder: "Dành tặng một danh hiệu cho đồng đội",
-  awardHints: [
-    "Ví dụ: Người truyền động lực cho tôi.",
-    "Danh hiệu sẽ hiển thị làm tiêu đề Kudos của bạn.",
-  ],
-  contentPlaceholder: "Hãy gửi gắm lời cám ơn và ghi nhận đến đồng đội tại đây nhé!",
-  contentHint: 'Bạn có thể "@ + tên" để nhắc tới đồng nghiệp khác',
-  communityStandards: "Tiêu chuẩn cộng đồng",
-  hashtagLabel: "Hashtag",
-  addHashtag: "+ Hashtag",
-  maxNote: "Tối đa 5", // keep in sync with MAX_HASHTAGS in write-kudo-form.ts (kept literal to avoid a circular import)
-  imageLabel: "Image",
-  addImage: "+ Image",
-  anonymousLabel: "Gửi lời cám ơn và ghi nhận ẩn danh",
-  cancel: "Hủy",
-  submit: "Gửi",
-} as const;
+  title: "composer.title",
+  recipientLabel: "composer.recipientLabel",
+  recipientPlaceholder: "composer.recipientPlaceholder",
+  awardLabel: "composer.awardLabel",
+  awardPlaceholder: "composer.awardPlaceholder",
+  awardHints: ["composer.awardHint1", "composer.awardHint2"],
+  contentPlaceholder: "composer.contentPlaceholder",
+  contentHint: "composer.contentHint",
+  communityStandards: "composer.communityStandards",
+  hashtagLabel: "composer.hashtagLabel",
+  addHashtag: "composer.addHashtag",
+  maxNote: "composer.maxNote", // keep in sync with MAX_HASHTAGS in write-kudo-form.ts (kept literal to avoid a circular import)
+  imageLabel: "composer.imageLabel",
+  addImage: "composer.addImage",
+  anonymousLabel: "composer.anonymousLabel",
+  cancel: "composer.cancel",
+  submit: "composer.submit",
+} satisfies Record<string, MessageKey | readonly MessageKey[]>;

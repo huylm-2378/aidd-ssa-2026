@@ -5,6 +5,7 @@
  * (FR-011/SC-002). Unit-tested in isolation in `write-kudo-form.test.ts`.
  */
 import type { SunnerOption } from "./write-kudo-content";
+import type { MessageKey } from "./i18n/use-translation";
 
 export const MAX_HASHTAGS = 5;
 export const MAX_IMAGES = 5;
@@ -33,17 +34,21 @@ export const EMPTY_FORM: WriteKudoForm = {
 };
 
 /**
- * Labels of the required fields still missing, in form order. Empty → the form
- * is submittable. Drives both the "Gửi" gate and the "what's missing" hint so
- * the two never disagree (FR-006, FR-007, FR-008, FR-011). Whitespace-only
- * award/body text does not count as filled.
+ * i18n catalog keys for the required fields still missing, in form order.
+ * Empty → the form is submittable. Drives both the "Gửi"/"Send" gate and the
+ * "what's missing" hint so the two never disagree (FR-006, FR-007, FR-008,
+ * FR-011). Whitespace-only award/body text does not count as filled.
+ *
+ * F014 round 4: returns `MessageKey`s (not raw labels) — the caller
+ * (`WriteKudoModal`) resolves each via `t()` at render time (same pattern as
+ * `SunnerStat.label` in `sun-kudos-content.ts`).
  */
-export function missingRequired(form: WriteKudoForm): string[] {
-  const missing: string[] = [];
-  if (form.recipient === null) missing.push("Người nhận");
-  if (form.award.trim().length === 0) missing.push("Danh hiệu");
-  if (form.body.trim().length === 0) missing.push("Nội dung");
-  if (form.hashtags.length < 1) missing.push("ít nhất 1 Hashtag");
+export function missingRequired(form: WriteKudoForm): MessageKey[] {
+  const missing: MessageKey[] = [];
+  if (form.recipient === null) missing.push("composer.field.recipient");
+  if (form.award.trim().length === 0) missing.push("composer.field.award");
+  if (form.body.trim().length === 0) missing.push("composer.field.content");
+  if (form.hashtags.length < 1) missing.push("composer.field.hashtag");
   return missing;
 }
 
