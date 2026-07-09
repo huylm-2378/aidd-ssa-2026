@@ -54,11 +54,14 @@ design, reusing the existing write-kudos composer modal and the awards page.
 - **Replace/build out**: `app/_components/homepage-saa/floating-widget-button.tsx`
   (existing stub; keep its inline `PenIcon`; add a `+`/× toggle glyph and a
   Sun* logo mark). Renaming is optional — keep the file/import stable if simpler.
-- **Directly reused**: `WriteKudoModal` (`open`/`onClose`/`triggerRef`,
-  self-contained with mock `sunnerOptions` fallback); `next/link` for the rules
-  route; the outside-click+Escape `useEffect` pattern from `hashtag-field.tsx`;
-  design tokens (`#d4271d`, `#ffea9e`, `#00101a`); `CloseIcon` path from
-  `write-kudo-modal.tsx` if a distinct × is needed.
+- **Directly reused**: `WriteKudoModal` (`open`/`onClose`/`triggerRef`;
+  ~~self-contained with mock `sunnerOptions` fallback~~ — the mock fallback was
+  deleted in a 2026-07-09 bugfix, see `F006_WriteKudo/technical-spec.md`; with
+  no `sunnerOptions` prop (the FAB's case, unchanged), `WriteKudoModal` now
+  fetches real `sunners` rows client-side via `useSunnerOptions`); `next/link`
+  for the rules route; the outside-click+Escape `useEffect` pattern from
+  `hashtag-field.tsx`; design tokens (`#d4271d`, `#ffea9e`, `#00101a`);
+  `CloseIcon` path from `write-kudo-modal.tsx` if a distinct × is needed.
 - Each file stays < 200 lines.
 
 ## Key entities

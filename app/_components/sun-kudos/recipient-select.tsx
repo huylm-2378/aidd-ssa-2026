@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SUNNER_OPTIONS, WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
+import { WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
 import { useTranslation } from "../../_lib/i18n/use-translation";
 
 interface RecipientSelectProps {
   value: SunnerOption | null;
   onChange: (sunner: SunnerOption | null) => void;
-  /** Recipient directory (F007: from Supabase). Falls back to the mock list. */
+  /**
+   * Recipient directory (F007: real Supabase rows — server-fetched or via
+   * `useSunnerOptions`). NEVER a mock: mock ids ("sunner-3") once leaked into
+   * `createKudo` and broke the uuid `receiver_id` insert.
+   */
   options?: readonly SunnerOption[];
 }
 
@@ -15,12 +19,12 @@ interface RecipientSelectProps {
  * "Người nhận *" — recipient autocomplete (FR-005, MoMorph `mms_B.2_Search`).
  * Controlled: parent owns `value`; this field only reports the selection.
  * Typing filters `options` (case-insensitive, contains); picking a result fills
- * the field and closes the list. Defaults to the static mock list.
+ * the field and closes the list.
  */
 export default function RecipientSelect({
   value,
   onChange,
-  options = SUNNER_OPTIONS,
+  options = [],
 }: RecipientSelectProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState(value?.name ?? "");

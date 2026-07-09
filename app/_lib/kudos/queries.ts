@@ -20,6 +20,26 @@ const KUDO_SELECT =
   "sender:sunners!sender_id(name,role_code,tier,avatar_url)," +
   "receiver:sunners!receiver_id(name,role_code,tier,avatar_url)";
 
+/** Kudo ids the signed-in user has hearted (F015). Empty set when signed out
+ *  or on any error → `likedByMe` renders false everywhere (reads fail SAFE). */
+async function getLikedKudoIds(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<Set<string>> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return new Set();
+    const { data } = await supabase
+      .from("kudo_likes")
+      .select("kudo_id")
+      .eq("user_id", user.id);
+    return new Set((data ?? []).map((r: { kudo_id: string }) => r.kudo_id));
+  } catch {
+    return new Set();
+  }
+}
+
 /** Top-5 most-liked kudos (optionally filtered). Secondary sort by created_at
  *  keeps equal-like ordering deterministic. */
 export async function getHighlightKudos(filter?: KudoFilter): Promise<KudoCard[]> {
@@ -35,7 +55,8 @@ export async function getHighlightKudos(filter?: KudoFilter): Promise<KudoCard[]
       .order("created_at", { ascending: false })
       .limit(5);
     if (error || !data) return [];
-    return (data as unknown as KudoRow[]).map(mapKudoRow);
+    const liked = await getLikedKudoIds(supabase);
+    return (data as unknown as KudoRow[]).map((row) => mapKudoRow(row, liked.has(row.id)));
   } catch {
     return [];
   }
@@ -50,7 +71,8 @@ export async function getAllKudos(filter?: KudoFilter): Promise<KudoCard[]> {
     if (filter?.department) query = query.eq("department", filter.department);
     const { data, error } = await query.order("created_at", { ascending: false });
     if (error || !data) return [];
-    return (data as unknown as KudoRow[]).map(mapKudoRow);
+    const liked = await getLikedKudoIds(supabase);
+    return (data as unknown as KudoRow[]).map((row) => mapKudoRow(row, liked.has(row.id)));
   } catch {
     return [];
   }

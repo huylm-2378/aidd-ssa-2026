@@ -41,6 +41,9 @@ homepage Header and Footer.
 | FR-010 | Render reused Footer with "Sun* Kudos" active | `Footer` (existing) | yes |
 | FR-011 | Route `/sun-kudos` renders this page, replacing the placeholder stub | `app/sun-kudos/page.tsx` | yes |
 
+> FR-006 update (F015): the heart + like count is now a real per-user like toggle (`HeartButton`),
+> not static display — see `F015_KudosHearts`.
+
 ## Key entities
 
 - `KudoCard`: `id, senderName, senderRole, senderTier, senderAvatar, receiverName, receiverRole,

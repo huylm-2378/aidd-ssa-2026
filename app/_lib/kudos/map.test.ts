@@ -71,6 +71,21 @@ describe("mapKudoRow", () => {
     expect(card.hashtags).toEqual([]);
     expect(card.photos).toBeUndefined();
   });
+
+  it("defaults likedByMe to false when the second arg is omitted", () => {
+    const card = mapKudoRow(baseRow);
+    expect(card.likedByMe).toBe(false);
+  });
+
+  it("sets likedByMe to true when passed true", () => {
+    const card = mapKudoRow(baseRow, true);
+    expect(card.likedByMe).toBe(true);
+  });
+
+  it("sets likedByMe to false when passed false explicitly", () => {
+    const card = mapKudoRow(baseRow, false);
+    expect(card.likedByMe).toBe(false);
+  });
 });
 
 describe("formatTimeRange", () => {

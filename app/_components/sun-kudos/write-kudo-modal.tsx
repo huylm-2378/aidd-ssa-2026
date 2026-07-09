@@ -13,12 +13,17 @@ import KudoEditor from "./kudo-editor";
 import HashtagField from "./hashtag-field";
 import ImageUploadField from "./image-upload-field";
 import { useDialogA11y } from "./use-dialog-a11y";
+import { useSunnerOptions } from "./use-sunner-options";
 
 interface WriteKudoModalProps {
   open: boolean;
   onClose: () => void;
   triggerRef?: RefObject<HTMLElement | null>;
-  /** Recipient directory (F007: from Supabase). Falls back to the mock list. */
+  /**
+   * Recipient directory (F007: from Supabase, server-fetched by /sun-kudos).
+   * When absent (homepage FAB), `useSunnerOptions` fetches the real rows
+   * client-side on first open — never a mock (mock ids broke createKudo).
+   */
   sunnerOptions?: readonly SunnerOption[];
 }
 
@@ -36,6 +41,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
   const [form, setForm] = useState<WriteKudoForm>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const options = useSunnerOptions(sunnerOptions, open);
 
   // Memoized so the a11y hook's Escape listener isn't torn down/re-added on
   // every keystroke while the modal is open.
@@ -97,7 +103,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
         <RecipientSelect
           value={form.recipient}
           onChange={(recipient) => updateForm("recipient", recipient)}
-          options={sunnerOptions}
+          options={options}
         />
 
         <div className="flex w-full flex-col gap-4">

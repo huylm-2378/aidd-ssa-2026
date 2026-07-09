@@ -37,6 +37,11 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 | FR-007 | "Viết Kudo" Gửi calls a Server Action that inserts a Kudo (recipient, title, body, hashtags, images, anonymous) and it appears in All Kudos on refresh/revalidate | `app/sun-kudos/actions.ts` + `write-kudo-modal.tsx` | yes |
 | FR-008 | Types stay single-sourced: the DB row types map cleanly to the existing `KudoCard` shape so section components need minimal change | `app/_lib/kudos/types.ts` | yes |
 
+> **Note (2026-07-09):** FR-003's "(from `SUNNER_OPTIONS`)" points at a mock list that no longer exists
+> in code — it was deleted from `write-kudo-content.ts` in a bugfix after its fake ids broke
+> `createKudo`'s uuid `receiver_id` insert. `supabase/seed.sql`'s seeded rows are unaffected; only that
+> parenthetical's source reference is stale. See `F006_WriteKudo/technical-spec.md`'s Key entities note.
+
 ## Key entities (DB)
 
 - `sunners(id uuid pk, name, role_code, tier, department, avatar_url, created_at)`
@@ -68,5 +73,5 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 
 ## Out of scope
 
-- Real image/file storage (Supabase Storage bucket), like/unlike interactions writing to DB, Secret Box open flow, per-user auth-scoped stats, pagination/infinite scroll, realtime subscriptions.
+- Real image/file storage (Supabase Storage bucket), ~~like/unlike interactions writing to DB~~ (delivered by F015_KudosHearts — `kudo_likes` table + `toggleHeart` action), Secret Box open flow, per-user auth-scoped stats, pagination/infinite scroll, realtime subscriptions.
 - Auth-gating the composer (login wall) — tracked as the production hardening of FR-002.
