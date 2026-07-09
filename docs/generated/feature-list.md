@@ -114,11 +114,13 @@ a logged-out visitor sees an empty identity block rather than a redirect.
 
 **Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F010_FloatingActionButton
 
-Homepage-only fixed bottom-right widget (MoMorph frame "Floating Action Button - phim nổi chức
-năng 2"): a round red toggle (`+` rotating into `×`) that reveals two gold pills, "Thể lệ" (link to
-Awards Information) and "Viết KUDOS" (opens the existing `WriteKudoModal` composer). Builds out the
-prior homepage stub `floating-widget-button.tsx` into the real widget. No new route, no data/schema
-change, no auth change — pure client UI reusing F002's route and F006's modal.
+Homepage-only fixed bottom-right widget, drawn from two MoMorph frames: collapsed
+("phim nổi chức năng", `_hphd32jN2`) is a gold icon pill (pen + "/" + Sun* logo); opened
+("Floating Action Button - phim nổi chức năng 2") is a static round red `×` toggle that reveals
+two gold pills, "Thể lệ" (opens the rules drawer, F013) and "Viết KUDOS" (opens the existing
+`WriteKudoModal` composer). Builds out the prior homepage stub `floating-widget-button.tsx` into
+the real widget. No new route, no data/schema change, no auth change — pure client UI reusing
+F006's modal and F013's drawer.
 
 **Related:** screens: Sv7DFwBw1h | routes: (homepage; links to /awards-information) | models: —
 

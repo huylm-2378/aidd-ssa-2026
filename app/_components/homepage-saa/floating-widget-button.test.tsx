@@ -18,6 +18,22 @@ describe("FloatingWidgetButton (F010)", () => {
     expect(screen.queryByText("Viết KUDOS")).not.toBeInTheDocument();
   });
 
+  it("collapsed toggle is the gold icon pill from frame _hphd32jN2, not the red close button", () => {
+    render(<FloatingWidgetButton />);
+    const toggle = screen.getByRole("button", { name: "Mở menu thao tác" });
+
+    // Gold pill with pen + "/" + logo (design collapsed state).
+    expect(toggle.className).toContain("bg-[#ffea9e]");
+    expect(toggle.querySelectorAll("img")).toHaveLength(2);
+    expect(toggle).toHaveTextContent("/");
+
+    // The red round close toggle belongs to the OPENED state only.
+    fireEvent.click(toggle);
+    const closeToggle = screen.getByRole("button", { name: "Đóng menu thao tác" });
+    expect(closeToggle.className).toContain("bg-[#d4271d]");
+    expect(closeToggle.querySelectorAll("img")).toHaveLength(0);
+  });
+
   it("opens the menu on click, revealing both actions and flipping aria-expanded", () => {
     render(<FloatingWidgetButton />);
     openMenu();
@@ -85,25 +101,23 @@ describe("FloatingWidgetButton (F010)", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("plus icon rotates 45° when menu is open (FR-003, FR-007)", () => {
+  // Design update (frame _hphd32jN2): collapsed state has NO svg glyph — it's
+  // the gold icon pill. The "x" svg appears only in the opened state.
+  it("shows the close 'x' glyph only while the menu is open (FR-003, FR-007)", () => {
     const { container } = render(<FloatingWidgetButton />);
-    const icon = container.querySelector("svg");
 
-    // Collapsed: no rotate-45
-    expect(icon).not.toHaveClass("rotate-45");
-    expect(icon).toHaveClass("rotate-0");
+    // Collapsed: no svg at all (pill uses img icons + a text "/").
+    expect(container.querySelector("svg")).toBeNull();
 
-    // Opened: rotate-45
     openMenu();
-    expect(icon).toHaveClass("rotate-45");
-    expect(icon).not.toHaveClass("rotate-0");
+    expect(container.querySelector("svg")).not.toBeNull();
   });
 
-  it("plus icon has motion-reduce:transition-none class for accessibility (FR-007)", () => {
-    const { container } = render(<FloatingWidgetButton />);
-    const icon = container.querySelector("svg");
+  it("toggle keeps motion-reduce:transition-none for accessibility (FR-007)", () => {
+    render(<FloatingWidgetButton />);
+    const toggle = screen.getByRole("button", { name: "Mở menu thao tác" });
 
-    expect(icon).toHaveClass("motion-reduce:transition-none");
+    expect(toggle).toHaveClass("motion-reduce:transition-none");
   });
 
   it("pills render in Figma order: 'Thể lệ' above 'Viết KUDOS'", () => {
