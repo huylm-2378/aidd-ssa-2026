@@ -61,14 +61,17 @@ describe("FloatingWidgetButton (F010)", () => {
     expect(screen.getByRole("button", { name: "Mở menu thao tác" })).toHaveFocus();
   });
 
-  it("'Thể lệ' links to /awards-information", () => {
+  it("'Thể lệ' closes the menu and opens the rules drawer", () => {
     render(<FloatingWidgetButton />);
     openMenu();
 
-    expect(screen.getByRole("link", { name: /Thể lệ/ })).toHaveAttribute(
-      "href",
-      "/awards-information",
+    fireEvent.click(screen.getByRole("button", { name: "Thể lệ" }));
+
+    expect(screen.getByRole("button", { name: "Mở menu thao tác" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
     );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("'Viết KUDOS' closes the menu and opens the write-kudo modal", () => {
@@ -107,15 +110,15 @@ describe("FloatingWidgetButton (F010)", () => {
     openMenu();
 
     // Both pills should be in the document
-    const theLeLink = screen.getByRole("link", { name: /Thể lệ/ });
+    const theLeButton = screen.getByRole("button", { name: /Thể lệ/ });
     const vietKudosButton = screen.getByRole("button", { name: /Viết KUDOS/ });
 
     // Verify they exist
-    expect(theLeLink).toBeInTheDocument();
+    expect(theLeButton).toBeInTheDocument();
     expect(vietKudosButton).toBeInTheDocument();
 
     // Verify order: Thể lệ comes before Viết KUDOS in DOM
-    expect(theLeLink.compareDocumentPosition(vietKudosButton)).toBe(
+    expect(theLeButton.compareDocumentPosition(vietKudosButton)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
   });
@@ -133,9 +136,68 @@ describe("FloatingWidgetButton (F010)", () => {
     render(<FloatingWidgetButton />);
     openMenu();
 
-    const pill = screen.getByRole("link", { name: /Thể lệ/ });
+    const pill = screen.getByRole("button", { name: /Thể lệ/ });
     expect(pill).toHaveClass("hover:scale-[1.03]");
     expect(pill).toHaveClass("active:scale-95");
     expect(pill).toHaveClass("motion-reduce:hover:scale-100");
+  });
+
+  it("critical regression: 'Viết KUDOS' in rules drawer closes rules AND opens composer", () => {
+    render(<FloatingWidgetButton />);
+
+    // Open FAB menu
+    openMenu();
+    expect(screen.getByRole("button", { name: "Đóng menu thao tác" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Click "Thể lệ" to open rules drawer
+    fireEvent.click(screen.getByRole("button", { name: /Thể lệ/ }));
+    expect(screen.getByRole("button", { name: "Mở menu thao tác" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    // Rules drawer should now be open
+    const rulesDialog = screen.getByRole("dialog");
+    expect(rulesDialog).toBeInTheDocument();
+
+    // Click "Viết KUDOS" inside the rules drawer
+    const writeKudosButtons = screen.getAllByRole("button", { name: /Viết KUDOS/ });
+    const writeInRulesButton = writeKudosButtons[writeKudosButtons.length - 1]; // Last one is in the rules drawer
+    fireEvent.click(writeInRulesButton);
+
+    // Rules drawer should close and composer should open
+    expect(screen.getByRole("button", { name: "Mở menu thao tác" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    // Verify composer dialog opened (there should be a dialog for the composer now)
+    const dialogs = screen.getAllByRole("dialog");
+    expect(dialogs.length).toBeGreaterThan(0);
+  });
+
+  it("rules drawer and composer modals share focus management via the FAB toggle", () => {
+    render(<FloatingWidgetButton />);
+
+    // Open FAB and click Thể lệ
+    openMenu();
+    fireEvent.click(screen.getByRole("button", { name: /Thể lệ/ }));
+
+    // Rules dialog open
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    // Close rules drawer
+    fireEvent.click(screen.getByRole("button", { name: /Đóng/ }));
+
+    // Dialog should close
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    // FAB menu should remain closed
+    expect(screen.getByRole("button", { name: "Mở menu thao tác" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   });
 });

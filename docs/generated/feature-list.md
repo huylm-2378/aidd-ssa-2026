@@ -15,6 +15,7 @@
 | 9 | F010 — Floating Action Button | P1 | ui | implemented |
 | 10 | F011 — Countdown / Prelaunch Page | P1 | ui | implemented |
 | 11 | F012 — Language Dropdown | P1 | ui | implemented |
+| 12 | F013 — Rules Drawer (Thể lệ) | P1 | ui | implemented |
 
 ## Feature Details
 
@@ -148,3 +149,19 @@ wiring, no new route, no DB/schema/auth change.
 **Related:** screens: hUyaaugye2 | routes: none — header component present on `/`, `/awards-information`,
 `/sun-kudos`, `/profile`, `/login`, `/auth/auth-code-error` (all pages that render the shared Header;
 `/prelaunch` has no Header by design) | models: —
+
+### F013 — Rules Drawer (Thể lệ)
+
+**Priority:** P1 | **Type:** ui | **Status:** implemented | **Slug:** F013_RulesModal
+
+A right-anchored "Thể lệ" (rules) drawer opened from the homepage FAB's "Thể lệ" pill (MoMorph "Thể lệ
+UPDATE", `b1Filzi9i6` / node `3204:6051`): a dark 553px panel with Hero badge tiers (New/Rising/Super/
+Legend), a 6-icon collectible grid, and "Kudos Quốc Dân" copy, footed by Đóng/Viết KUDOS buttons. The
+FAB's "Thể lệ" pill changes from a `<Link href="/awards-information">` to opening this modal ("Viết
+KUDOS" inside it opens the existing `WriteKudoModal`). Reuses the `WriteKudoModal` portal/backdrop
+shape, `useDialogA11y` (which gained `preventScroll: true` on its initial focus call), and `useMounted`.
+Client-only, static copy in `app/_lib/rules-content.ts`, no data/model change, no new route, no DB/auth
+change — the `/awards-information` route is unchanged and still reachable directly.
+
+**Related:** screens: b1Filzi9i6 | routes: none — overlay opened from the homepage FAB (was
+`/awards-information` before F013) | models: —

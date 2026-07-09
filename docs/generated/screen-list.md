@@ -9,7 +9,9 @@ client-side modal over `/sun-kudos` rather than a distinct route, so it's listed
 deferred to REG###. SCR008 (F010) is the same kind of exception: its own dedicated MoMorph frame, but it
 renders as an overlay widget on `/` rather than a distinct route. SCR010 (F012) is the same kind of
 exception again: its own dedicated MoMorph frame, but it renders as a header dropdown overlay present on
-every header-bearing route rather than a distinct route._
+every header-bearing route rather than a distinct route. SCR011 (F013) is the same kind of exception
+once more: its own dedicated MoMorph frame, but it renders as a right-anchored drawer opened from the
+SCR008 FAB rather than a distinct route._
 
 | SCR | Screen | Route | Owning feature | Notes |
 |-----|--------|-------|----------------|-------|
@@ -20,6 +22,7 @@ every header-bearing route rather than a distinct route._
 | SCR005 | Auth Code Error | `/auth/auth-code-error` | F005 | OAuth failure fallback; message + link back to `/login` |
 | SCR006 | Viết Kudo (composer modal) | `/sun-kudos` (modal, no dedicated route) | F006 | Recipient autocomplete, danh hiệu, content editor, hashtags (max 5), images (max 5), anonymous toggle; opened from the hero prompt search bar, closes via Hủy/backdrop/Escape/Gửi |
 | SCR007 | User Profile (a.k.a. "Profile bản thân", MoMorph `3FoIx6ALVb`) | `/profile` | F009 | Keyvisual banner, identity block (avatar/name/department+tier placeholder, icon-collection strip), stats panel (Kudos/hearts/Secret Box counts, visual-only "Mở Secret Box" button), Sent/Received Kudos feed; own profile only, not auth-gated |
-| SCR008 | Floating Action Button (a.k.a. "phim nổi chức năng 2", MoMorph `Sv7DFwBw1h`) | `/` (fixed overlay widget, no dedicated route) | F010 | Collapsed red `+` toggle rotates into `×`; opens two gold pills, "Thể lệ" (→ `/awards-information`) and "Viết KUDOS" (opens SCR006 modal); closes on toggle/Escape/outside click |
+| SCR008 | Floating Action Button (a.k.a. "phim nổi chức năng 2", MoMorph `Sv7DFwBw1h`) | `/` (fixed overlay widget, no dedicated route) | F010 | Collapsed red `+` toggle rotates into `×`; opens two gold pills, "Thể lệ" (opens SCR011 drawer as of F013 — previously linked to `/awards-information`) and "Viết KUDOS" (opens SCR006 modal); closes on toggle/Escape/outside click |
 | SCR009 | Countdown / Prelaunch page (a.k.a. "Countdown - Prelaunch page", MoMorph `8PJQswPZmU`) | `/prelaunch` | F011 | Standalone full-screen route, no Header/Footer; Root-further keyvisual bg, centered "Sự kiện sẽ bắt đầu sau" heading, live DAYS/HOURS/MINUTES countdown (reuses homepage hero's `useCountdown`/`CountdownTile`) |
 | SCR010 | Language Dropdown (a.k.a. "Dropdown-ngôn ngữ", MoMorph `hUyaaugye2`) | header overlay on every header-bearing route (no dedicated route) | F012 | Trigger shows active flag+code+chevron; panel lists VN/EN rows with flag icons, active row highlighted; dismiss on outside click/Escape/select; client-only state, no i18n wiring; present in both full and `minimal` header variants (not on `/prelaunch`, which has no Header) |
+| SCR011 | Rules Drawer "Thể lệ" (a.k.a. "Thể lệ UPDATE", MoMorph `b1Filzi9i6` / node `3204:6051`) | `/` (right-anchored drawer opened from the SCR008 FAB, no dedicated route) | F013 | Dark 553px panel: Hero badge tiers (New/Rising/Super/Legend), 6-icon collectible grid, "Kudos Quốc Dân" copy; footer Đóng (closes) / Viết KUDOS (opens SCR006 modal); reuses SCR006's portal/backdrop + `useDialogA11y`/`useMounted`; static content, no data/auth change |

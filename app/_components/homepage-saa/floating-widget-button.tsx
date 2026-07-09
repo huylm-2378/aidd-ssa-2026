@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import RulesModal from "../sun-kudos/rules-modal";
 import WriteKudoModal from "../sun-kudos/write-kudo-modal";
 
 // mm:313:9140 "Widget Button" -- column layout (gap 20px, align-items flex-end)
@@ -14,7 +14,7 @@ const PILL_CLASSES =
  * Homepage floating action button (F010, mm:313:9139 "Floating Action Button
  * - phim nổi chức năng 2"). Collapsed: a 56x56 round red toggle with a "+"
  * glyph. Opened: the toggle rotates into "x" and reveals two gold pills --
- * "Thể lệ" (links to /awards-information) and "Viết KUDOS" (opens the
+ * "Thể lệ" (opens the RulesModal drawer) and "Viết KUDOS" (opens the
  * existing WriteKudoModal, closing this menu first). The menu closes on the
  * toggle, Escape, or an outside click -- the same pattern as
  * `hashtag-field.tsx` -- and returns focus to the toggle button.
@@ -22,6 +22,7 @@ const PILL_CLASSES =
 export default function FloatingWidgetButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -52,6 +53,11 @@ export default function FloatingWidgetButton() {
     setComposerOpen(true);
   }
 
+  function handleOpenRules() {
+    setIsOpen(false);
+    setRulesOpen(true);
+  }
+
   return (
     <>
       <div
@@ -60,15 +66,11 @@ export default function FloatingWidgetButton() {
       >
         {isOpen && (
           <div className="flex flex-col items-end gap-5">
-            <Link
-              href="/awards-information"
-              onClick={() => setIsOpen(false)}
-              className={PILL_CLASSES}
-            >
+            <button type="button" onClick={handleOpenRules} className={PILL_CLASSES}>
               {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
               <img src="/float-action-button/MM_MEDIA_LOGO.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
               Thể lệ
-            </Link>
+            </button>
             <button type="button" onClick={handleWriteKudos} className={PILL_CLASSES}>
               {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
               <img src="/float-action-button/MM_MEDIA_Pen.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
@@ -91,6 +93,15 @@ export default function FloatingWidgetButton() {
       </div>
 
       <WriteKudoModal open={composerOpen} onClose={() => setComposerOpen(false)} triggerRef={toggleRef} />
+      <RulesModal
+        open={rulesOpen}
+        onClose={() => setRulesOpen(false)}
+        triggerRef={toggleRef}
+        onWriteKudos={() => {
+          setRulesOpen(false);
+          setComposerOpen(true);
+        }}
+      />
     </>
   );
 }
