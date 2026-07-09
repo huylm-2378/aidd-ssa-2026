@@ -77,13 +77,16 @@ export function formatTickerTime(iso: string): string {
 
 /** A realtime `kudos` INSERT row's receiver → a ticker line. Unknown/missing
  *  receiver id (deleted sunner, not in the fetched list) falls back to a
- *  generic label rather than leaving the line blank. */
+ *  generic label rather than leaving the line blank. `receivedLabel` is the
+ *  already-translated "đã nhận được một Kudos mới" phrase (F014 i18n) — this
+ *  module stays hook-free, so the caller supplies it via t(). */
 export function buildActivityEntry(
   row: { receiver_id: string | null; created_at: string },
   nameById: Map<string, string>,
+  receivedLabel: string,
 ): string {
   const name = (row.receiver_id && nameById.get(row.receiver_id)) || "Someone";
-  return `${formatTickerTime(row.created_at)} ${name} đã nhận được một Kudos mới`;
+  return `${formatTickerTime(row.created_at)} ${name} ${receivedLabel}`;
 }
 
 /** Lowercase + strip diacritics (NFD combining marks) + explicit đ/Đ → d (NFD

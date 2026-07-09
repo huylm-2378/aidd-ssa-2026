@@ -16,6 +16,7 @@
 | 10 | F011 — Countdown / Prelaunch Page | P1 | ui | implemented |
 | 11 | F012 — Language Dropdown | P1 | ui | implemented |
 | 12 | F013 — Rules Drawer (Thể lệ) | P1 | ui | implemented |
+| 13 | F014 — Internationalization (i18n VN·EN) | P1 | infra/ui | implemented |
 
 ## Feature Details
 
@@ -165,3 +166,40 @@ change — the `/awards-information` route is unchanged and still reachable dire
 
 **Related:** screens: b1Filzi9i6 | routes: none — overlay opened from the homepage FAB (was
 `/awards-information` before F013) | models: —
+
+### F014 — Internationalization (i18n VN·EN)
+
+**Priority:** P1 | **Type:** infra/ui | **Status:** implemented | **Slug:** F014_Internationalization
+
+A real, dependency-free VN/EN i18n layer: a client `LanguageProvider` (React Context, default `vi`,
+localStorage `saa-lang`) mounted in `app/layout.tsx`, typed flat-key catalogs (`app/_lib/i18n/vi.ts` /
+`en.ts`, composed from per-area fragments under `app/_lib/i18n/messages/`, 162 keys, `en` compile-checked
+against `vi`), and a `useTranslation()` hook exposing `t()`. Rewires F012's `LanguageSwitcher` from
+local state to this context, and migrates the header, footer, account menu, and homepage components
+(hero, kudos banner, awards section/cards, Root Further copy) to `t()`. Round 2 (same cycle) added the
+Profile screen (identity block, stats panel, Kudos section) and the Awards-information page (hero +
+per-award detail sections, incl. long descriptions/quantity units/prize notes); a new server→client
+pipeline lets `mapStats()` (`app/_lib/kudos/map.ts`) hand components a catalog key (`MessageKey`)
+instead of fixed copy, consumed by both `profile-stats.tsx` and `sun-kudos/kudos-sidebar.tsx`. Round 3
+(same cycle) added the FAB pills + menu aria-labels, the whole "Thể lệ" rules drawer, and the
+`/sun-kudos` screen itself (hero, search bar, sidebar recent-gifts heading + Secret Box CTA, highlight
+carousel incl. `{current}`/`{total}` page interpolation, kudo-card view-details action, and the
+Spotlight board's aria/zoom/reset/search/live ticker — `buildActivityEntry()` in `spotlight-fns.ts`
+stays hook-free by taking a pre-translated `receivedLabel` param from its caller). Section headings
+("ALL KUDOS"/"HIGHLIGHT KUDOS"/"SPOTLIGHT BOARD"), their landmark aria-labels, the "Hashtag" filter
+label, and kudo-card's "Copy Link"/"Spam" stay English by design (nav-labels precedent), not gaps.
+Round 4 (same cycle) added the Write Kudo composer (modal, rich-text toolbar, recipient/hashtag/image
+fields), backed by a new `messages/{vi,en}-composer.ts` fragment; the `createKudo` server action now
+returns a stable `CreateKudoErrorCode` instead of a VN string (a server action can't call `t()`), mapped
+to composer copy by the new `resolveComposerError()` helper — a second server-boundary key-not-string
+pattern alongside `mapStats()`. Round 5 (final) migrates the last three VN-only routes — `/login`,
+`/prelaunch`, `/auth/auth-code-error` — each a Server Component exporting `metadata` that delegates its
+translated copy to a new small `"use client"` leaf (`login-welcome.tsx`, `prelaunch-heading.tsx`,
+`auth-error-content.tsx`); `google-login-button.tsx` and `countdown-row.tsx` also switch to `t()`.
+`app/_lib/login-content.ts` (F004) is deleted, absorbed into the catalog. **The entire app is now
+translated** — remaining untranslated is only page `metadata` (title/description, a structural
+Server-Component boundary), mock/seed data, and the handful of design-English strings noted in F014's
+spec (section headings, "Copy Link"/"Spam", tier/icon names). 202/202 tests passing across 32 files.
+No new dependency, no routes/data/auth change.
+
+**Related:** screens: hUyaaugye2 | routes: all pages with Header | models: —

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MAX_HASHTAGS } from "../../_lib/write-kudo-form";
 import { HASHTAG_OPTIONS, WRITE_KUDO_COPY } from "../../_lib/write-kudo-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 interface HashtagFieldProps {
   value: string[];
@@ -21,6 +22,7 @@ const LISTBOX_ID = "hashtag-dropdown";
  * current choice (the design frame only depicts the open dropdown).
  */
 export default function HashtagField({ value, onChange }: HashtagFieldProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const atCap = value.length >= MAX_HASHTAGS;
@@ -69,11 +71,11 @@ export default function HashtagField({ value, onChange }: HashtagFieldProps) {
             <PlusIcon />
             <span className="flex flex-col leading-tight">
               <span className="font-montserrat text-base font-bold text-[#00101a]">
-                {WRITE_KUDO_COPY.hashtagLabel}
+                {t(WRITE_KUDO_COPY.hashtagLabel)}
                 <span className="text-[#e46060]">*</span>
               </span>
               <span className="font-montserrat text-xs font-bold text-[#998c5f]">
-                {WRITE_KUDO_COPY.maxNote}
+                {t(WRITE_KUDO_COPY.maxNote)}
               </span>
             </span>
           </button>
@@ -81,7 +83,7 @@ export default function HashtagField({ value, onChange }: HashtagFieldProps) {
           {open && (
             <ul
               id={LISTBOX_ID}
-              aria-label={WRITE_KUDO_COPY.hashtagLabel}
+              aria-label={t(WRITE_KUDO_COPY.hashtagLabel)}
               className="absolute left-0 top-full z-10 mt-1 flex w-[318px] flex-col gap-0.5 rounded-lg border border-[#998c5f] bg-[#00070c] p-1.5"
             >
               {HASHTAG_OPTIONS.map((tag) => {
@@ -116,7 +118,7 @@ export default function HashtagField({ value, onChange }: HashtagFieldProps) {
             {tag}
             <button
               type="button"
-              aria-label={`Xóa hashtag ${tag}`}
+              aria-label={t("composer.removeHashtag", { tag })}
               onClick={() => removeTag(tag)}
               className="flex h-4 w-4 items-center justify-center text-[#998c5f]"
             >

@@ -4,8 +4,10 @@ import { useCallback, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { EMPTY_FORM, canSubmit, missingRequired, type WriteKudoForm } from "../../_lib/write-kudo-form";
 import { WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
+import { resolveComposerError } from "../../_lib/write-kudo-error";
 import { useMounted } from "../../_lib/use-mounted";
 import { createKudo } from "../../sun-kudos/actions";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import RecipientSelect from "./recipient-select";
 import KudoEditor from "./kudo-editor";
 import HashtagField from "./hashtag-field";
@@ -29,6 +31,7 @@ const TITLE_ID = "write-kudo-title";
  * `overflow-hidden`/`backdrop-blur` ancestor stacking context (Risk in plan).
  */
 export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOptions }: WriteKudoModalProps) {
+  const { t } = useTranslation();
   const mounted = useMounted();
   const [form, setForm] = useState<WriteKudoForm>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +72,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
     // On success the board is revalidated server-side; close + reset. On error
     // (e.g. not logged in) keep the modal open and show why (no data lost).
     if (result.ok) handleClose();
-    else setError(result.error ?? "Không gửi được Kudo. Vui lòng thử lại.");
+    else setError(resolveComposerError(t, result.error));
   }
 
   return createPortal(
@@ -88,7 +91,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
           className="flex w-full max-w-[752px] flex-col items-start gap-8 rounded-3xl bg-[#fff8e1] p-6 font-montserrat sm:p-10"
         >
           <h2 id={TITLE_ID} className="w-full text-center text-2xl font-bold leading-10 text-[#00101a] sm:text-[32px]">
-          {WRITE_KUDO_COPY.title}
+          {t(WRITE_KUDO_COPY.title)}
         </h2>
 
         <RecipientSelect
@@ -100,20 +103,20 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
         <div className="flex w-full flex-col gap-4">
           <div className="flex w-full items-center gap-4">
             <label className="flex w-[146px] shrink-0 items-center gap-0.5 font-montserrat text-base font-bold text-[#00101a]">
-              {WRITE_KUDO_COPY.awardLabel}
+              {t(WRITE_KUDO_COPY.awardLabel)}
               <span className="text-[#e46060]">*</span>
             </label>
             <input
               type="text"
               value={form.award}
               onChange={(e) => updateForm("award", e.target.value)}
-              placeholder={WRITE_KUDO_COPY.awardPlaceholder}
+              placeholder={t(WRITE_KUDO_COPY.awardPlaceholder)}
               className="h-14 flex-1 rounded-lg border border-[#998c5f] bg-white px-6 py-4 font-montserrat text-base font-bold text-[#00101a] focus-visible:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1 pl-[162px] font-montserrat text-sm font-bold text-[#999999]">
             {WRITE_KUDO_COPY.awardHints.map((hint) => (
-              <p key={hint}>{hint}</p>
+              <p key={hint}>{t(hint)}</p>
             ))}
           </div>
         </div>
@@ -131,7 +134,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
             onChange={(e) => updateForm("anonymous", e.target.checked)}
             className="h-6 w-6 rounded border border-[#999999]"
           />
-          {WRITE_KUDO_COPY.anonymousLabel}
+          {t(WRITE_KUDO_COPY.anonymousLabel)}
         </label>
 
         {error && (
@@ -142,7 +145,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
 
         {!error && missingFields.length > 0 && (
           <p className="w-full font-montserrat text-sm font-bold text-[#998c5f]">
-            Cần điền để gửi: {missingFields.join(", ")}
+            {t("composer.missingHint", { fields: missingFields.map((field) => t(field)).join(", ") })}
           </p>
         )}
 
@@ -152,7 +155,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
             onClick={handleClose}
             className="flex shrink-0 items-center gap-2 rounded border border-[#998c5f] bg-[#ffea9e]/10 px-10 py-4 font-montserrat text-base font-bold text-[#00101a]"
           >
-            {WRITE_KUDO_COPY.cancel}
+            {t(WRITE_KUDO_COPY.cancel)}
             <CloseIcon />
           </button>
           <button
@@ -161,7 +164,7 @@ export default function WriteKudoModal({ open, onClose, triggerRef, sunnerOption
             onClick={handleSubmit}
             className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#ffea9e] px-4 py-4 font-montserrat text-base font-bold text-[#00101a] transition-colors hover:bg-[#fae287] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {WRITE_KUDO_COPY.submit}
+            {t(WRITE_KUDO_COPY.submit)}
             <SendIcon />
           </button>
         </div>

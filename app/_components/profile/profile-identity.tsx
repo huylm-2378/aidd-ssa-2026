@@ -1,4 +1,7 @@
+"use client";
+
 import KudoAvatar from "../sun-kudos/kudos-avatar";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 /** Figma "danh hiệu" badge artwork (space encoded for the static asset path). */
 const TIER_BADGE_SRC = "/profiles/danh%20hi%E1%BB%87u.png";
@@ -25,6 +28,7 @@ export default function ProfileIdentity({
   department = "CEVC3",
   tier = "Legend Hero",
 }: ProfileIdentityProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       <div className="rounded-full ring-4 ring-white">
@@ -42,7 +46,7 @@ export default function ProfileIdentity({
       </div>
       <div className="mt-6 flex w-full flex-col items-center gap-3">
         <span className="font-montserrat text-[22px] text-white">
-          Bộ sưu tập icon của tôi
+          {t("profile.iconCollection")}
         </span>
         <div className="flex flex-wrap justify-center gap-4">
           {Array.from({ length: ICON_SLOT_COUNT }, (_, index) => (

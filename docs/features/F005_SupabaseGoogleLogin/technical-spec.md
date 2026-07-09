@@ -88,7 +88,9 @@ ONLY** — the legacy `get`/`set`/`remove` trio is disallowed by current `@supab
   missing/failed code redirect to `/auth/auth-code-error`.
 - **FR-005 — Auth-code-error page.** `app/auth/auth-code-error/page.tsx` — a small standalone page
   (reuse shared Header `minimal` + Footer `minimal` for visual consistency) explaining sign-in failed
-  with a link back to `/login`.
+  with a link back to `/login`. (F014 round 5: the heading/body/link text moved into a new
+  `auth-error-content.tsx` client leaf reading the i18n catalog; `page.tsx` itself — route, chrome,
+  `metadata` — is unchanged.)
 - **FR-006 — Sign-out Server Action.** `app/auth/actions.ts` (`"use server"`): `signOut()` calls the
   server client's `signOut()`, `revalidatePath('/', 'layout')`, then `redirect('/')`. Invoked from the
   account menu via `<form action={signOut}>`.

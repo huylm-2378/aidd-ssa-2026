@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat, Montserrat_Alternates } from "next/font/google";
+import { LanguageProvider } from "./_components/i18n/language-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,7 +40,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${montserratAlternates.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* Client i18n boundary only -- layout stays a Server Component, `metadata`
+            above is unaffected. `<html lang>` stays "en" this cycle (see
+            language-provider.tsx doc comment / technical-spec.md U1). */}
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

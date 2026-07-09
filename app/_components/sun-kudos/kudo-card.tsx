@@ -1,4 +1,7 @@
+"use client";
+
 import type { KudoCard as KudoCardData } from "../../_lib/kudos-cards";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import KudoAvatar from "./kudos-avatar";
 import TierBadge from "./tier-badge";
 
@@ -55,6 +58,7 @@ export default function KudoCard({
   kudo: KudoCardData;
   isSpam?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <article className="relative flex w-full flex-col gap-4 rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
       {isSpam && (
@@ -123,7 +127,7 @@ export default function KudoCard({
           <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#d4271d]" fill="currentColor" aria-hidden>
             <path d="M12 21s-7.5-4.9-10-9.3C.5 8.6 2 5 5.5 5c2 0 3.3 1.2 4 2.3C10.2 6.2 11.5 5 13.5 5 17 5 18.5 8.6 17 11.7 14.5 16.1 12 21 12 21z" />
           </svg>
-          <span className="sr-only">lượt thích</span>
+          <span className="sr-only">{t("sunKudos.likesSrLabel")}</span>
         </span>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -138,10 +142,10 @@ export default function KudoCard({
           </button>
           <button
             type="button"
-            aria-label="Xem chi tiết"
+            aria-label={t("sunKudos.viewDetails")}
             className="flex items-center gap-1 rounded px-3 py-2 text-base font-bold tracking-[0.15px] text-[#00101a] transition-colors hover:bg-[#00101a]/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#998c5f]"
           >
-            Xem chi tiết
+            {t("sunKudos.viewDetails")}
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" aria-hidden>
               <path d="M7 17L17 7M17 7H8M17 7v9" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
             </svg>

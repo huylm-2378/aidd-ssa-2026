@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SUNNER_OPTIONS, WRITE_KUDO_COPY, type SunnerOption } from "../../_lib/write-kudo-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 interface RecipientSelectProps {
   value: SunnerOption | null;
@@ -21,6 +22,7 @@ export default function RecipientSelect({
   onChange,
   options = SUNNER_OPTIONS,
 }: RecipientSelectProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState(value?.name ?? "");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export default function RecipientSelect({
         htmlFor="write-kudo-recipient"
         className="flex w-[146px] shrink-0 items-center gap-0.5 font-montserrat text-base font-bold text-[#00101a]"
       >
-        {WRITE_KUDO_COPY.recipientLabel}
+        {t(WRITE_KUDO_COPY.recipientLabel)}
         <span className="text-[#e46060]">*</span>
       </label>
 
@@ -78,7 +80,7 @@ export default function RecipientSelect({
           aria-haspopup="listbox"
           aria-controls="write-kudo-recipient-list"
           autoComplete="off"
-          placeholder={WRITE_KUDO_COPY.recipientPlaceholder}
+          placeholder={t(WRITE_KUDO_COPY.recipientPlaceholder)}
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
           // Open on user click or typing — NOT on focus: the dialog focus-trap

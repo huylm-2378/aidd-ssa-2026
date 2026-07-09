@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/app/_lib/supabase/client";
-import { LOGIN_CONTENT } from "../../_lib/login-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 // F005: real Google OAuth trigger. Clicking starts Supabase `signInWithOAuth` (PKCE), which redirects
 // the browser to Google via Supabase, then back to our /auth/callback route. Gold pill styling +
-// label + Google glyph kept byte-for-byte from the F004 button.
+// label + Google glyph kept byte-for-byte from the F004 button (label via i18n catalog since F014).
 export default function GoogleLoginButton() {
+  const { t } = useTranslation();
   const [isPending, setIsPending] = useState(false);
 
   async function handleSignIn() {
@@ -28,7 +29,7 @@ export default function GoogleLoginButton() {
       disabled={isPending}
       className="inline-flex h-[60px] items-center gap-3 rounded bg-[#ffea9e] px-6 font-montserrat text-lg font-bold text-[#00101a] transition-all duration-200 hover:bg-[#fff8e1] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
     >
-      <span>{LOGIN_CONTENT.loginLabel}</span>
+      <span>{t("login.googleButton")}</span>
       <GoogleGlyph />
     </button>
   );

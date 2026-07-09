@@ -1,6 +1,7 @@
 "use client";
 
 import CountdownTile from "../_components/homepage-saa/countdown-tile";
+import { useTranslation } from "../_lib/i18n/use-translation";
 import { useCountdown } from "../_lib/use-countdown";
 import { useMounted } from "../_lib/use-mounted";
 
@@ -13,6 +14,7 @@ const PLACEHOLDER = "00";
  * only take over once mounted, avoiding a wall-clock hydration mismatch.
  */
 export default function CountdownRow() {
+  const { t } = useTranslation();
   const mounted = useMounted();
   const { days, hours, minutes } = useCountdown(process.env.NEXT_PUBLIC_SAA_EVENT_START);
 
@@ -20,9 +22,9 @@ export default function CountdownRow() {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-[60px]">
-      <CountdownTile value={d} label="DAYS" />
-      <CountdownTile value={h} label="HOURS" />
-      <CountdownTile value={m} label="MINUTES" />
+      <CountdownTile value={d} label={t("countdown.days")} />
+      <CountdownTile value={h} label={t("countdown.hours")} />
+      <CountdownTile value={m} label={t("countdown.minutes")} />
     </div>
   );
 }

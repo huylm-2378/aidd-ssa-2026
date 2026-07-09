@@ -65,7 +65,7 @@ export function mapKudoRow(row: KudoRow): KudoCard {
   };
 }
 
-/** The single stats row → the 5 sidebar rows (labels are fixed copy). */
+/** The single stats row → the 5 sidebar rows (labels are i18n catalog keys — consumers translate via t()). */
 export function mapStats(row: KudosStatsRow | null): SunnerStat[] {
   const s = row ?? {
     received: 0,
@@ -75,11 +75,11 @@ export function mapStats(row: KudosStatsRow | null): SunnerStat[] {
     secret_box_unopened: 0,
   };
   return [
-    { label: "Số Kudos bạn nhận được:", value: String(s.received) },
-    { label: "Số Kudos bạn đã gửi:", value: String(s.sent) },
-    { label: "Số tim bạn nhận được:", value: String(s.hearts) },
-    { label: "Số Secret Box bạn đã mở:", value: String(s.secret_box_opened) },
-    { label: "Số Secret Box chưa mở:", value: String(s.secret_box_unopened) },
+    { label: "stats.received", value: String(s.received) },
+    { label: "stats.sent", value: String(s.sent) },
+    { label: "stats.hearts", value: String(s.hearts) },
+    { label: "stats.secretOpened", value: String(s.secret_box_opened) },
+    { label: "stats.secretUnopened", value: String(s.secret_box_unopened) },
   ];
 }
 

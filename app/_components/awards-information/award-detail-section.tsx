@@ -1,15 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import {
   AWARD_FRAME_SIZE,
   AWARD_FRAME_SRC,
   type AwardCategory,
 } from "../../_lib/award-categories";
+import { useTranslation, type MessageKey } from "../../_lib/i18n/use-translation";
 import { AwardDiamondIcon, AwardLicenseIcon } from "./award-icons";
 
 interface AwardDetailSectionProps {
   award: AwardCategory;
   index: number;
 }
+
+// `award-categories.ts` (shared with the homepage grid) stays VI-only data
+// (F014 -- out of scope, see award-card.tsx precedent), so the finite set of
+// `quantityUnit` / prize `note` strings it produces are mapped to catalog
+// keys here rather than duplicating the whole data file per locale.
+const QUANTITY_UNIT_KEY: Record<string, MessageKey> = {
+  "Cá nhân": "awardsDetail.qty.individual",
+  "Tập thể": "awardsDetail.qty.collective",
+  "Cá nhân hoặc tập thể": "awardsDetail.qty.individualOrCollective",
+};
+
+const PRIZE_NOTE_KEY: Record<string, MessageKey> = {
+  "cho mỗi giải thưởng": "awardsDetail.note.perAward",
+  "cho giải cá nhân": "awardsDetail.note.individual",
+  "cho giải tập thể": "awardsDetail.note.collective",
+};
 
 /**
  * One award row on `/awards-information` (Figma `Frame 506` / `Frame 507`):
@@ -21,8 +40,11 @@ export default function AwardDetailSection({
   award,
   index,
 }: AwardDetailSectionProps) {
+  const { t } = useTranslation();
   const isReversed = index % 2 !== 0;
   const hasMultiplePrizes = award.prizes.length > 1;
+  const longDescriptionKey = `awards.long.${award.slug}` as MessageKey;
+  const quantityUnitKey = QUANTITY_UNIT_KEY[award.quantityUnit];
 
   return (
     <section
@@ -67,7 +89,7 @@ export default function AwardDetailSection({
         </h2>
 
         <p className="text-justify font-montserrat text-base font-bold leading-6 tracking-[0.5px] text-white">
-          {award.longDescription}
+          {t(longDescriptionKey)}
         </p>
 
         <hr className="w-full border-t border-[#2e3940]" />
@@ -75,40 +97,43 @@ export default function AwardDetailSection({
         <div className="flex flex-wrap items-center gap-3">
           <AwardDiamondIcon className="h-6 w-6 shrink-0 text-white" />
           <span className="font-montserrat text-2xl font-bold leading-8 text-[#ffea9e]">
-            Số lượng giải thưởng:
+            {t("awardsDetail.quantityLabel")}
           </span>
           <span className="font-montserrat text-4xl font-bold leading-[44px] text-white">
             {award.quantity}
           </span>
           <span className="font-montserrat text-sm font-bold tracking-[0.1px] text-white">
-            {award.quantityUnit}
+            {quantityUnitKey ? t(quantityUnitKey) : award.quantityUnit}
           </span>
         </div>
 
         <hr className="w-full border-t border-[#2e3940]" />
 
         <div className="flex flex-col gap-4">
-          {award.prizes.map((prize, prizeIndex) => (
-            <div key={prizeIndex} className="flex flex-col gap-4">
-              {hasMultiplePrizes && prizeIndex > 0 && (
-                <p className="font-montserrat text-sm font-bold uppercase tracking-[0.15px] text-white/70">
-                  Hoặc
-                </p>
-              )}
-              <div className="flex flex-wrap items-center gap-3">
-                <AwardLicenseIcon className="h-6 w-6 shrink-0 text-white" />
-                <span className="font-montserrat text-2xl font-bold leading-8 text-[#ffea9e]">
-                  Giá trị giải thưởng:
-                </span>
-                <span className="font-montserrat text-4xl font-bold leading-[44px] text-white">
-                  {prize.value}
-                </span>
-                <span className="font-montserrat text-sm font-bold tracking-[0.1px] text-white">
-                  {prize.note}
-                </span>
+          {award.prizes.map((prize, prizeIndex) => {
+            const noteKey = PRIZE_NOTE_KEY[prize.note];
+            return (
+              <div key={prizeIndex} className="flex flex-col gap-4">
+                {hasMultiplePrizes && prizeIndex > 0 && (
+                  <p className="font-montserrat text-sm font-bold uppercase tracking-[0.15px] text-white/70">
+                    {t("awardsDetail.or")}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  <AwardLicenseIcon className="h-6 w-6 shrink-0 text-white" />
+                  <span className="font-montserrat text-2xl font-bold leading-8 text-[#ffea9e]">
+                    {t("awardsDetail.prizeValueLabel")}
+                  </span>
+                  <span className="font-montserrat text-4xl font-bold leading-[44px] text-white">
+                    {prize.value}
+                  </span>
+                  <span className="font-montserrat text-sm font-bold tracking-[0.1px] text-white">
+                    {noteKey ? t(noteKey) : prize.note}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

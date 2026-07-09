@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -5,6 +7,7 @@ import {
   AWARD_FRAME_SRC,
   type AwardCategory,
 } from "../../_lib/award-categories";
+import { useTranslation, type MessageKey } from "../../_lib/i18n/use-translation";
 
 interface AwardCardProps {
   award: AwardCategory;
@@ -24,7 +27,13 @@ interface AwardCardProps {
 /* mm:I2167:9080;214:1019;81:2442 */
 /* mm:I2167:9081;214:1019;81:2442 */
 export default function AwardCard({ award }: AwardCardProps) {
+  const { t } = useTranslation();
   const href = `/awards-information#${award.slug}`;
+  // Homepage description is a localized catalog entry, keyed off the shared
+  // `award-categories.ts` slug (F014 -- that data file is out of scope /
+  // shared with awards-information, so its `description` field stays VI-only
+  // and this component reads the translated copy from the catalog instead).
+  const descriptionKey = `awards.desc.${award.slug}` as MessageKey;
 
   return (
     <article className="flex flex-col items-start gap-6">
@@ -60,13 +69,13 @@ export default function AwardCard({ award }: AwardCardProps) {
           {award.title}
         </Link>
         <p className="line-clamp-2 font-montserrat text-base leading-6 tracking-[0.5px] text-white">
-          {award.description}
+          {t(descriptionKey)}
         </p>
         <Link
           href={href}
           className="flex items-center gap-1 py-4 font-montserrat text-base font-medium leading-6 tracking-[0.15px] text-white transition-colors hover:text-[#ffea9e] focus-visible:outline-none focus-visible:underline"
         >
-          Chi tiết
+          {t("common.detail")}
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" aria-hidden>
             <path d="M7 17L17 7M17 7H8M17 7v9" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
           </svg>

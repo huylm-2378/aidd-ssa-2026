@@ -11,6 +11,11 @@ source_design:
 
 # F012 — Language Dropdown (Dropdown ngôn ngữ)
 
+> **Superseded note (F014):** the "client-only local state, no i18n wiring in scope" decision below
+> was superseded by [F014 — Internationalization](../F014_Internationalization/technical-spec.md),
+> which rewires this switcher to a real `LanguageProvider` context. Kept here as a historical record
+> of the F012-era decision.
+
 ## Summary
 
 Build out the header's language switcher (currently an emoji + plain-text list

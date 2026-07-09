@@ -47,6 +47,11 @@ pattern) — a trimmed, centered variant of the homepage hero countdown.
 | FR-006 | When the target is elapsed/absent (`isPending:false`), the page still renders gracefully (zeros), never crashes | `app/prelaunch/page.tsx` | yes |
 | FR-007 | Layout is responsive (desktop 1512px design; digits/labels scale down and stay centered with no horizontal body scroll on narrow viewports) | `app/prelaunch/page.tsx` | yes |
 
+> **F014 (round 5) update:** FR-003's heading now renders via a new
+> `prelaunch-heading.tsx` client leaf reading `prelaunch.heading` from the i18n
+> catalog (same VN text), not inline in `page.tsx`; `page.tsx` composes it —
+> see `docs/features/F014_Internationalization/technical-spec.md` FR-014.
+
 ## Reuse (no new copies)
 
 - **Directly reused**: `useCountdown` (`app/_lib/use-countdown.ts`), `CountdownTile`

@@ -177,3 +177,108 @@ built from the server-fetched `sunners` list (why `getSpotlight()` now selects `
 - Postgres Changes broadcasts to every subscriber (no server-side row filtering); acceptable at this
   scale. Broadcast-from-DB is the higher-volume alternative (YAGNI now).
 - No reconnect/backoff logic (v1). A dropped socket degrades to the static server snapshot.
+
+## Internationalization (i18n)
+
+The app uses a **dependency-free, client-side i18n layer** (no `next-intl`,
+`react-i18next`, and no locale-prefixed routing — Next 16 App Router has no
+built-in i18n routing).
+
+### Shape
+
+- **`LanguageProvider`** (`app/_components/i18n/language-provider.tsx`, `"use client"`)
+  — React Context holding `lang: "vi" | "en"` (default `"vi"`). Mounted in
+  `app/layout.tsx` (a Server Component) as a client wrapper around `{children}`,
+  so the whole tree can read the active locale.
+- **Catalogs** (`app/_lib/i18n/vi.ts`, `en.ts`) — plain typed objects, keyed by
+  UI area (`header.*`, `footer.*`, `hero.*`, `awards.*`, `fab.*`, `rules.*`,
+  `spotlight.*`, …). `vi` is the source of truth; the `Messages` type is
+  derived from `vi` and `en` is compile-checked against it (missing EN key =
+  TS error). Each catalog is now a thin composer over per-area fragment files
+  under `app/_lib/i18n/messages/` (`{vi,en}-core.ts` for chrome/homepage/
+  Profile/Awards-information, `{vi,en}-kudos.ts` for the FAB, rules drawer,
+  and `/sun-kudos` screen) — the fragment split keeps every file under the
+  200-line budget while `vi.ts`/`en.ts` still expose the single merged
+  `Messages`/`MessageKey` shape the rest of the app imports.
+- **`useTranslation()`** (`app/_lib/i18n/use-translation.ts`) — returns
+  `{ t, lang, setLang }`. `t(key)` resolves a dot-path against the active
+  catalog, falls back to the `vi` value (never a raw key), and does `{name}`
+  interpolation.
+
+### Server-produced UI labels (Profile + sun-kudos stats)
+
+Not every translated string starts life as client-side copy. `mapStats()`
+(`app/_lib/kudos/map.ts`, part of the F007 data layer) maps the single
+`kudos_stats` row to the sidebar's five stat rows, and now returns each row's
+`label` as a `MessageKey` (e.g. `"stats.received"`) rather than fixed VI text.
+The client resolves it at render time — `profile-stats.tsx` (Profile screen)
+and `sun-kudos/kudos-sidebar.tsx` both call `t(stat.label)` against the same
+`SunnerStat[]` shape, so the one server-side change translates the stats panel
+in both places without duplicating logic.
+
+### Server-action error codes (Write Kudo composer)
+
+A second server-boundary pattern, alongside `mapStats()` above: the
+`createKudo` server action (`app/sun-kudos/actions.ts`, F007) has no React
+context either, so on a known failure it returns a stable
+`CreateKudoErrorCode` (`"missing_fields" | "auth_required" | "unknown"`)
+instead of a VN string. The client-side helper `app/_lib/write-kudo-error.ts`'s
+`resolveComposerError(t, error)` maps each code to a `composer.error.*`
+catalog key; any other error value (a dynamic Supabase/`Error.message`
+string) passes through untranslated, since it's already human-readable and
+not one of the known codes. `write-kudo-content.ts`'s `WRITE_KUDO_COPY` and
+`write-kudo-form.ts`'s `missingRequired()` follow the same
+key-not-string convention — the modal translates and joins the returned
+`MessageKey[]` into `composer.missingHint`'s `{fields}` interpolation.
+
+### RSC pages with a client leaf (login, prelaunch, auth-code-error)
+
+A third pattern, alongside the two server-boundary ones above: `/login`,
+`/prelaunch`, and `/auth/auth-code-error` are Server Components that export
+`metadata`, so none of them can call `useTranslation()` directly. Each page
+stays a Server Component and delegates its translated copy to a small new
+`"use client"` leaf — `login-welcome.tsx`, `prelaunch-heading.tsx`,
+`auth-error-content.tsx` — that reads the context and renders the
+`t()`-resolved text; the page composes the leaf alongside its existing
+chrome/keyvisual markup, unchanged. `app/_lib/login-content.ts` (the F004
+static-copy module) is deleted — its two strings now live as
+`login.subtitle1`/`login.subtitle2` in the catalog, read by `login-welcome.tsx`.
+
+### Hook-free modules stay hook-free
+
+Some translated copy lives in plain data/helper modules that must not import
+React hooks (e.g. `rules-content.ts`'s `RULES_COPY`/`RULE_TIERS`, and
+`spotlight-fns.ts`'s pure helpers for the live board). The pattern: the
+module holds `MessageKey`s (or takes a translated value as a parameter)
+instead of calling `t()` itself, and the consuming component resolves the
+active-locale text. Concretely, `buildActivityEntry()` takes a third
+`receivedLabel: string` argument rather than hardcoding the VN ticker suffix
+or importing `useTranslation()`; `spotlight-board-live.tsx` supplies
+`t("spotlight.receivedKudos")` at the call site, keeping `spotlight-fns.ts`
+importable from Node test files with no React runtime.
+
+### Persistence & hydration
+
+Locale persists in `localStorage` (`saa-lang`). The server always renders the
+default `vi`; after mount the provider reads storage and updates state. This
+accepts a one-frame flash of Vietnamese on an EN-persisted reload — a deliberate
+KISS tradeoff over cookie-based SSR reads for an internal, no-SEO app.
+
+### Boundaries
+
+Server Components that export `metadata` (`login/page.tsx`, `prelaunch/page.tsx`,
+`auth-code-error/page.tsx`) cannot read the Context, so their `title`/
+`description` stay Vietnamese-only — a structural boundary (Server Component
+`metadata` vs. Context), not a content gap, since round 5 migrated every
+visible string on those three pages via the client-leaf pattern above. Mock/
+seed data (real names, user-authored kudos bodies) is never translated. As of
+round 5, the entire app's visible UI is migrated (see the server-key
+pipeline, the server-action error-code pattern, and the client-leaf pattern
+above); the only strings left untranslated are page `metadata`, mock/seed
+data, and the handful below that stay English by design.
+A handful of sun-kudos/highlight/all-kudos strings stay English **by
+design** (section headings, their landmark aria-labels, the "Hashtag" filter
+label, kudo-card's "Copy Link"/"Spam") — not a migration gap. Right after a
+locale switch, the live activity ticker can briefly mix English (new
+realtime rows) with Vietnamese (older static seed rows) until the seed rows
+scroll off, since seed data is never translated.

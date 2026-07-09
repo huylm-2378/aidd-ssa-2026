@@ -4,13 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import CountdownTile from "./countdown-tile";
 import { useCountdown } from "../../_lib/use-countdown";
-import {
-  EVENT_BROADCAST_NOTE,
-  EVENT_DATETIME_LABEL,
-  EVENT_VENUE_LABEL,
-} from "../../_lib/event-info-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
+import { EVENT_DATETIME_LABEL, EVENT_VENUE_LABEL } from "../../_lib/event-info-content";
 
 export default function Hero() {
+  const { t } = useTranslation();
   const { days, hours, minutes, isPending } = useCountdown(
     process.env.NEXT_PUBLIC_SAA_EVENT_START,
   );
@@ -18,7 +16,7 @@ export default function Hero() {
   return (
     <section
       className="relative px-6 pb-16 pt-24 sm:px-12 lg:px-[144px] lg:pb-0 lg:pt-24"
-      aria-label="Event hero"
+      aria-label={t("hero.sectionAria")}
     >
       {/* The keyvisual artwork (mm:2167:9028) + Cover scrim (mm:2167:9029) are rendered once in
           page.tsx as a shared background spanning this hero AND the Root Further content section,
@@ -28,7 +26,7 @@ export default function Hero() {
         <h1>
           <Image
             src="/homepage-saa/root-further-logo.png"
-            alt="Root Further"
+            alt={t("hero.logoAlt")}
             width={451}
             height={200}
             priority
@@ -39,34 +37,34 @@ export default function Hero() {
         <div className="flex flex-col items-start gap-4">
           {isPending && (
             <p className="font-montserrat text-2xl font-bold leading-8 text-white">
-              Coming soon
+              {t("hero.comingSoon")}
             </p>
           )}
 
           <div className="flex flex-wrap items-center gap-4 sm:gap-10">
-            <CountdownTile value={days} label="DAYS" />
-            <CountdownTile value={hours} label="HOURS" />
-            <CountdownTile value={minutes} label="MINUTES" />
+            <CountdownTile value={days} label={t("countdown.days")} />
+            <CountdownTile value={hours} label={t("countdown.hours")} />
+            <CountdownTile value={minutes} label={t("countdown.minutes")} />
           </div>
         </div>
 
         <div className="flex flex-col items-start gap-2">
           <div className="flex flex-wrap items-center gap-4 sm:gap-14">
             <p className="font-montserrat text-sm font-bold leading-6 tracking-[0.15px] text-white sm:text-base">
-              Thời gian:{" "}
+              {t("hero.timeLabel")}{" "}
               <span className="text-2xl leading-8 text-[#ffea9e]">
                 {EVENT_DATETIME_LABEL}
               </span>
             </p>
             <p className="font-montserrat text-sm font-bold leading-6 tracking-[0.15px] text-white sm:text-base">
-              Địa điểm:{" "}
+              {t("hero.venueLabel")}{" "}
               <span className="text-2xl leading-8 text-[#ffea9e]">
                 {EVENT_VENUE_LABEL}
               </span>
             </p>
           </div>
           <p className="font-montserrat text-sm font-bold leading-6 tracking-[0.5px] text-white sm:text-base">
-            {EVENT_BROADCAST_NOTE}
+            {t("hero.broadcastNote")}
           </p>
         </div>
 
@@ -75,14 +73,14 @@ export default function Hero() {
             href="/awards-information"
             className="flex items-center gap-2 rounded-lg bg-[#ffea9e] px-6 py-4 font-montserrat text-lg font-bold text-[#00101a] shadow-sm transition-all duration-200 hover:bg-[#fff8e1] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-[0.98]"
           >
-            ABOUT AWARDS
+            {t("hero.aboutAwards")}
             <ArrowUpRightIcon />
           </Link>
           <Link
             href="/sun-kudos"
             className="flex items-center gap-2 rounded-lg border border-[#998c5f] bg-[#ffea9e]/10 px-6 py-4 font-montserrat text-lg font-bold text-white transition-all duration-200 hover:bg-[#ffea9e]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-[0.98]"
           >
-            ABOUT KUDOS
+            {t("hero.aboutKudos")}
             <ArrowUpRightIcon />
           </Link>
         </div>

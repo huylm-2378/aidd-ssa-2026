@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-
-const CLEAR_OPTION = "Tất cả";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 /**
  * Controlled filter dropdown for the Highlight Kudos section (FIX 3). Renders
- * an explicit "Tất cả" entry above `options` to clear the selection back to
- * "all"; the actual filtering happens in the parent, which owns `selected`.
+ * an explicit translated "clear" entry (`filter.clearAll`) above `options` to
+ * reset the selection back to "all"; the actual filtering happens in the
+ * parent, which owns `selected`.
  *
  * `selected` is the match key compared against `options` for `aria-selected`.
  * Optional `display` overrides only the trigger button's text (e.g. to append
@@ -26,6 +26,7 @@ export default function FilterDropdown({
   display?: string;
   onChange: (value: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const choose = (value: string | null) => {
@@ -60,7 +61,7 @@ export default function FilterDropdown({
               onClick={() => choose(null)}
               className="block w-full px-4 py-2 text-left font-montserrat text-sm font-bold text-[#ffea9e] transition-colors hover:bg-white/10"
             >
-              {CLEAR_OPTION}
+              {t("filter.clearAll")}
             </button>
           </li>
           {options.map((option) => (

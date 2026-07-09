@@ -1,22 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import ProfileStats from "./profile-stats";
+import { renderWithLang } from "../../_lib/i18n/test-utils";
 import type { SunnerStat } from "../../_lib/sun-kudos-content";
 
 const stats: SunnerStat[] = [
-  { label: "Số Kudos bạn nhận được:", value: "25" },
-  { label: "Số Kudos bạn đã gửi:", value: "12" },
-  { label: "Số tim bạn nhận được:", value: "40" },
-  { label: "Số Secret Box bạn đã mở:", value: "3" },
-  { label: "Số Secret Box chưa mở:", value: "2" },
+  { label: "stats.received", value: "25" },
+  { label: "stats.sent", value: "12" },
+  { label: "stats.hearts", value: "40" },
+  { label: "stats.secretOpened", value: "3" },
+  { label: "stats.secretUnopened", value: "2" },
 ];
 
 describe("ProfileStats", () => {
-  it("renders all 5 labels and their values", () => {
+  it("renders all 5 VI labels (default, no provider) and their values", () => {
     render(<ProfileStats stats={stats} />);
-    for (const { label } of stats) {
-      expect(screen.getByText(label)).toBeInTheDocument();
-    }
+    expect(screen.getByText("Số Kudos bạn nhận được:")).toBeInTheDocument();
+    expect(screen.getByText("Số Kudos bạn đã gửi:")).toBeInTheDocument();
+    expect(screen.getByText("Số tim bạn nhận được:")).toBeInTheDocument();
+    expect(screen.getByText("Số Secret Box bạn đã mở:")).toBeInTheDocument();
+    expect(screen.getByText("Số Secret Box chưa mở:")).toBeInTheDocument();
     expect(screen.getByText("25")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("40")).toBeInTheDocument();
@@ -42,5 +45,14 @@ describe("ProfileStats", () => {
     render(<ProfileStats stats={stats} />);
     const button = screen.getByRole("button", { name: "Mở Secret Box" });
     expect(button).toHaveAttribute("type", "button");
+  });
+
+  it("renders EN labels and button text when the active locale is EN", () => {
+    renderWithLang(<ProfileStats stats={stats} />, "en");
+    expect(screen.getByText("Kudos received:")).toBeInTheDocument();
+    expect(screen.getByText("Secret Boxes unopened:")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open Secret Box" }),
+    ).toBeInTheDocument();
   });
 });

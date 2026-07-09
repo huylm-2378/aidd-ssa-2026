@@ -1,3 +1,5 @@
+import type { MessageKey } from "./i18n/use-translation";
+
 /**
  * Static labels and sidebar mock data for the Sun* Kudos page (F003).
  *
@@ -7,7 +9,13 @@
  * rows, and the "10 Sunner nhận quà mới nhất" list. Static content only.
  */
 export interface SunnerStat {
-  label: string;
+  /**
+   * F014: a translation key rather than raw copy — `mapStats()` (and the mock
+   * `SUNNER_STATS` below) hand back `stats.*` keys, and consumers
+   * (`profile-stats.tsx`, `kudos-sidebar.tsx`) resolve them via `t()` at
+   * render time so the sidebar/profile panels re-render in the active locale.
+   */
+  label: MessageKey;
   value: string;
 }
 
@@ -17,20 +25,24 @@ export interface RecentGiftSunner {
   avatar?: string;
 }
 
-/** Hero band copy (keyvisual + "KUDOS" wordmark). */
+/**
+ * Hero band copy (keyvisual + "KUDOS" wordmark). F014: `eyebrowKey` is a
+ * translation key, resolved via `t()` in `kudos-hero.tsx`; `wordmark` is the
+ * brand name and stays literal in every locale.
+ */
 export const KUDOS_HERO = {
-  eyebrow: "Hệ thống ghi nhận và cảm ơn",
+  eyebrowKey: "sunKudos.heroEyebrow" as MessageKey,
   wordmark: "KUDOS",
-} as const;
+};
 
-/** Search-bar pill placeholders (visual-only inputs). */
+/** Search-bar pill placeholders (visual-only inputs) — F014 translation keys. */
 export const KUDOS_SEARCH = {
-  promptPlaceholder: "Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?",
-  profilePlaceholder: "Tìm kiếm profile Sunner",
-} as const;
+  promptPlaceholderKey: "sunKudos.searchPromptPlaceholder" as MessageKey,
+  profilePlaceholderKey: "sunKudos.searchProfilePlaceholder" as MessageKey,
+};
 
-/** Shared eyebrow above each gold section title. */
-export const SECTION_EYEBROW = "Sun* Annual Awards 2025";
+/** Shared eyebrow above each gold section title — reuses the existing key. */
+export const SECTION_EYEBROW: MessageKey = "common.sectionEyebrow";
 
 /** Highlight-section filter dropdown options — wired to real filtering (FIX 3). */
 export const HASHTAG_FILTERS: readonly string[] = [
@@ -50,19 +62,19 @@ export const DEPARTMENT_FILTERS: readonly string[] = [
 ];
 
 /** Shown when the Highlight filter combination matches no Kudo. */
-export const HIGHLIGHT_EMPTY = "Không có Kudo phù hợp";
+export const HIGHLIGHT_EMPTY: MessageKey = "sunKudos.highlightEmpty";
 
 /** Sidebar personal-stats panel — 5 rows (label + gold value). */
 export const SUNNER_STATS: readonly SunnerStat[] = [
-  { label: "Số Kudos bạn nhận được:", value: "25" },
-  { label: "Số Kudos bạn đã gửi:", value: "25" },
-  { label: "Số tim bạn nhận được:", value: "25" },
-  { label: "Số Secret Box bạn đã mở:", value: "25" },
-  { label: "Số Secret Box chưa mở:", value: "25" },
+  { label: "stats.received", value: "25" },
+  { label: "stats.sent", value: "25" },
+  { label: "stats.hearts", value: "25" },
+  { label: "stats.secretOpened", value: "25" },
+  { label: "stats.secretUnopened", value: "25" },
 ];
 
-/** Sidebar "10 Sunner nhận quà mới nhất" list. */
-export const RECENT_GIFTS_HEADING = "10 Sunner nhận quà mới nhất";
+/** Sidebar "10 Sunner nhận quà mới nhất" list heading — F014 translation key. */
+export const RECENT_GIFTS_HEADING: MessageKey = "sunKudos.recentGiftsHeading";
 
 export const RECENT_GIFT_SUNNERS: readonly RecentGiftSunner[] = [
   { name: "Huỳnh Dương Xuân", note: "Nhận được 1 áo phông SAA" },
@@ -77,5 +89,5 @@ export const RECENT_GIFT_SUNNERS: readonly RecentGiftSunner[] = [
   { name: "Đặng Hải Đăng", note: "Nhận được 1 áo phông SAA" },
 ];
 
-/** Secret Box CTA label (visual-only button). */
-export const SECRET_BOX_LABEL = "Mở Secret Box";
+/** Secret Box CTA label (visual-only button) — reuses the existing Profile key. */
+export const SECRET_BOX_LABEL: MessageKey = "profile.openSecretBox";

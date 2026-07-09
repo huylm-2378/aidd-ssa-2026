@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { type RefObject } from "react";
 import RulesModal from "./rules-modal";
+import { renderWithLang } from "../../_lib/i18n/test-utils";
 
 describe("RulesModal (F013)", () => {
   it("renders nothing when closed", () => {
@@ -94,6 +95,16 @@ describe("RulesModal (F013)", () => {
     // Both callbacks should fire (onWriteKudos is called, onClose is NOT directly called by this button)
     // But onWriteKudos IS called, which typically triggers the parent to close the drawer
     expect(onWriteKudos).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the title, close, and write CTA in EN when the active locale is EN (F014 round 3)", () => {
+    renderWithLang(<RulesModal open onClose={vi.fn()} />, "en");
+
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Close/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Write KUDOS/ })).toBeInTheDocument();
+    expect(screen.getByText("NATIONAL KUDOS")).toBeInTheDocument();
+    expect(screen.getByText("1-4 people have sent you Kudos")).toBeInTheDocument();
   });
 
   it("returns focus to triggerRef when closed (useDialogA11y focus management)", () => {

@@ -4,6 +4,7 @@ import { useCallback, useRef, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { RULES_COPY, RULE_ICONS, RULE_TIERS, type CollectibleIcon, type RuleTier } from "../../_lib/rules-content";
 import { useMounted } from "../../_lib/use-mounted";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import { useDialogA11y } from "./use-dialog-a11y";
 
 interface RulesModalProps {
@@ -24,6 +25,7 @@ const TITLE_ID = "rules-modal-title";
  */
 export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: RulesModalProps) {
   const mounted = useMounted();
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClose = useCallback(() => {
@@ -46,14 +48,14 @@ export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: 
           className="flex w-full max-w-[553px] flex-col gap-6 bg-[#00070c] p-6 font-montserrat sm:p-10"
         >
           <h2 id={TITLE_ID} className="text-[32px] font-bold leading-tight text-[#ffea9e] sm:text-[45px]">
-            {RULES_COPY.title}
+            {t(RULES_COPY.title)}
           </h2>
 
           <section className="flex flex-col gap-4">
             <h3 className="text-lg font-bold uppercase leading-7 text-[#ffea9e] sm:text-[22px]">
-              {RULES_COPY.receiversHeading}
+              {t(RULES_COPY.receiversHeading)}
             </h3>
-            <p className="text-sm font-medium text-white sm:text-base">{RULES_COPY.receiversIntro}</p>
+            <p className="text-sm font-medium text-white sm:text-base">{t(RULES_COPY.receiversIntro)}</p>
             <div className="flex flex-col gap-4">
               {RULE_TIERS.map((tier) => (
                 <TierRow key={tier.name} tier={tier} />
@@ -63,22 +65,22 @@ export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: 
 
           <section className="flex flex-col gap-4">
             <h3 className="text-lg font-bold uppercase leading-7 text-[#ffea9e] sm:text-[22px]">
-              {RULES_COPY.sendersHeading}
+              {t(RULES_COPY.sendersHeading)}
             </h3>
-            <p className="text-sm font-medium text-white sm:text-base">{RULES_COPY.sendersIntro}</p>
+            <p className="text-sm font-medium text-white sm:text-base">{t(RULES_COPY.sendersIntro)}</p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {RULE_ICONS.map((icon) => (
                 <IconTile key={icon.name} icon={icon} />
               ))}
             </div>
-            <p className="text-sm font-medium text-white">{RULES_COPY.iconsNote}</p>
+            <p className="text-sm font-medium text-white">{t(RULES_COPY.iconsNote)}</p>
           </section>
 
           <section className="flex flex-col gap-4">
             <h3 className="text-xl font-bold uppercase leading-8 text-[#ffea9e] sm:text-2xl">
-              {RULES_COPY.nationalHeading}
+              {t(RULES_COPY.nationalHeading)}
             </h3>
-            <p className="text-sm font-medium text-white sm:text-base">{RULES_COPY.nationalCopy}</p>
+            <p className="text-sm font-medium text-white sm:text-base">{t(RULES_COPY.nationalCopy)}</p>
           </section>
 
           <div className="flex w-full items-center gap-6 pt-2">
@@ -87,7 +89,7 @@ export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: 
               onClick={handleClose}
               className="flex shrink-0 items-center gap-2 rounded border border-[#998c5f] bg-[#ffea9e]/10 px-10 py-4 font-montserrat text-base font-bold text-[#ffea9e]"
             >
-              {RULES_COPY.closeLabel}
+              {t(RULES_COPY.closeLabel)}
               <CloseIcon />
             </button>
             <button
@@ -95,7 +97,7 @@ export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: 
               onClick={() => onWriteKudos?.()}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#ffea9e] px-4 py-4 font-montserrat text-base font-bold text-[#00101a] transition-colors hover:bg-[#fae287]"
             >
-              {RULES_COPY.writeLabel}
+              {t(RULES_COPY.writeLabel)}
               <PenIcon />
             </button>
           </div>
@@ -107,14 +109,15 @@ export default function RulesModal({ open, onClose, onWriteKudos, triggerRef }: 
 }
 
 function TierRow({ tier }: { tier: RuleTier }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4">
       {/* Hero badges are wide pills — fix height, keep natural width (no squish). */}
       {/* eslint-disable-next-line @next/next/no-img-element -- static local asset */}
       <img src={tier.badgeSrc} alt="" aria-hidden className="h-7 w-auto shrink-0 object-contain" />
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-bold text-[#ffea9e]">{tier.countLabel}</p>
-        <p className="text-sm font-medium text-white">{tier.description}</p>
+        <p className="text-sm font-bold text-[#ffea9e]">{t(tier.countKey)}</p>
+        <p className="text-sm font-medium text-white">{t(tier.descKey)}</p>
       </div>
     </div>
   );

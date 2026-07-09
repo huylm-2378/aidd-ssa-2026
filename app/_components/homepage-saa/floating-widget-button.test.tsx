@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import FloatingWidgetButton from "./floating-widget-button";
+import { renderWithLang } from "../../_lib/i18n/test-utils";
 
 function openMenu() {
   fireEvent.click(screen.getByRole("button", { name: "Mở menu thao tác" }));
@@ -176,6 +177,19 @@ describe("FloatingWidgetButton (F010)", () => {
     // Verify composer dialog opened (there should be a dialog for the composer now)
     const dialogs = screen.getAllByRole("dialog");
     expect(dialogs.length).toBeGreaterThan(0);
+  });
+
+  it("renders EN pill labels and toggle aria-label when the active locale is EN (F014 round 3)", () => {
+    renderWithLang(<FloatingWidgetButton />, "en");
+
+    fireEvent.click(screen.getByRole("button", { name: "Open action menu" }));
+
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("Write KUDOS")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close action menu" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 
   it("rules drawer and composer modals share focus management via the FAB toggle", () => {

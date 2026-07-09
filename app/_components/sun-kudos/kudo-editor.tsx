@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { WRITE_KUDO_COPY } from "../../_lib/write-kudo-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 interface KudoEditorProps {
   value: string;
@@ -15,27 +16,28 @@ interface KudoEditorProps {
  * styled `<textarea>` that actually captures the body text.
  */
 export default function KudoEditor({ value, onChange }: KudoEditorProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex w-full flex-col items-end gap-1">
       <div className="flex w-full flex-col items-start overflow-hidden rounded-lg border border-[#998c5f]">
         <div className="flex w-full items-center justify-end border-b border-[#998c5f]">
           <div className="flex items-center">
-            <ToolbarButton label="In đậm">
+            <ToolbarButton label={t("composer.toolbar.bold")}>
               <BoldIcon />
             </ToolbarButton>
-            <ToolbarButton label="In nghiêng">
+            <ToolbarButton label={t("composer.toolbar.italic")}>
               <ItalicIcon />
             </ToolbarButton>
-            <ToolbarButton label="Gạch ngang">
+            <ToolbarButton label={t("composer.toolbar.strikethrough")}>
               <StrikethroughIcon />
             </ToolbarButton>
-            <ToolbarButton label="Danh sách số">
+            <ToolbarButton label={t("composer.toolbar.numberList")}>
               <NumberListIcon />
             </ToolbarButton>
-            <ToolbarButton label="Chèn liên kết">
+            <ToolbarButton label={t("composer.toolbar.link")}>
               <LinkIcon />
             </ToolbarButton>
-            <ToolbarButton label="Trích dẫn">
+            <ToolbarButton label={t("composer.toolbar.quote")}>
               <QuoteIcon />
             </ToolbarButton>
           </div>
@@ -43,21 +45,21 @@ export default function KudoEditor({ value, onChange }: KudoEditorProps) {
             type="button"
             className="flex h-10 shrink-0 items-center border-l border-[#998c5f] px-4 font-montserrat text-base font-bold text-[#00101a] underline"
           >
-            {WRITE_KUDO_COPY.communityStandards}
+            {t(WRITE_KUDO_COPY.communityStandards)}
           </button>
         </div>
 
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={WRITE_KUDO_COPY.contentPlaceholder}
+          placeholder={t(WRITE_KUDO_COPY.contentPlaceholder)}
           rows={6}
           className="min-h-[120px] w-full flex-1 resize-y bg-white px-6 py-4 font-montserrat text-base font-bold text-[#00101a] placeholder:text-[#999999] focus-visible:outline-none"
         />
       </div>
 
       <p className="w-full font-montserrat text-base font-bold tracking-wide text-[#00101a]">
-        {WRITE_KUDO_COPY.contentHint}
+        {t(WRITE_KUDO_COPY.contentHint)}
       </p>
     </div>
   );

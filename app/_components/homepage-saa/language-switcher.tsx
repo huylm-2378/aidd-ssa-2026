@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation, type Locale } from "../../_lib/i18n/use-translation";
 
 type LangCode = "VN" | "EN";
 
@@ -9,18 +10,22 @@ const LANGUAGES: readonly { code: LangCode; label: string; flag: string }[] = [
   { code: "EN", label: "EN", flag: "/language-dropdown/GB-NIR%20-%20Northern%20Ireland.png" },
 ];
 
+/** UI-language tokens ("VN"/"EN") <-> app locale ("vi"/"en") -- not translated copy. */
+const CODE_BY_LOCALE: Record<Locale, LangCode> = { vi: "VN", en: "EN" };
+const LOCALE_BY_CODE: Record<LangCode, Locale> = { VN: "vi", EN: "en" };
+
 /**
  * Header language switcher (F012, MoMorph "Dropdown-ngôn ngữ" `hUyaaugye2`).
  * Extracted from `header.tsx`: trigger shows the active language's flag +
  * code + a rotating chevron; the panel lists VN/EN rows with flag icons and
  * highlights the active one. Dismiss (outside mousedown + Escape) mirrors the
  * `hashtag-field.tsx` / `floating-widget-button.tsx` pattern, including focus
- * return to the trigger. Selection is client-only local state (no i18n
- * wiring in scope).
+ * return to the trigger. Selection flows through the `LanguageProvider`
+ * context (F014) -- picking EN/VN here changes app copy everywhere.
  */
 export default function LanguageSwitcher() {
   const [open, setOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState<LangCode>("VN");
+  const { lang, setLang } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -47,11 +52,12 @@ export default function LanguageSwitcher() {
   }, [open]);
 
   function selectLang(code: LangCode) {
-    setSelectedLang(code);
+    setLang(LOCALE_BY_CODE[code]);
     close();
   }
 
-  const active = LANGUAGES.find((lang) => lang.code === selectedLang) ?? LANGUAGES[0];
+  const selectedLang = CODE_BY_LOCALE[lang];
+  const active = LANGUAGES.find((item) => item.code === selectedLang) ?? LANGUAGES[0];
 
   return (
     <div ref={rootRef} className="relative">
@@ -78,21 +84,21 @@ export default function LanguageSwitcher() {
 
       {open && (
         <div className="absolute right-0 top-full z-10 mt-2 flex min-w-[140px] flex-col rounded-lg border border-[#998c5f] bg-[#00070c] p-1.5">
-          {LANGUAGES.map((lang) => {
-            const isActive = lang.code === selectedLang;
+          {LANGUAGES.map((language) => {
+            const isActive = language.code === selectedLang;
             return (
               <button
-                key={lang.code}
+                key={language.code}
                 type="button"
-                onClick={() => selectLang(lang.code)}
+                onClick={() => selectLang(language.code)}
                 className={`flex w-full items-center justify-between gap-2 rounded px-4 py-4 text-left transition-colors ${
                   isActive ? "bg-[#ffea9e]/20" : "hover:bg-white/10"
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <FlagIcon flag={lang.flag} />
+                  <FlagIcon flag={language.flag} />
                   <span className="font-montserrat text-[16px] font-bold tracking-[0.15px] text-white">
-                    {lang.label}
+                    {language.label}
                   </span>
                 </span>
               </button>

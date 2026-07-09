@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { screen, fireEvent } from "@testing-library/react";
+import { renderWithLang } from "../../_lib/i18n/test-utils";
 import LanguageSwitcher from "./language-switcher";
 
 // Only the trigger carries `aria-expanded`, so `{ expanded }` uniquely
@@ -13,9 +14,12 @@ function openPanel() {
   fireEvent.click(getTrigger(false));
 }
 
+// F014: selection now flows through `LanguageProvider` context instead of
+// local state, so every render needs a provider. `renderWithLang` (default
+// "vi") reproduces the old default-VN behavior for the F012 regression suite.
 describe("LanguageSwitcher (F012)", () => {
   it("renders closed by default with the VN trigger", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     const trigger = getTrigger(false);
 
     expect(trigger).toHaveAttribute("aria-haspopup", "true");
@@ -26,7 +30,7 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("toggles the panel open on click, flipping aria-expanded", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     const trigger = getTrigger(true);
@@ -36,7 +40,7 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("both VN and EN rows render with flag images", () => {
-    const { container } = render(<LanguageSwitcher />);
+    const { container } = renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     // Flags are decorative (alt=""), so we query the DOM directly for img elements
@@ -56,7 +60,7 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("VN row is highlighted by default (active language)", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     // The trigger shares the text "VN" as the active row, so grab all matches
@@ -70,7 +74,7 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("selecting EN updates the trigger and closes the panel", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     fireEvent.click(screen.getByRole("button", { name: /EN/ }));
@@ -82,7 +86,7 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("closes on Escape and returns focus to the trigger", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     fireEvent.keyDown(document, { key: "Escape" });
@@ -92,11 +96,28 @@ describe("LanguageSwitcher (F012)", () => {
   });
 
   it("closes on outside mousedown", () => {
-    render(<LanguageSwitcher />);
+    renderWithLang(<LanguageSwitcher />);
     openPanel();
 
     fireEvent.mouseDown(document.body);
 
     getTrigger(false);
+  });
+});
+
+// F014 AC-6/FR-005: setLang now flows through LanguageProvider context end-to-end.
+describe("LanguageSwitcher context flow (F014)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("selecting EN persists the locale to localStorage via context", () => {
+    renderWithLang(<LanguageSwitcher />);
+    openPanel();
+
+    fireEvent.click(screen.getByRole("button", { name: /EN/ }));
+
+    expect(getTrigger(false)).toHaveTextContent("EN");
+    expect(localStorage.getItem("saa-lang")).toBe("en");
   });
 });

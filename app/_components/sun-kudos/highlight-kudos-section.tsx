@@ -8,6 +8,7 @@ import {
   HASHTAG_FILTERS,
   SECTION_EYEBROW,
 } from "../../_lib/sun-kudos-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 import FilterDropdown from "./filter-dropdown";
 import HighlightCarousel from "./highlight-carousel";
 
@@ -24,6 +25,7 @@ export default function HighlightKudosSection({
 }: {
   kudos: readonly KudoCard[];
 }) {
+  const { t } = useTranslation();
   const [hashtag, setHashtag] = useState<string | null>(null);
   const [department, setDepartment] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
@@ -54,7 +56,7 @@ export default function HighlightKudosSection({
     >
       <header className="flex flex-col gap-4">
         <p className="font-montserrat text-2xl font-bold leading-8 text-white">
-          {SECTION_EYEBROW}
+          {t(SECTION_EYEBROW)}
         </p>
         <hr className="w-full border-t border-[#2e3940]" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -69,7 +71,7 @@ export default function HighlightKudosSection({
               onChange={handleHashtagChange}
             />
             <FilterDropdown
-              label="Phòng ban"
+              label={t("sunKudos.departmentFilterLabel")}
               options={DEPARTMENT_FILTERS}
               selected={department}
               onChange={handleDepartmentChange}

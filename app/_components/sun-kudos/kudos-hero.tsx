@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { KUDOS_HERO } from "../../_lib/sun-kudos-content";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 /**
  * Hero band for `/sun-kudos` (MoMorph `Frame 487` / `A_KV Kudos`, node
@@ -11,6 +14,7 @@ import { KUDOS_HERO } from "../../_lib/sun-kudos-content";
  * spans the search band below (matching the frame's 0-512 Keyvisual).
  */
 export default function KudosHero() {
+  const { t } = useTranslation();
   return (
     <section
       className="relative px-6 pb-10 pt-16 sm:px-12 lg:px-[144px] lg:pb-16 lg:pt-24"
@@ -19,7 +23,7 @@ export default function KudosHero() {
       <div className="flex max-w-[1224px] flex-col items-start gap-2">
         {/* mm:2940:13439 -- gold eyebrow, 36px/700 Montserrat. */}
         <p className="font-montserrat text-2xl font-bold leading-tight text-[#ffea9e] sm:text-3xl lg:text-[36px] lg:leading-[44px]">
-          {KUDOS_HERO.eyebrow}
+          {t(KUDOS_HERO.eyebrowKey)}
         </p>
         {/* mm:2940:13440 -- "KUDOS" wordmark logo (red Sun* "S" + KUDOS). */}
         <h1 className="m-0">

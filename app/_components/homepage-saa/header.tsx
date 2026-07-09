@@ -3,19 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation, type MessageKey } from "../../_lib/i18n/use-translation";
 import AccountMenu from "./account-menu";
 import LanguageSwitcher from "./language-switcher";
 
 interface NavLink {
-  label: string;
+  labelKey: MessageKey;
   href: string;
   scrollTop?: boolean;
 }
 
 const NAV_LINKS: readonly NavLink[] = [
-  { label: "About SAA 2025", href: "/", scrollTop: true },
-  { label: "Award Information", href: "/awards-information" },
-  { label: "Sun* Kudos", href: "/sun-kudos" },
+  { labelKey: "nav.about", href: "/", scrollTop: true },
+  { labelKey: "nav.awards", href: "/awards-information" },
+  { labelKey: "nav.kudos", href: "/sun-kudos" },
 ];
 
 function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -31,6 +32,7 @@ function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
 // other routes byte-for-byte unchanged.
 export default function Header({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between gap-8 bg-[#101417]/80 px-6 py-3 backdrop-blur-sm sm:px-9 lg:px-[144px]">
@@ -39,12 +41,12 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
           href="/"
           onClick={handleLogoClick}
           className="block h-12 w-[52px] shrink-0 transition-opacity hover:opacity-80"
-          aria-label="Sun* Annual Awards home"
+          aria-label={t("common.logoHome")}
         >
           {/* mm:I2167:9091;178:1033;178:1030 */}
           <Image
             src="/header-and-footer/MM_MEDIA_Logo.png"
-            alt="Sun* Annual Awards logo"
+            alt={t("common.logoAlt")}
             width={52}
             height={48}
             className="h-full w-full object-contain"
@@ -61,7 +63,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
             const isActive = pathname === link.href;
             return (
               <Link
-                key={link.href + link.label}
+                key={link.href + link.labelKey}
                 href={link.href}
                 onClick={link.scrollTop ? handleLogoClick : undefined}
                 aria-current={isActive ? "page" : undefined}
@@ -71,7 +73,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
                     : "border-transparent text-white hover:text-[#ffea9e]"
                 }`}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             );
           })}
@@ -84,7 +86,7 @@ export default function Header({ minimal = false }: { minimal?: boolean }) {
         {!minimal && (
         <button
           type="button"
-          aria-label="Notifications"
+          aria-label={t("header.notifications")}
           className="relative flex h-10 w-10 items-center justify-center rounded transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
         >
           <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" aria-hidden>

@@ -9,17 +9,9 @@ import {
 } from "../../_lib/profile/split-kudos";
 import KudoCard from "../sun-kudos/kudo-card";
 import FilterDropdown from "../sun-kudos/filter-dropdown";
+import { useTranslation } from "../../_lib/i18n/use-translation";
 
 type View = keyof KudoSplit;
-
-const VIEW_LABEL: Record<View, string> = {
-  sent: "Đã gửi",
-  received: "Đã nhận",
-};
-
-const VIEW_OPTIONS: readonly string[] = [VIEW_LABEL.sent, VIEW_LABEL.received];
-
-const EMPTY_MESSAGE = "Chưa có Kudo nào";
 
 /**
  * Profile Kudos section (F009 FR-007/008/009): the shared "Sun* Annual
@@ -35,24 +27,32 @@ export default function ProfileKudosSection({
   kudos: readonly KudoCardData[];
   currentUserName: string;
 }) {
+  const { t } = useTranslation();
   const [view, setView] = useState<View>(DEFAULT_KUDOS_TAB);
+
+  const viewLabel: Record<View, string> = {
+    sent: t("profile.tabSent"),
+    received: t("profile.tabReceived"),
+  };
+  const viewOptions: readonly string[] = [viewLabel.sent, viewLabel.received];
 
   const { sent, received } = splitKudosByUser(kudos, currentUserName);
   const active = view === "sent" ? sent : received;
 
-  // FilterDropdown always renders a "Tất cả" clear row that reports `null`;
-  // this toggle has no "all" state, so a clear click clamps back to default.
+  // FilterDropdown always renders a translated "clear" row that reports
+  // `null`; this toggle has no "all" state, so a clear click clamps back to
+  // default.
   const handleViewChange = (value: string | null) => {
-    if (value === VIEW_LABEL.sent) setView("sent");
-    else if (value === VIEW_LABEL.received) setView("received");
+    if (value === viewLabel.sent) setView("sent");
+    else if (value === viewLabel.received) setView("received");
     else setView(DEFAULT_KUDOS_TAB);
   };
 
   return (
-    <section className="flex flex-col gap-10 py-16" aria-label="Kudos của bạn">
+    <section className="flex flex-col gap-10 py-16" aria-label={t("profile.ariaYourKudos")}>
       <header className="flex flex-col gap-4">
         <p className="font-montserrat text-2xl font-bold leading-8 text-white">
-          Sun* Annual Awards 2025
+          {t("common.sectionEyebrow")}
         </p>
         <hr className="w-full border-t border-[#2e3940]" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -60,10 +60,10 @@ export default function ProfileKudosSection({
             KUDOS
           </h2>
           <FilterDropdown
-            label={VIEW_LABEL[view]}
-            options={VIEW_OPTIONS}
-            selected={VIEW_LABEL[view]}
-            display={`${VIEW_LABEL[view]} (${active.length})`}
+            label={viewLabel[view]}
+            options={viewOptions}
+            selected={viewLabel[view]}
+            display={`${viewLabel[view]} (${active.length})`}
             onChange={handleViewChange}
           />
         </div>
@@ -75,7 +75,7 @@ export default function ProfileKudosSection({
             role="status"
             className="py-12 text-center font-montserrat text-lg font-bold text-[#999]"
           >
-            {EMPTY_MESSAGE}
+            {t("profile.emptyKudos")}
           </p>
         ) : (
           active.map((kudo) => <KudoCard key={kudo.id} kudo={kudo} />)

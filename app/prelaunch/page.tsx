@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import CountdownRow from "./countdown-row";
+import PrelaunchHeading from "./prelaunch-heading";
 
 export const metadata: Metadata = {
   title: "Sắp diễn ra — Sun* Annual Awards 2025",
@@ -29,9 +30,7 @@ export default function PrelaunchPage() {
       </div>
 
       <div className="flex flex-col items-center gap-10 text-center sm:gap-14">
-        <h1 className="font-montserrat text-2xl font-bold leading-tight text-white sm:text-[36px] sm:leading-[1.2]">
-          Sự kiện sẽ bắt đầu sau
-        </h1>
+        <PrelaunchHeading />
         <CountdownRow />
       </div>
     </div>
