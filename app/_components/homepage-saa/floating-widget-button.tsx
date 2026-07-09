@@ -12,13 +12,14 @@ const PILL_CLASSES =
   "flex items-center gap-2 rounded bg-[#ffea9e] p-4 font-montserrat text-2xl font-bold leading-8 text-[#00101a] shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition-transform duration-150 hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] motion-reduce:transition-none motion-reduce:hover:scale-100";
 
 /**
- * Homepage floating action button (F010, mm:313:9139 "Floating Action Button
- * - phim nổi chức năng 2"). Collapsed: a 56x56 round red toggle with a "+"
- * glyph. Opened: the toggle rotates into "x" and reveals two gold pills --
- * "Thể lệ" (opens the RulesModal drawer) and "Viết KUDOS" (opens the
- * existing WriteKudoModal, closing this menu first). The menu closes on the
- * toggle, Escape, or an outside click -- the same pattern as
- * `hashtag-field.tsx` -- and returns focus to the toggle button.
+ * Homepage floating action button (F010). Two design frames:
+ * - Collapsed (mm:313:9137 "phim nổi chức năng", `_hphd32jN2`): a gold pill
+ *   (106x64, radius 100px, #FAE287 glow) holding pen + "/" + Sun* logo icons.
+ * - Opened (mm:313:9139 "phim nổi chức năng 2"): a 56x56 round red "x" toggle
+ *   with two gold pills above -- "Thể lệ" (opens the RulesModal drawer) and
+ *   "Viết KUDOS" (opens the existing WriteKudoModal, closing this menu first).
+ * The menu closes on the toggle, Escape, or an outside click -- the same
+ * pattern as `hashtag-field.tsx` -- and returns focus to the toggle button.
  */
 export default function FloatingWidgetButton() {
   const { t } = useTranslation();
@@ -88,9 +89,28 @@ export default function FloatingWidgetButton() {
           aria-haspopup="true"
           aria-expanded={isOpen}
           aria-label={isOpen ? t("fab.closeMenu") : t("fab.openMenu")}
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#d4271d] shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4271d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
+          className={
+            isOpen
+              ? // mm:313:9139 opened state -- round red close toggle.
+                "flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#d4271d] shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4271d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
+              : // mm:313:9138 collapsed state -- gold icon pill (106x64, radius 100,
+                // #FAE287 glow) with pen + "/" + Sun* logo, per frame `_hphd32jN2`.
+                "flex h-16 items-center gap-2 rounded-full bg-[#ffea9e] p-4 shadow-[0_4px_4px_rgba(0,0,0,0.25),0_0_6px_0_#fae287] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffea9e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00101a] active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100"
+          }
         >
-          <PlusIcon open={isOpen} />
+          {isOpen ? (
+            <CloseIcon />
+          ) : (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
+              <img src="/float-action-button/MM_MEDIA_Pen.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
+              <span className="font-montserrat text-2xl font-bold leading-8 text-[#00101a]" aria-hidden>
+                /
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static local icon */}
+              <img src="/float-action-button/MM_MEDIA_LOGO.png" alt="" aria-hidden className="h-6 w-6 shrink-0" />
+            </>
+          )}
         </button>
       </div>
 
@@ -108,19 +128,11 @@ export default function FloatingWidgetButton() {
   );
 }
 
-/** "+" that rotates 45deg into "x" when the menu is open (FR-003, FR-007). */
-function PlusIcon({ open }: { open: boolean }) {
+/** "x" glyph for the opened state's round red close toggle (FR-003, FR-007). */
+function CloseIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`h-6 w-6 text-white transition-transform duration-200 motion-reduce:transition-none motion-reduce:duration-0 ${
-        open ? "rotate-45" : "rotate-0"
-      }`}
-      fill="none"
-      stroke="currentColor"
-      aria-hidden
-    >
-      <path d="M12 5v14M5 12h14" strokeWidth={2} strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" aria-hidden>
+      <path d="M6 6l12 12M18 6L6 18" strokeWidth={2} strokeLinecap="round" />
     </svg>
   );
 }
