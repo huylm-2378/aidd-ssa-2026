@@ -63,4 +63,9 @@ export const enKudos: Record<keyof typeof viKudos, string> = {
   "spotlight.zoomOut": "Zoom out",
   "spotlight.resetPosition": "Reset position",
   "spotlight.zoomIn": "Zoom in",
+
+  "hearts.like": "Like this Kudos",
+  "hearts.unlike": "Unlike this Kudos",
+  "hearts.signInRequired": "Sign in to heart this Kudos.",
+  "hearts.error": "Couldn't update. Please try again.",
 };

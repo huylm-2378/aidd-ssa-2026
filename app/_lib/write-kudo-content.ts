@@ -1,15 +1,18 @@
 import type { MessageKey } from "./i18n/use-translation";
 
 /**
- * Static copy + mock recipient list for the "Viết Kudo" composer modal (F006),
- * faithful to the MoMorph frame "Viết Kudo" (`ihQ26W78P2` / node `520:11602`,
- * modal instance `520:11647`). Required-field `*` markers are appended at
- * render time, not baked into these labels. Recipient names are reused from
- * `sun-kudos-content.ts` / `kudos-cards.ts` to keep the mock world consistent.
+ * Static copy for the "Viết Kudo" composer modal (F006), faithful to the
+ * MoMorph frame "Viết Kudo" (`ihQ26W78P2` / node `520:11602`, modal instance
+ * `520:11647`). Required-field `*` markers are appended at render time, not
+ * baked into these labels.
  *
  * F014 round 4: `WRITE_KUDO_COPY` holds i18n catalog KEYS (`composer.*`),
  * not raw strings — consumers resolve them via `t()` at render time (same
  * pattern as `SunnerStat.label` in `sun-kudos-content.ts`).
+ *
+ * The old mock `SUNNER_OPTIONS` list is gone: its fake ids ("sunner-1..9")
+ * leaked into `createKudo`'s uuid `receiver_id` insert. Recipients now always
+ * come from real `sunners` rows (server-fetched or `useSunnerOptions`).
  */
 export interface SunnerOption {
   id: string;
@@ -17,19 +20,6 @@ export interface SunnerOption {
   role: string;
   avatar?: string;
 }
-
-/** Mock Sunner directory for the recipient autocomplete (FR-005). No real lookup. */
-export const SUNNER_OPTIONS: readonly SunnerOption[] = [
-  { id: "sunner-1", name: "Trần Minh Anh", role: "CEVC19" },
-  { id: "sunner-2", name: "Phạm Thu Hà", role: "CEVC07" },
-  { id: "sunner-3", name: "Nguyễn Hoàng Linh", role: "CEVC12" },
-  { id: "sunner-4", name: "Lê Quốc Bảo", role: "CEVC22" },
-  { id: "sunner-5", name: "Đỗ Khánh Chi", role: "CEVC05" },
-  { id: "sunner-6", name: "Vũ Ngọc Mai", role: "CEVC14" },
-  { id: "sunner-7", name: "Hoàng Anh Tú", role: "CEVC30" },
-  { id: "sunner-8", name: "Ngô Phương Thảo", role: "CEVC18" },
-  { id: "sunner-9", name: "Đặng Hải Đăng", role: "CEVC26" },
-];
 
 /**
  * Fixed catalog of selectable hashtags for the composer dropdown (FR-008,

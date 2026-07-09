@@ -97,3 +97,67 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
     return { ok: false, error: e instanceof Error ? e.message : "unknown" };
   }
 }
+
+/** Stable, locale-independent codes for the toggleHeart failure modes. */
+export type ToggleHeartErrorCode = "auth_required" | "unknown";
+
+export interface ToggleHeartResult {
+  ok: boolean;
+  liked?: boolean;
+  likeCount?: number;
+  error?: ToggleHeartErrorCode | string;
+}
+
+/**
+ * Toggle the current user's like on a kudo (F015). INSERT-first: two rapid
+ * taps can't both create a like because the `kudo_likes` PK rejects the
+ * second insert (23505 unique_violation) — that rejection IS the un-like
+ * signal, so there's no read-then-write race window (AC-2). `like_count` is
+ * never written here; DB triggers on `kudo_likes` keep it in sync (FR-002).
+ */
+export async function toggleHeart(kudoId: string): Promise<ToggleHeartResult> {
+  if (!kudoId) return { ok: false, error: "unknown" };
+
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { ok: false, error: "auth_required" };
+    }
+
+    let liked = true;
+    const { error: insertError } = await supabase
+      .from("kudo_likes")
+      .insert({ kudo_id: kudoId, user_id: user.id });
+
+    if (insertError) {
+      // 23505 = unique_violation: already liked -> this tap un-likes it.
+      if (insertError.code === "23505") {
+        const { error: deleteError } = await supabase
+          .from("kudo_likes")
+          .delete()
+          .eq("kudo_id", kudoId)
+          .eq("user_id", user.id);
+        if (deleteError) return { ok: false, error: deleteError.message };
+        liked = false;
+      } else {
+        return { ok: false, error: insertError.message };
+      }
+    }
+
+    const { data: row } = await supabase
+      .from("kudos")
+      .select("like_count")
+      .eq("id", kudoId)
+      .maybeSingle();
+
+    revalidatePath("/sun-kudos");
+    revalidatePath("/profile");
+    return { ok: true, liked, likeCount: row?.like_count ?? 0 };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "unknown" };
+  }
+}

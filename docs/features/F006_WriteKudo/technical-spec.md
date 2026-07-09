@@ -47,6 +47,14 @@ network). The rich-text toolbar is rendered as a **visual (non-wired)** control 
 - `SunnerOption`: `id, name, role, avatar` — mock recipient list for the autocomplete (reuse/extend
   existing kudos mock data where possible). Lives in `app/_lib/write-kudo-content.ts` alongside
   static copy (title, placeholders, hint strings, community-standards label).
+
+  > **Update (bugfix, 2026-07-09):** the mock recipient list (`SUNNER_OPTIONS`) described above was
+  > deleted from `write-kudo-content.ts` — its fake ids ("sunner-1..9") leaked into F007's `createKudo`
+  > uuid `receiver_id` insert (`invalid input syntax for type uuid`). Recipients now always come from
+  > real `sunners` rows: server-fetched by `/sun-kudos` (F007's `getSunnerOptions`), or — when the
+  > homepage FAB opens the composer with no server data — fetched client-side once on open via
+  > `app/_components/sun-kudos/use-sunner-options.ts` (public-read RLS; degrades to an empty list on
+  > fetch failure). The `SunnerOption` type itself is unchanged.
 - Form state (client, ephemeral): `recipient: SunnerOption | null`, `award: string`,
   `body: string`, `hashtags: string[]` (≤5), `images: {id, url}[]` (≤5), `anonymous: boolean`.
 
@@ -69,7 +77,9 @@ network). The rich-text toolbar is rendered as a **visual (non-wired)** control 
   no image persistence (object URLs only, revoked on close).
 - Rich-text toolbar is visual-only; body is captured via a plain (styled) textarea. `@`-mention is a
   hint string only (no live mention autocomplete).
-- Recipient autocomplete filters a small static mock Sunner list; no real directory lookup.
+- ~~Recipient autocomplete filters a small static mock Sunner list; no real directory lookup~~ —
+  superseded by the 2026-07-09 bugfix (see the note under Key entities); autocomplete now always
+  queries real `sunners` rows.
 - Community-standards ("Tiêu chuẩn cộng đồng") link is visual-only (no target page).
 - Anonymous toggle only sets local state (design's "enter anonymous name" sub-field is out of scope
   unless it appears in a variant; the base frame shows only the checkbox).

@@ -7,6 +7,12 @@ vi.mock("../../sun-kudos/actions", () => ({
   createKudo: vi.fn(async () => ({ ok: false, error: "auth_required" })),
 }));
 
+// Real recipient rows are server-fetched (or via useSunnerOptions) since the
+// mock-id uuid bugfix — tests supply an explicit directory with a real-shaped id.
+const SUNNERS = [
+  { id: "6f1a2b3c-0000-0000-0000-000000000001", name: "Trần Minh Anh", role: "CEVC19" },
+];
+
 describe("WriteKudoModal (F014 round 4 — composer i18n)", () => {
   it("renders the title, cancel, and submit in VI by default (no provider)", () => {
     render(<WriteKudoModal open onClose={vi.fn()} />);
@@ -36,7 +42,7 @@ describe("WriteKudoModal (F014 round 4 — composer i18n)", () => {
   });
 
   it("maps a known server-action error code (auth_required) to the EN message on submit", async () => {
-    renderWithLang(<WriteKudoModal open onClose={vi.fn()} />, "en");
+    renderWithLang(<WriteKudoModal open onClose={vi.fn()} sunnerOptions={SUNNERS} />, "en");
 
     fireEvent.click(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("button", { name: /Trần Minh Anh/ }));

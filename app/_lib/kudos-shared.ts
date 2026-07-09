@@ -21,6 +21,9 @@ export interface KudoCard {
   hashtags: readonly string[];
   /** Raw like count; rendered localized (e.g. 1000 → "1.000"). */
   likeCount: number;
+  /** True when the current signed-in user has hearted this kudo; false when
+   *  signed out or not yet liked. Hydrated by the server queries (F015). */
+  likedByMe?: boolean;
   /** Receiver's department; one of `DEPARTMENT_FILTERS` (sun-kudos-content.ts). */
   department: string;
   /** Optional photo captions; each renders one placeholder thumbnail. */

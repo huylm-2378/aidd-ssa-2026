@@ -68,4 +68,9 @@ export const viKudos = {
   "spotlight.zoomOut": "Thu nhỏ",
   "spotlight.resetPosition": "Đặt lại vị trí",
   "spotlight.zoomIn": "Phóng to",
+
+  "hearts.like": "Thả tim",
+  "hearts.unlike": "Bỏ tim",
+  "hearts.signInRequired": "Đăng nhập để thả tim.",
+  "hearts.error": "Không thể cập nhật. Vui lòng thử lại.",
 };

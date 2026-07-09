@@ -282,3 +282,34 @@ label, kudo-card's "Copy Link"/"Spam") — not a migration gap. Right after a
 locale switch, the live activity ticker can briefly mix English (new
 realtime rows) with Vietnamese (older static seed rows) until the seed rows
 scroll off, since seed data is never translated.
+
+## Kudos Hearts (F015)
+
+### Schema addition (Supabase `public`)
+
+- **`kudo_likes`** (migration `0004_kudos_likes.sql`): `(kudo_id uuid FK→kudos
+  ON DELETE CASCADE, user_id uuid FK→auth.users ON DELETE CASCADE, created_at,
+  PRIMARY KEY (kudo_id, user_id))` — one like per user per kudo by
+  construction.
+- `kudos.like_count` remains the denormalized read column; it is maintained
+  exclusively by `AFTER INSERT/DELETE` triggers on `kudo_likes` (SECURITY
+  DEFINER function). Clients never gain an UPDATE policy on `kudos`.
+
+### RLS
+
+- `kudo_likes`: SELECT for anon+authenticated (board is public-read);
+  INSERT only `auth.uid() = user_id`; DELETE only own row; no UPDATE.
+- Preserves the `0002` hardening posture: every write has a real actor.
+
+### Write path
+
+`HeartButton` (client, optimistic ±1 with rollback) → `toggleHeart` server
+action (mirrors `createKudo`: `getUser()` → stable error codes
+`auth_required`/`unknown` → insert-or-delete on unique violation → fresh count
+returned → `revalidatePath`). Signed-out taps roll back and show a translated
+inline prompt — no route gating.
+
+### Read path
+
+List queries also fetch the signed-in user's liked ids in one `kudo_likes`
+SELECT and map `likedByMe` onto each kudo row; anon ⇒ `false`.

@@ -17,6 +17,7 @@
 | 11 | F012 — Language Dropdown | P1 | ui | implemented |
 | 12 | F013 — Rules Drawer (Thể lệ) | P1 | ui | implemented |
 | 13 | F014 — Internationalization (i18n VN·EN) | P1 | infra/ui | implemented |
+| 14 | F015 — Kudos Hearts (Thả tim) | P1 | ui/data | implemented |
 
 ## Feature Details
 
@@ -203,3 +204,18 @@ spec (section headings, "Copy Link"/"Spam", tier/icon names). 202/202 tests pass
 No new dependency, no routes/data/auth change.
 
 **Related:** screens: hUyaaugye2 | routes: all pages with Header | models: —
+
+### F015 — Kudos Hearts (Thả tim)
+
+**Priority:** P1 | **Type:** ui/data | **Status:** implemented | **Slug:** F015_KudosHearts
+
+Turns the static heart + like-count on `KudoCard` into a per-user like toggle: a signed-in Sunner taps
+to like/unlike a kudo, enforced by a new `kudo_likes` join table (PK `(kudo_id, user_id)`, RLS
+insert/delete-own, no UPDATE). `kudos.like_count` is maintained exclusively by `AFTER INSERT/DELETE`
+triggers on `kudo_likes` — never by client code. `HeartButton` optimistically flips ±1 with rollback on
+action failure, and re-syncs already-mounted card instances (Highlight/All Kudos/Profile all render the
+same kudo) from fresh props after `revalidatePath`. A signed-out tap shows an inline, translated
+"sign in required" prompt — no redirect, no route gating. Realtime propagation across clients and
+wiring `kudos_stats.hearts` to real per-user likes are explicitly out of scope.
+
+**Related:** screens: MaZUn5xHXZ | routes: /sun-kudos, /profile | models: kudo_likes, kudos.like_count

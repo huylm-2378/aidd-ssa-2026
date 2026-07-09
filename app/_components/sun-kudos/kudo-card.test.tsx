@@ -1,7 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import KudoCard from "./kudo-card";
 import type { KudoCard as KudoCardData } from "../../_lib/kudos-cards";
+
+// KudoCard now renders HeartButton, which imports `toggleHeart` from a
+// "use server" file (pulls in `next/headers`) -- that throws in jsdom.
+// Precedent: write-kudo-modal.test.tsx:6-7 (F015 P03 R1).
+vi.mock("../../sun-kudos/actions", () => ({
+  toggleHeart: vi.fn(async () => ({ ok: true, liked: true, likeCount: 1 })),
+}));
 
 const baseKudo: KudoCardData = {
   id: "k1",

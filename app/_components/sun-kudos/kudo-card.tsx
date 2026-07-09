@@ -4,6 +4,7 @@ import type { KudoCard as KudoCardData } from "../../_lib/kudos-cards";
 import { useTranslation } from "../../_lib/i18n/use-translation";
 import KudoAvatar from "./kudos-avatar";
 import TierBadge from "./tier-badge";
+import HeartButton from "./heart-button";
 
 /** Sender/receiver identity block: avatar + name + role code + hero-tier badge. */
 function Person({
@@ -120,15 +121,13 @@ export default function KudoCard({
 
       <div className={DIVIDER} />
 
-      {/* mm:335:9461 -- footer: like count + visual-only actions */}
+      {/* mm:335:9461 -- footer: like toggle + visual-only actions */}
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <span className="flex items-center gap-2 text-2xl font-bold leading-8 text-[#00101a]">
-          {kudo.likeCount.toLocaleString("vi-VN")}
-          <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#d4271d]" fill="currentColor" aria-hidden>
-            <path d="M12 21s-7.5-4.9-10-9.3C.5 8.6 2 5 5.5 5c2 0 3.3 1.2 4 2.3C10.2 6.2 11.5 5 13.5 5 17 5 18.5 8.6 17 11.7 14.5 16.1 12 21 12 21z" />
-          </svg>
-          <span className="sr-only">{t("sunKudos.likesSrLabel")}</span>
-        </span>
+        <HeartButton
+          kudoId={kudo.id}
+          initialLiked={kudo.likedByMe ?? false}
+          initialCount={kudo.likeCount}
+        />
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

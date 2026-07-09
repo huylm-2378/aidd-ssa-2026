@@ -34,8 +34,9 @@ export function formatTimeRange(iso: string): string {
   return `${time} - ${day}`;
 }
 
-/** One `kudos` row (sender/receiver embedded) → a `KudoCard`. */
-export function mapKudoRow(row: KudoRow): KudoCard {
+/** One `kudos` row (sender/receiver embedded) → a `KudoCard`. `likedByMe`
+ *  defaults to false so existing callers/tests are unaffected (F015). */
+export function mapKudoRow(row: KudoRow, likedByMe = false): KudoCard {
   const images = row.image_urls ?? [];
   // Sender precedence: anonymous → hidden; else the logged-in user who created
   // it (denormalized sender_name/avatar, no directory role/tier); else the
@@ -60,6 +61,7 @@ export function mapKudoRow(row: KudoRow): KudoCard {
     body: row.body,
     hashtags: row.hashtags ?? [],
     likeCount: row.like_count,
+    likedByMe,
     department: row.department,
     photos: images.length > 0 ? images : undefined,
   };
