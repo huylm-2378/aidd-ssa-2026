@@ -51,15 +51,24 @@ const DIVIDER = "h-px w-full bg-[#ffea9e]";
  *
  * `isSpam` is a visual-only flag (F009 profile moderation view): it overlays
  * a red "Spam" pill top-right of the card and carries no data-layer meaning.
+ *
+ * `fixed` is the Highlight-carousel mode (design frame: every slide is a
+ * constant 528x525 box regardless of content): single-line title/time/hashtags,
+ * body text line-clamped with an ellipsis, photo strip capped to one row, and
+ * the gold box clips any remaining overflow. The stacked feeds (All Kudos, profile)
+ * omit it and keep intrinsic, content-driven height.
  */
 export default function KudoCard({
   kudo,
   isSpam,
+  fixed,
 }: {
   kudo: KudoCardData;
   isSpam?: boolean;
+  fixed?: boolean;
 }) {
   const { t } = useTranslation();
+  const clampLine = fixed ? "truncate" : "";
   return (
     <article className="relative flex w-full flex-col gap-4 self-stretch rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
       {isSpam && (
@@ -89,20 +98,31 @@ export default function KudoCard({
       <div className={DIVIDER} />
 
       {/* mm:335:9448 -- content; flex-1 keeps equal-height carousel cards footer-aligned */}
-      <div className="flex flex-1 flex-col gap-4">
-        <p className="font-bold leading-6 tracking-[0.5px] text-[#999]">
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <p className={`font-bold leading-6 tracking-[0.5px] text-[#999] ${clampLine}`}>
           {kudo.timeRange}
         </p>
-        <p className="text-center text-base font-bold leading-6 tracking-[0.5px] text-[#00101a]">
+        <p className={`text-center text-base font-bold leading-6 tracking-[0.5px] text-[#00101a] ${clampLine}`}>
           {kudo.title}
         </p>
 
-        <div className="flex-1 rounded-xl border border-[#ffea9e] bg-[#ffea9e]/40 px-6 py-4">
-          <p className="text-justify text-lg font-bold leading-8 text-[#00101a]">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[#ffea9e] bg-[#ffea9e]/40 px-6 py-4">
+          <p
+            className={`text-lg font-bold leading-8 text-[#00101a] ${
+              fixed
+                ? kudo.photos?.length
+                  ? "line-clamp-1"
+                  : "line-clamp-2"
+                : "text-justify"
+            }`}
+          >
             {kudo.body}
           </p>
           {kudo.photos && kudo.photos.length > 0 && (
-            <ul className="mt-3 flex flex-wrap gap-2" aria-label="Kudo photos">
+            <ul
+              className={`mt-3 flex gap-2 ${fixed ? "flex-nowrap overflow-hidden" : "flex-wrap"}`}
+              aria-label="Kudo photos"
+            >
               {kudo.photos.map((photo) => (
                 <li
                   key={photo}
@@ -114,7 +134,7 @@ export default function KudoCard({
           )}
         </div>
 
-        <p className="font-bold leading-6 tracking-[0.5px] text-[#d4271d]">
+        <p className={`font-bold leading-6 tracking-[0.5px] text-[#d4271d] ${clampLine}`}>
           {kudo.hashtags.join(" ")}
         </p>
       </div>

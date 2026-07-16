@@ -35,6 +35,42 @@ One diagnosis subtlety worth remembering: `items-stretch` on a flex row is not t
 
 ---
 
+## Follow-up: Fixed 525px Slides + Ellipsis (same day)
+
+The user pushed the fix further: equal-per-page was not enough — slides must be a
+constant size on *every* page, with long text cut by an ellipsis. MoMorph agreed:
+every design slide is a fixed 528×525 instance and the body text node (`662:12223`)
+literally ends in "...". Implementation: a new opt-in `fixed` mode on `KudoCard`
+(single-line time/title/hashtags, `line-clamp-2` body — `line-clamp-1` when a photo
+strip is present — one-row photos, `min-h-0 overflow-hidden` clipping) and
+`lg:h-[525px]` on the carousel slot wrappers. Measured 525px across all five pages.
+
+Two traps surfaced en route: a naive unconditional `h-[525px]` crushed the 375px
+viewport into an unreadable card (fix: gate the fixed height to `lg`+, where the
+1440px design applies), and `text-justify` + `line-clamp` stretched a two-word
+clamped line into giant gaps (fix: drop justify in fixed mode). Three sun-kudos e2e
+failures turned out to be pre-existing seed drift — live like-counts (F015 hearts)
+reordered the top-5 and department counts — proven by failing identically on
+stashed HEAD. Reviewer sealed 9/10, 0 critical; gate hard-SEALED.
+
+## Follow-up 2: Edge Fade Overlays (same day)
+
+Third request in the same area: the side peeks should *fade* into the dark page
+background ("hiệu ứng mờ ở hai biên"), not dim uniformly. The design carries two
+overlay frames over the side cards (`2940:13469`/`2940:13467`,
+`linear-gradient(90°/270°, #00101A 50%, transparent)`); the implementation had
+approximated them with `opacity-40`. Replaced with per-peek
+`pointer-events-none absolute` gradient overlays (`bg-gradient-to-r|l
+from-[#00101a] via-[#00101a]/60 to-transparent`). Verified with playwright+sharp
+pixel profiling — left peek runs (1,16,26) at the outer edge to (234,228,208)
+inward, right peek mirrored — plus a new e2e test pinning both overlays' computed
+gradient directions (proven red without the fix). One measurement lesson: only
+`element.screenshot()` gave trustworthy crops; `page.screenshot({clip})` with
+boundingBox+scrollY math silently sampled the wrong region twice before that
+became obvious.
+
+---
+
 ## Lessons Learned
 
 1. **Stretch is one level deep**: equal-height flex layouts need every intermediate wrapper to be a flex container (or the leaf to be `h-full`); auditing the chain beats guessing which class is missing.

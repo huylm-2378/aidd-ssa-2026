@@ -1,11 +1,15 @@
 {
-  "task": "Fix Sun* Kudos Highlight carousel (MoMorph MaZUn5xHXZ) so all visible slides render at equal height: KudoCard height was intrinsic/content-driven, so peek cards floated shorter than the active card (measured 558px vs 466px), diverging from the design where all three slides are top- and bottom-aligned",
+  "task": "Highlight carousel slides (MoMorph MaZUn5xHXZ) must render at a fixed size — the design frame pins every slide to a 528x525 box with body text truncated by an ellipsis (node 662:12223 ends in '...'), while the implementation let card height follow content, so the row resized between pages (558px page 1 vs 678px page 2 after the equal-height fix). Fix: slides render KudoCard in a new `fixed` mode (lg:h-[525px] wrappers, line-clamped body with ellipsis, single-line time/title/hashtags, one-row photo strip, overflow clipped); stacked feeds keep intrinsic height; FIX 3: edge peeks used a uniform opacity-40 dim while the design fades side cards into the background via directional gradient overlays (nodes 2940:13469/13467, linear-gradient #00101A 50% -> transparent) — replaced with pointer-events-none absolute gradient overlays per peek",
   "mode": "auto",
   "acceptanceCriteria": [
-    "all visible carousel slides (peek + active) share one height and are top/bottom aligned at lg+ viewports",
-    "e2e regression test 'all visible carousel slides render at equal height' fails without the fix and passes with it",
-    "All Kudos feed and profile card lists are unaffected (stacked cards keep intrinsic height)",
-    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass"
+    "every carousel slide measures exactly 525px tall on every page at lg+ viewports",
+    "long body text is truncated with an ellipsis instead of growing the card",
+    "e2e regression test 'carousel slides keep the fixed 525px design height' fails without the fix and passes with it",
+    "below lg the card keeps clamped intrinsic height with no horizontal overflow at 375px",
+    "All Kudos feed and profile card lists are unaffected (fixed mode is opt-in via prop)",
+    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass",
+    "each edge peek carries a directional gradient overlay (dark at the outer edge, transparent toward the active card) instead of uniform opacity",
+    "e2e regression test 'edge peeks fade into the background via gradient overlays' fails without the fix and passes with it"
   ],
   "touchpoints": [
     "app/_components/sun-kudos/highlight-carousel.tsx",
@@ -14,10 +18,11 @@
   ],
   "blastRadius": [
     "Highlight carousel layout (active card + peeks + arrows)",
-    "KudoCard rendering in All Kudos feed and profile moderation list"
+    "KudoCard rendering in All Kudos feed and profile moderation list",
+    "Mobile (sub-lg) single-card carousel rendering"
   ],
   "contracts": [
-    "KudoCard props (kudo, isSpam) unchanged",
+    "KudoCard props gain optional `fixed?: boolean` (additive; kudo, isSpam unchanged)",
     "HighlightCarousel props (kudos, pageIndex, onPrev, onNext) unchanged"
   ]
 }

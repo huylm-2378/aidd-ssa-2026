@@ -3,14 +3,21 @@
   "criticalCount": 0,
   "decision": "SEALED",
   "acceptanceCovered": [
-    "all visible carousel slides (peek + active) share one height and are top/bottom aligned at lg+ viewports",
-    "e2e regression test 'all visible carousel slides render at equal height' fails without the fix and passes with it",
-    "All Kudos feed and profile card lists are unaffected (stacked cards keep intrinsic height)",
-    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass"
+    "every carousel slide measures exactly 525px tall on every page at lg+ viewports",
+    "long body text is truncated with an ellipsis instead of growing the card",
+    "e2e regression test 'carousel slides keep the fixed 525px design height' fails without the fix and passes with it",
+    "below lg the card keeps clamped intrinsic height with no horizontal overflow at 375px",
+    "All Kudos feed and profile card lists are unaffected (fixed mode is opt-in via prop)",
+    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass",
+    "each edge peek carries a directional gradient overlay (dark at the outer edge, transparent toward the active card) instead of uniform opacity",
+    "e2e regression test 'edge peeks fade into the background via gradient overlays' fails without the fix and passes with it"
   ],
   "regressionChecked": [
-    "Highlight carousel layout (active card + peeks + arrows)",
-    "KudoCard rendering in All Kudos feed and profile moderation list"
+    "Highlight carousel layout (active card + peeks + arrows) — self-stretch + explicit lg:h-[525px] wrapper height still forces article height, unchanged by FIX 3; verified via playwright measurements [525,525] page1, [525,525,525]x3 pages, [525,525] page5, and the fixed-525px + gradient-overlay tests both pass together in the same run",
+    "KudoCard rendering in All Kudos feed and profile moderation list — grep-confirmed both callers (all-kudos-section.tsx:53, profile-kudos-section.tsx:81) omit `fixed`; unaffected by FIX 3, which only touches highlight-carousel.tsx PeekSlot/PEEK_CLASS",
+    "Mobile (sub-lg) single-card carousel rendering — PEEK_CLASS remains lg-gated (`lg:flex`), so the gradient overlay never renders below lg (peeks stay hidden entirely); no change to sub-lg behavior from FIX 3",
+    "unconditional min-h-0/overflow-hidden added to the content column and gold box by the prior fix — reviewed for regression risk: harmless in non-fixed mode since these boxes have no upstream height constraint there",
+    "edge peek overlays are decorative and non-interactive — outer PEEK_CLASS container keeps `aria-hidden`+`inert` unchanged so the overlay sits inside an already-decorative subtree; overlay itself carries `pointer-events-none`; empty-peek branch (no kudo) correctly renders no overlay since there's nothing to fade; gradient direction traced through code (align=\"end\"→bg-gradient-to-r for the left/prev peek, align=\"start\"→bg-gradient-to-l for the right/next peek) matches the pixel-profile evidence and the #00101a fade target matches the page's actual bg-[#00101a] (app/sun-kudos/page.tsx:41), so it genuinely blends into the page background, not just a coincidental color match"
   ],
   "contractStatus": "OK",
   "refuted": [],

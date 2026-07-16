@@ -111,29 +111,60 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(indicator).toHaveText("1/5");
   });
 
-  test("all visible carousel slides render at equal height, top- and bottom-aligned", async ({
+  test("carousel slides keep the fixed 525px design height on every page, top-aligned", async ({
     page,
   }) => {
     test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const highlight = page.locator("section[aria-label='Highlight Kudos']");
+    const indicator = highlight.getByText(/^\d+\/\d+$/);
 
-    // Page 2 shows all three slots: prev peek + current + next peek.
-    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
-    await expect(highlight.getByText(/^\d+\/\d+$/)).toHaveText("2/5");
-
-    const boxes = await highlight
-      .locator("article")
-      .evaluateAll((cards) =>
+    const measure = () =>
+      highlight.locator("article").evaluateAll((cards) =>
         cards.map((card) => {
           const { top, height } = card.getBoundingClientRect();
           return { top: Math.round(top), height: Math.round(height) };
         }),
       );
+
+    // Page 1: current + next peek. Long content must not grow the slide —
+    // the card is a fixed 525px box (design frame MaZUn5xHXZ) with
+    // ellipsized text.
+    let boxes = await measure();
+    expect(boxes.length).toBe(2);
+    for (const box of boxes) expect(box.height).toBe(525);
+
+    // Page 2 shows all three slots: prev peek + current + next peek.
+    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
+    await expect(indicator).toHaveText("2/5");
+    boxes = await measure();
     expect(boxes.length).toBe(3);
     for (const box of boxes) {
-      expect(box.height).toBe(boxes[0].height);
+      expect(box.height).toBe(525);
       expect(box.top).toBe(boxes[0].top);
     }
+  });
+
+  test("edge peeks fade into the background via gradient overlays (design nodes 2940:13469/13467)", async ({
+    page,
+  }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+
+    // Page 2 shows both peeks. Each peek carries a directional gradient
+    // overlay: dark at the outer screen edge, transparent toward the active
+    // card — not a uniform opacity dim.
+    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
+    await expect(highlight.getByText(/^\d+\/\d+$/)).toHaveText("2/5");
+
+    const gradients = await highlight
+      .locator(".pointer-events-none.absolute")
+      .evaluateAll((overlays) =>
+        overlays.map((el) => getComputedStyle(el).backgroundImage),
+      );
+    expect(gradients).toHaveLength(2);
+    expect(gradients[0]).toContain("linear-gradient(to right");
+    expect(gradients[1]).toContain("linear-gradient(to left");
+    for (const g of gradients) expect(g).toContain("rgb(0, 16, 26)");
   });
 
   test("selecting a Phòng ban filter narrows the highlight feed and resets the carousel to page 1 (FIX 3)", async ({
