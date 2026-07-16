@@ -111,6 +111,31 @@ test.describe("Sun* Kudos page (F003)", () => {
     await expect(indicator).toHaveText("1/5");
   });
 
+  test("all visible carousel slides render at equal height, top- and bottom-aligned", async ({
+    page,
+  }) => {
+    test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
+    const highlight = page.locator("section[aria-label='Highlight Kudos']");
+
+    // Page 2 shows all three slots: prev peek + current + next peek.
+    await highlight.getByRole("button", { name: "Kudo tiếp theo" }).click();
+    await expect(highlight.getByText(/^\d+\/\d+$/)).toHaveText("2/5");
+
+    const boxes = await highlight
+      .locator("article")
+      .evaluateAll((cards) =>
+        cards.map((card) => {
+          const { top, height } = card.getBoundingClientRect();
+          return { top: Math.round(top), height: Math.round(height) };
+        }),
+      );
+    expect(boxes.length).toBe(3);
+    for (const box of boxes) {
+      expect(box.height).toBe(boxes[0].height);
+      expect(box.top).toBe(boxes[0].top);
+    }
+  });
+
   test("selecting a Phòng ban filter narrows the highlight feed and resets the carousel to page 1 (FIX 3)", async ({
     page,
   }) => {

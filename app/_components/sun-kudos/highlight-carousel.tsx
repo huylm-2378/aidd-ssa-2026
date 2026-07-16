@@ -7,7 +7,7 @@ import KudoCard from "./kudo-card";
 
 const PEEK_CLASS = "hidden w-[140px] shrink-0 overflow-hidden opacity-40 lg:flex";
 const ARROW_BTN =
-  "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]";
+  "flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-full text-white transition-colors hover:bg-white/10 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]";
 
 /**
  * Decorative, non-interactive sliver of a neighboring card (FIX 1 peek).
@@ -24,7 +24,7 @@ function PeekSlot({ kudo, align }: { kudo?: KudoCardData; align: "start" | "end"
       aria-hidden
       inert
     >
-      <div className="w-[528px] shrink-0">
+      <div className="flex w-[528px] shrink-0">
         <KudoCard kudo={kudo} />
       </div>
     </div>
@@ -86,7 +86,7 @@ export default function HighlightCarousel({
 
         <PeekSlot kudo={prev} align="end" />
 
-        <div className="w-full min-w-0 max-w-[528px]">
+        <div className="flex w-full min-w-0 max-w-[528px]">
           <KudoCard kudo={current} />
         </div>
 
