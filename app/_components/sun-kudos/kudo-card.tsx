@@ -61,7 +61,7 @@ export default function KudoCard({
 }) {
   const { t } = useTranslation();
   return (
-    <article className="relative flex w-full flex-col gap-4 rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
+    <article className="relative flex w-full flex-col gap-4 self-stretch rounded-2xl border-4 border-[#ffea9e] bg-[#fff8e1] px-6 pb-4 pt-6 font-montserrat">
       {isSpam && (
         <span className="absolute right-4 top-4 rounded-full bg-[#d4271d] px-2 py-0.5 font-montserrat text-xs font-bold text-white">
           Spam
@@ -88,8 +88,8 @@ export default function KudoCard({
 
       <div className={DIVIDER} />
 
-      {/* mm:335:9448 -- content */}
-      <div className="flex flex-col gap-4">
+      {/* mm:335:9448 -- content; flex-1 keeps equal-height carousel cards footer-aligned */}
+      <div className="flex flex-1 flex-col gap-4">
         <p className="font-bold leading-6 tracking-[0.5px] text-[#999]">
           {kudo.timeRange}
         </p>
@@ -97,7 +97,7 @@ export default function KudoCard({
           {kudo.title}
         </p>
 
-        <div className="rounded-xl border border-[#ffea9e] bg-[#ffea9e]/40 px-6 py-4">
+        <div className="flex-1 rounded-xl border border-[#ffea9e] bg-[#ffea9e]/40 px-6 py-4">
           <p className="text-justify text-lg font-bold leading-8 text-[#00101a]">
             {kudo.body}
           </p>
