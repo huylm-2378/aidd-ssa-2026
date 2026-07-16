@@ -1,0 +1,19 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "all visible carousel slides (peek + active) share one height and are top/bottom aligned at lg+ viewports",
+    "e2e regression test 'all visible carousel slides render at equal height' fails without the fix and passes with it",
+    "All Kudos feed and profile card lists are unaffected (stacked cards keep intrinsic height)",
+    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass"
+  ],
+  "regressionChecked": [
+    "Highlight carousel layout (active card + peeks + arrows)",
+    "KudoCard rendering in All Kudos feed and profile moderation list"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

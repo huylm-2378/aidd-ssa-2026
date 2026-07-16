@@ -1,0 +1,23 @@
+{
+  "task": "Fix Sun* Kudos Highlight carousel (MoMorph MaZUn5xHXZ) so all visible slides render at equal height: KudoCard height was intrinsic/content-driven, so peek cards floated shorter than the active card (measured 558px vs 466px), diverging from the design where all three slides are top- and bottom-aligned",
+  "mode": "auto",
+  "acceptanceCriteria": [
+    "all visible carousel slides (peek + active) share one height and are top/bottom aligned at lg+ viewports",
+    "e2e regression test 'all visible carousel slides render at equal height' fails without the fix and passes with it",
+    "All Kudos feed and profile card lists are unaffected (stacked cards keep intrinsic height)",
+    "unit tests, tsc --noEmit, eslint (changed files), and next build all pass"
+  ],
+  "touchpoints": [
+    "app/_components/sun-kudos/highlight-carousel.tsx",
+    "app/_components/sun-kudos/kudo-card.tsx",
+    "e2e/sun-kudos.spec.ts"
+  ],
+  "blastRadius": [
+    "Highlight carousel layout (active card + peeks + arrows)",
+    "KudoCard rendering in All Kudos feed and profile moderation list"
+  ],
+  "contracts": [
+    "KudoCard props (kudo, isSpam) unchanged",
+    "HighlightCarousel props (kudos, pageIndex, onPrev, onNext) unchanged"
+  ]
+}

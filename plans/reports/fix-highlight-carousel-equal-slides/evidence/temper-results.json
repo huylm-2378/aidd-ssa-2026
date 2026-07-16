@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "vitest: 223 passed (223), 35 files",
+      "ts": "2026-07-16T15:15:08.666Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "no type errors",
+      "ts": "2026-07-16T15:15:08.666Z"
+    },
+    {
+      "command": "npx eslint app/_components/sun-kudos/highlight-carousel.tsx app/_components/sun-kudos/kudo-card.tsx e2e/sun-kudos.spec.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "changed files lint clean",
+      "ts": "2026-07-16T15:15:08.666Z"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "next build succeeded",
+      "ts": "2026-07-16T15:15:08.666Z"
+    },
+    {
+      "command": "KUDOS_DB_SEEDED=1 npx playwright test sun-kudos.spec.ts -g \"equal height\"",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "1 passed — slides equal height/top/bottom on page 2 (3 cards); proven to fail with fix stashed",
+      "ts": "2026-07-16T15:15:08.666Z"
+    }
+  ]
+}
