@@ -5,7 +5,7 @@ import { HIGHLIGHT_EMPTY } from "../../_lib/sun-kudos-content";
 import { useTranslation } from "../../_lib/i18n/use-translation";
 import KudoCard from "./kudo-card";
 
-const PEEK_CLASS = "hidden w-[140px] shrink-0 overflow-hidden opacity-40 lg:flex";
+const PEEK_CLASS = "relative hidden w-[140px] shrink-0 overflow-hidden lg:flex";
 const ARROW_BTN =
   "flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-full text-white transition-colors hover:bg-white/10 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]";
 
@@ -13,6 +13,9 @@ const ARROW_BTN =
  * Decorative, non-interactive sliver of a neighboring card (FIX 1 peek).
  * `align="end"` shows the card's trailing edge (used on the left, nearest the
  * active card); `align="start"` shows its leading edge (used on the right).
+ * Per the design's edge overlays (nodes `2940:13469`/`2940:13467`,
+ * `linear-gradient(90deg, #00101A 50%, transparent)`), the sliver fades into
+ * the page background toward the outer edge instead of dimming uniformly.
  */
 function PeekSlot({ kudo, align }: { kudo?: KudoCardData; align: "start" | "end" }) {
   if (!kudo) {
@@ -24,9 +27,14 @@ function PeekSlot({ kudo, align }: { kudo?: KudoCardData; align: "start" | "end"
       aria-hidden
       inert
     >
-      <div className="flex w-[528px] shrink-0">
-        <KudoCard kudo={kudo} />
+      <div className="flex w-[528px] shrink-0 lg:h-[525px]">
+        <KudoCard kudo={kudo} fixed />
       </div>
+      <div
+        className={`pointer-events-none absolute inset-0 z-10 from-[#00101a] via-[#00101a]/60 to-transparent ${
+          align === "end" ? "bg-gradient-to-r" : "bg-gradient-to-l"
+        }`}
+      />
     </div>
   );
 }
@@ -36,8 +44,13 @@ function PeekSlot({ kudo, align }: { kudo?: KudoCardData; align: "start" | "end"
  * multi-card peek layout — the active card is centered at full width while
  * the previous/next cards show a partial, faded sliver at the edges. Below
  * `lg` the peeks are hidden and only the active card renders (no page
- * overflow at any width). Arrows advance one card at a time; `pageIndex` is
- * owned by the parent so it can be reset when filters change (FIX 3).
+ * overflow at any width). At `lg`+ every slide is a fixed 525px-tall box per
+ * the design frame (cards render in `fixed` mode, ellipsizing long content),
+ * so the row never resizes while paging; below `lg` the single visible card
+ * keeps clamped-but-intrinsic height (the 1440px design height would crush
+ * narrow viewports). Arrows advance one card at a time;
+ * `pageIndex` is owned by the parent so it can be reset when filters change
+ * (FIX 3).
  */
 export default function HighlightCarousel({
   kudos,
@@ -86,8 +99,8 @@ export default function HighlightCarousel({
 
         <PeekSlot kudo={prev} align="end" />
 
-        <div className="flex w-full min-w-0 max-w-[528px]">
-          <KudoCard kudo={current} />
+        <div className="flex w-full min-w-0 max-w-[528px] lg:h-[525px]">
+          <KudoCard kudo={current} fixed />
         </div>
 
         <PeekSlot kudo={next} align="start" />
