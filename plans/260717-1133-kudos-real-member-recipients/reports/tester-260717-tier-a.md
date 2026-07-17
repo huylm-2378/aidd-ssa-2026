@@ -114,3 +114,15 @@ The 3 write-kudo.spec.ts failures flagged above as "new" were re-run on HEAD wit
 `app/sun-kudos/actions.ts` + `actions.test.ts` stashed: **identical 3 failures, 9 passed**.
 They are PRE-EXISTING (same live-DB/seed-drift family as the 3 sun-kudos.spec.ts failures),
 NOT caused by this change. Logged as a known issue for a separate fix session.
+
+## Tier B live results (2026-07-17, post-apply)
+- SC-007 PASS: 3 linked member rows (backfill) — names+avatars from Google metadata; seed count 62 intact
+- SC-006/SC-008 pending user interaction: fresh composer check + one logged-in kudo submit (sender_id assert)
+
+
+## Tier B final (2026-07-17 17:02+)
+- SC-006 PASS: user selected real linked member 'Do Anh Tuan B' as receiver from composer
+- SC-008 PASS: newest kudo sender_id -> linked sunner 'Le Minh Huy' (FK join resolves); sender_name matches
+- SC-009 PASS: 62 seed rows intact; card rendering unchanged
+ALL SC-006..SC-011 VERIFIED — plan closed.
+

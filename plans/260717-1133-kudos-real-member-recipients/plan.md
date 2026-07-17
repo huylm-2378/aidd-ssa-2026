@@ -1,7 +1,7 @@
 ---
 title: "Kudos recipients = seed sunners + real Google members"
 description: "Link sunners to auth.users so Google-logged-in members become Kudo recipients + close the sender_id gap."
-status: in_review
+status: completed
 priority: P1
 effort: 4.5h
 branch: main
@@ -39,10 +39,10 @@ Spec draft (authoritative for FR/SC ids): `spec/F007_KudosData/technical-spec.md
 
 | # | Phase | Files (owner) | Status | Depends on |
 |---|-------|---------------|--------|-----------|
-| 01 | [Migration + operator handoff](phase-01-migration-sunners-auth-link.md) — FR-009/FR-010, SC-006/SC-007 | `supabase/migrations/0005_sunners_auth_link.sql` | complete (code) — awaiting operator apply via Dashboard SQL Editor | — |
+| 01 | [Migration + operator handoff](phase-01-migration-sunners-auth-link.md) — FR-009/FR-010, SC-006/SC-007 | `supabase/migrations/0005_sunners_auth_link.sql` | completed (0005 applied by operator 2026-07-17) | — |
 | 02 | [createKudo sender_id + unit tests](phase-02-create-kudo-sender-id.md) — FR-011, SC-008 | `app/sun-kudos/actions.ts`, `actions.test.ts` | completed | — (parallel w/ 01, 03) |
 | 03 | [Doc drift fixes](phase-03-doc-drift-fixes.md) — FR-013 | `docs/features/F00{6,7}_*`, `docs/system/{architecture,permissions}.md` | completed | — (parallel w/ 01, 02) |
-| 04 | [Verification](phase-04-verification.md) — SC-006..SC-011 | (no code; reports) | Tier A complete; Tier B blocked on operator gate | 01 (applied), 02, 03 |
+| 04 | [Verification](phase-04-verification.md) — SC-006..SC-011 | (no code; reports) | completed — Tier A + Tier B live-verified | 01 (applied), 02, 03 |
 
 Phases 01/02/03 touch disjoint files → parallel-safe. Phase 04 is the integration gate.
 

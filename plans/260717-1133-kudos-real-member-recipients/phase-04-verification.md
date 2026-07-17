@@ -58,11 +58,11 @@
 - [x] Tier A: tsc / lint / vitest / build all green
 - [x] Tier A: SC-010 code review recorded (in tester-260717-tier-a.md)
 - [x] Tier A: e2e regression green (19/25 passed; 6 failures pre-existing on HEAD, documented)
-- [ ] Operator gate cleared (`0005` applied)
-- [ ] Tier B: SC-006 fresh-login row + composer visibility
-- [ ] Tier B: SC-007 backfill rows present
-- [ ] Tier B: SC-008 sender_id populated + card unchanged
-- [ ] Tier B: SC-009 seeded flows unaffected
+- [x] Operator gate cleared (`0005` applied — user, 2026-07-17)
+- [x] Tier B: SC-006 composer lists real members; user selected linked member 'Do Anh Tuan B' as receiver (2026-07-17 17:02 kudo)
+- [x] Tier B: SC-007 backfill rows present (3 linked members via anon query; 62 seed rows intact)
+- [x] Tier B: SC-008 newest kudo sender_id=5cfde5ca-… → linked sunner 'Le Minh Huy'; denormalized name matches, card unchanged
+- [x] Tier B: SC-009 seed rows intact (62 NULL-linked), e2e seed-guarded suite unchanged
 - [x] Verification report written to `plans/reports/` (tester-260717-tier-a.md)
 - [ ] Trigger F007 promote (draft → implemented) once operator gate clears and Tier B green
 
