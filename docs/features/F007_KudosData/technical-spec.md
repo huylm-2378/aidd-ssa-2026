@@ -23,6 +23,13 @@ key, no CLI, no psql. Therefore **DDL + seed are delivered as SQL files the user
 Dashboard → SQL Editor** (`supabase/migrations/*.sql` + `supabase/seed.sql`). All app code is written
 and typechecked here; end-to-end verification runs against the live DB **after** the user applies the SQL.
 
+> **Revision (2026-07-17, plan `260717-1133-kudos-real-member-recipients`):** members who log in via
+> Google (F005) become first-class Kudo recipients, mixed into the same directory as the seeded
+> sunners — `sunners.auth_user_id` links to `auth.users`, a non-blocking first-login trigger
+> auto-creates a sunner row, and a backfill covers earlier logins (FR-009/FR-010). `createKudo` now
+> also sets `sender_id` via that link (FR-011). Live activation requires the operator to apply
+> `supabase/migrations/0005_sunners_auth_link.sql` in the Dashboard SQL Editor.
+
 ## Requirements
 
 | Code | Description | Handler | Verifiable |
@@ -36,6 +43,11 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 | FR-006 | Highlight filters (hashtag/phòng ban) drive the query (server round-trip via searchParams, or client fetch) so filtering reflects real data | `highlight-kudos-section.tsx` + query | yes |
 | FR-007 | "Viết Kudo" Gửi calls a Server Action that inserts a Kudo (recipient, title, body, hashtags, images, anonymous) and it appears in All Kudos on refresh/revalidate | `app/sun-kudos/actions.ts` + `write-kudo-modal.tsx` | yes |
 | FR-008 | Types stay single-sourced: the DB row types map cleanly to the existing `KudoCard` shape so section components need minimal change | `app/_lib/kudos/types.ts` | yes |
+| FR-009 | `sunners.auth_user_id uuid UNIQUE NULL REFERENCES auth.users(id) ON DELETE SET NULL`; trigger `on_auth_user_created` AFTER INSERT ON `auth.users` runs `public.handle_new_member()` (SECURITY DEFINER, `set search_path = public`, `EXCEPTION WHEN OTHERS THEN RETURN NEW` — signups are never blocked) inserting a sunner with name = COALESCE(`raw_user_meta_data->>'full_name'`, `->>'name'`, email), avatar = COALESCE(`->>'avatar_url'`, `->>'picture'`), defaults `role_code='SUN'`, `tier='New Hero'`, `department='CEVC'`, `ON CONFLICT (auth_user_id) DO NOTHING` | `supabase/migrations/0005_sunners_auth_link.sql` | yes |
+| FR-010 | Backfill: same INSERT…SELECT over existing `auth.users` rows lacking a linked sunner (idempotent) | same migration | yes |
+| FR-011 | `createKudo` resolves the caller's sunner row (`sunners.id WHERE auth_user_id = user.id`) and sets `sender_id` on the insert; denormalized `sender_name`/`sender_avatar` stay as display fallback; lookup miss → `sender_id` NULL, submit never fails | `app/sun-kudos/actions.ts` | yes |
+| FR-012 | Recipient options stay `getSunnerOptions()`/`useSunnerOptions` over `sunners` unfiltered — real members appear automatically (mixed directory, locked decision); no email rendered anywhere | `app/_lib/kudos/queries.ts` (no change) | yes |
+| FR-013 | Doc drift fixes: (a) this spec's Assumptions correction (below); (b) F006 FR-005 "mock Sunner list" wording; (c) `docs/system/architecture.md` + `permissions.md` gain the auth link + trigger | docs | yes |
 
 > **Note (2026-07-09):** FR-003's "(from `SUNNER_OPTIONS`)" points at a mock list that no longer exists
 > in code — it was deleted from `write-kudo-content.ts` in a bugfix after its fake ids broke
@@ -44,7 +56,7 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 
 ## Key entities (DB)
 
-- `sunners(id uuid pk, name, role_code, tier, department, avatar_url, created_at)`
+- `sunners(id uuid pk, name, role_code, tier, department, avatar_url, created_at, auth_user_id uuid UNIQUE NULL → auth.users(id) ON DELETE SET NULL)` — `auth_user_id` NULL for the 62 seed rows; set for real Google members (trigger/backfill). Email is **never stored**.
 - `kudos(id uuid pk, sender_id fk, receiver_id fk, title, body, hashtags text[], image_urls text[], department, like_count int, is_anonymous bool, created_at)`
 - `recent_gifts(id, sunner_id fk|name, note, created_at)` — backs "10 Sunner nhận quà mới nhất"
 - `secret_box_stats` (or seeded `kudos_stats`) — backs the sidebar counters not derivable from `kudos`
@@ -57,14 +69,22 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 - SC-003: Submitting the composer inserts a row; the new Kudo shows in All Kudos after revalidate/refresh.
 - SC-004: With the DB unreachable or empty, the page renders a graceful fallback (no runtime crash).
 - SC-005: `npx tsc`, lint, and unit tests for the query/mapping layer pass; existing e2e stay green (adapted to data-driven rendering).
+- SC-006: after `0005` is applied, a fresh Google login creates a matching `sunners` row (name+avatar from metadata) and the member appears in the composer's recipient list.
+- SC-007: members who logged in before `0005` appear after the backfill.
+- SC-008: a Kudo submitted while logged in carries `sender_id` = the caller's sunner id; card rendering unchanged.
+- SC-009: seeded flows unaffected — NULL-linked sunners behave exactly as before.
+- SC-010: a failing trigger can never block signup (EXCEPTION guard — code-reviewed).
+- SC-011: tsc/lint/vitest/build pass; seed-guarded e2e unaffected.
 
 ## Assumptions
 
 - **SQL-run handoff**: user applies `supabase/migrations/*.sql` + `supabase/seed.sql` via the Dashboard;
   agent verifies afterward via the anon key.
-- **RLS**: public SELECT for the board is intended (public recognition wall). Kudos INSERT is made
-  **demo-permissive (anon allowed)** so "Gửi" works without a login wall — flagged as a tradeoff;
-  production should require `authenticated` (F005 session already exists) and/or move inserts behind auth.
+- **RLS**: public SELECT for the board is intended (public recognition wall) — including real member
+  names/avatars once `0005` lands (accepted, locked decision 2026-07-17). Kudos INSERT is
+  **`authenticated`-only since migration `0002`** and `createKudo` refuses without a session
+  (FR-002a). *(An earlier revision of this spec described the INSERT policy as "demo-permissive
+  (anon allowed)" — that state was superseded by `0002` and the wording corrected 2026-07-17.)*
 - Arrays (`hashtags`, `image_urls`) over join tables — KISS for this scope.
 - Image upload stays client-side object-URLs at the UI; only URLs/paths are stored (no real file storage/bucket in this scope).
 - Sidebar "personal" stats are demo/global aggregates + seeded values (no per-user identity mapping yet).
@@ -74,4 +94,7 @@ and typechecked here; end-to-end verification runs against the live DB **after**
 ## Out of scope
 
 - Real image/file storage (Supabase Storage bucket), ~~like/unlike interactions writing to DB~~ (delivered by F015_KudosHearts — `kudo_likes` table + `toggleHeart` action), Secret Box open flow, per-user auth-scoped stats, pagination/infinite scroll, realtime subscriptions.
-- Auth-gating the composer (login wall) — tracked as the production hardening of FR-002.
+- Auth-gating the composer *UI* (a login wall before opening it) — submit itself has required a
+  session since `0002`/FR-002a; only the open-the-modal gate remains out of scope.
+- Re-syncing member name/avatar on later logins; profile self-editing; merging seed sunners with
+  same-named real members (kept as separate rows — locked decision); storing email in `sunners`.
