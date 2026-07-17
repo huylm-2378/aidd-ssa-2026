@@ -1,0 +1,23 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "migration 0005 is idempotent and carries SECURITY DEFINER + set search_path = public + EXCEPTION WHEN OTHERS THEN RETURN NEW (SC-010)",
+    "createKudo sets sender_id when a linked sunner row exists and keeps NULL on lookup miss without failing the submit (FR-011)",
+    "unit tests cover linked-member, lookup-miss, auth_required, and missing_fields paths",
+    "tsc --noEmit, eslint (changed files), vitest, and next build all pass (SC-011)",
+    "e2e: no NEW failures attributable to this change (pre-existing seed-drift failures documented)",
+    "doc drift resolved: no stale 'mock Sunner list' or 'anon insert allowed' statements; system docs describe the auth_user_id link and trigger (FR-013)"
+  ],
+  "regressionChecked": [
+    "Kudo submit flow (createKudo insert payload) — sender_id added, all other fields byte-identical to prior insert payload",
+    "sunners directory consumers (getSunnerOptions/useSunnerOptions, KUDO_SELECT sender/receiver joins) — verified zero diff in app/_lib/kudos/queries.ts and use-sunner-options.ts; explicit column selects (never `select *`) so the new auth_user_id column can't leak into any existing shape",
+    "Supabase signup path (trigger on auth.users) — EXCEPTION WHEN OTHERS THEN RETURN NEW confirmed present, non-blocking",
+    "toggleHeart tests sharing the actions.test.ts mock — all 6 pre-existing toggleHeart tests present and unchanged in the diff; shared select().eq().maybeSingle() mock chain confirmed compatible with both createKudo's two-call sequence and toggleHeart's single-call use"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

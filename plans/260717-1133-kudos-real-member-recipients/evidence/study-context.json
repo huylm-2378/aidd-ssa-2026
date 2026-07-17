@@ -1,0 +1,32 @@
+{
+  "task": "F007 revision: members who logged in via Google become Kudo recipients — sunners.auth_user_id link + non-blocking first-login trigger + backfill (migration 0005, operator-applied), createKudo sets sender_id via the link (miss -> NULL, never fails), doc drift fixed (F006 'mock list', F007 'anon insert allowed', architecture/permissions system docs)",
+  "mode": "code",
+  "acceptanceCriteria": [
+    "migration 0005 is idempotent and carries SECURITY DEFINER + set search_path = public + EXCEPTION WHEN OTHERS THEN RETURN NEW (SC-010)",
+    "createKudo sets sender_id when a linked sunner row exists and keeps NULL on lookup miss without failing the submit (FR-011)",
+    "unit tests cover linked-member, lookup-miss, auth_required, and missing_fields paths",
+    "tsc --noEmit, eslint (changed files), vitest, and next build all pass (SC-011)",
+    "e2e: no NEW failures attributable to this change (pre-existing seed-drift failures documented)",
+    "doc drift resolved: no stale 'mock Sunner list' or 'anon insert allowed' statements; system docs describe the auth_user_id link and trigger (FR-013)"
+  ],
+  "touchpoints": [
+    "supabase/migrations/0005_sunners_auth_link.sql",
+    "app/sun-kudos/actions.ts",
+    "app/sun-kudos/actions.test.ts",
+    "docs/features/F007_KudosData/technical-spec.md",
+    "docs/features/F006_WriteKudo/technical-spec.md",
+    "docs/system/architecture.md",
+    "docs/system/permissions.md"
+  ],
+  "blastRadius": [
+    "Kudo submit flow (createKudo insert payload)",
+    "sunners directory consumers: recipient select, spotlight roster, KUDO_SELECT joins",
+    "Supabase signup path (trigger on auth.users)",
+    "toggleHeart tests sharing the actions.test.ts mock"
+  ],
+  "contracts": [
+    "createKudo(input: CreateKudoInput): Promise<CreateKudoResult> — signature and error codes unchanged",
+    "getSunnerOptions()/useSunnerOptions — unchanged (mixed directory, locked decision)",
+    "kudos insert RLS stays authenticated-only (0002); no service_role introduced"
+  ]
+}
