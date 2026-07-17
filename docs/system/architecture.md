@@ -1,315 +1,231 @@
-# System Architecture — Authentication (Supabase Google OAuth)
+# Architecture
 
-> Forward-drafted for F005. Promoted to `docs/system/architecture.md` at implement-start.
-> Session-only, PKCE Google OAuth via `@supabase/ssr`. No DB schema, no route protection.
+## System Architecture
 
-## Where auth sits in the app
+Sun* Annual Awards 2025 is a single Next.js 16 (App Router) web app (`app/`) backed directly by
+Supabase (Postgres + Auth + Realtime) via the anon/publishable key — no custom backend API layer.
+Next.js 16 renamed the `middleware.ts` convention to `proxy.ts` (same signature, `config.matcher`
+unchanged); this repo has already migrated (`proxy.ts:1-15`, comment confirms the rename).
 
-The app is a Next.js 16.2.9 App Router marketing site (F001–F004: `/`, `/awards-information`,
-`/sun-kudos`, `/login`) — all public, static/client-rendered. F005 adds an authentication *capability*
-without changing that public posture: it introduces a Supabase session, but no page is gated behind it.
+### Runtime layers
 
-```
-Next.js App Router
-├── proxy.ts (root)  ── refresh-only ──▶ app/_lib/supabase/middleware.ts → updateSession()
-├── app/
-│   ├── (marketing pages — public, unchanged)
-│   ├── login/page.tsx  ── renders ──▶ _components/login/google-login-button.tsx (client trigger)
-│   ├── auth/
-│   │   ├── callback/route.ts        (GET: exchangeCodeForSession → redirect)
-│   │   ├── callback/redirect-guard.ts  (pure sanitizeNext — unit-tested)
-│   │   ├── auth-code-error/page.tsx (failure landing)
-│   │   └── actions.ts               ("use server": signOut)
-│   └── _components/homepage-saa/
-│       ├── header.tsx               (client; renders <AccountMenu/> when !minimal)
-│       └── account-menu.tsx         (client; getUser + onAuthStateChange, sign-in/out UI)
-└── app/_lib/supabase/
-    ├── client.ts   (createBrowserClient)
-    ├── server.ts   (createServerClient + await cookies())
-    └── middleware.ts (updateSession helper)
-```
+```mermaid
+graph TB
+    subgraph Client["Browser"]
+        Browser["Client Components<br/>(sun-kudos board, composer,<br/>login button, language switch)"]
+    end
+    subgraph Edge["Next.js Edge Runtime"]
+        Proxy["proxy.ts<br/>(request matcher, session refresh)"]
+    end
+    subgraph App["Next.js App Router (app/)"]
+        RSC["Server Components<br/>(page.tsx per route)"]
+        Actions["Server Actions<br/>(auth/actions.ts, sun-kudos/actions.ts)"]
+        RouteHandler["Route Handler<br/>(auth/callback/route.ts)"]
+    end
+    subgraph Backend["Supabase"]
+        Auth["Auth (Google OAuth, PKCE)"]
+        DB["Postgres (kudos, sunners, kudo_likes)"]
+        Realtime["Realtime (postgres_changes)"]
+    end
 
-## The three Supabase clients (why three)
-
-`@supabase/ssr` needs different cookie plumbing per execution context:
-
-- **Browser client** (`client.ts`) — runs in Client Components. Manages cookies via `document.cookie`
-  automatically; no adapter. A module-level **singleton** (unlike the server client below) — the header
-  and its account menu remount on every client-side navigation, so creating a fresh client per call
-  would churn the `onAuthStateChange` subscription. Used by the login button (`signInWithOAuth`) and
-  the account menu (`getUser`, `onAuthStateChange`).
-- **Server client** (`server.ts`) — runs in Route Handlers / Server Actions / Server Components. Built
-  per request with `await cookies()` (Next 15/16 async API) and a `getAll`/`setAll` cookie adapter.
-  Never a singleton — a shared instance would leak one request's cookies into another.
-- **Middleware helper** (`middleware.ts`) — runs at the edge on every matched request. Reads request
-  cookies, refreshes the token via `getUser()`, and writes refreshed cookies onto the response.
-
-Cookie adapter is `getAll()`/`setAll()` **only**. Supabase chunks large session cookies
-(`sb-<ref>-auth-token.0/.1/…`); always go through the adapter, never hand-parse cookies.
-
-## Data flows
-
-### Sign-in (PKCE)
-1. `GoogleLoginButton` (client) → `signInWithOAuth({provider:'google', redirectTo:<origin>/auth/callback})`.
-2. supabase-js generates a PKCE `code_verifier` (stored in a cookie) and redirects the browser to Google
-   via Supabase's `/auth/v1/authorize`.
-3. User authenticates with Google → Google redirects to Supabase's own
-   `https://<ref>.supabase.co/auth/v1/callback`.
-4. Supabase finishes the handshake → redirects the browser to `<origin>/auth/callback?code=…`.
-5. `app/auth/callback/route.ts` `GET`: `sanitizeNext(next)`, then `exchangeCodeForSession(code)` (validates
-   the verifier, sets HttpOnly session cookies) → `redirect('/')`. On any failure → `/auth/auth-code-error`.
-
-### Token refresh (every request)
-`middleware.ts` → `updateSession()` builds a server client bound to the request, calls `getUser()`
-immediately (no code between creation and the call — a race here causes random logouts), and returns the
-mutated `supabaseResponse` untouched. This is the *only* place a stale access token gets proactively
-refreshed before a Server Component reads it (Server Components can only read cookies, never write them).
-**It performs no gating** — there is no `if (!user) redirect(...)`.
-
-### Reading identity (client-side, in the header)
-`AccountMenu` (client) calls the browser client `getUser()` on mount and subscribes to
-`onAuthStateChange`; it re-renders on `SIGNED_IN` / `SIGNED_OUT`. This keeps identity local to the one
-component that needs it, avoiding threading a `user` prop from every page's server component through the
-shared layout (DRY/KISS — see permissions.md rationale).
-
-### Sign-out
-Account menu renders `<form action={signOut}>`. The `signOut` Server Action calls the server client's
-`signOut()` (clears HttpOnly cookies server-side), `revalidatePath('/', 'layout')` (drops stale RSC
-cache), then `redirect('/')`. `onAuthStateChange` fires `SIGNED_OUT` so the menu flips to logged-out.
-
-## Why middleware exists with zero protected routes
-
-Route protection and token refresh are different jobs. This app needs only the second. Without the
-refresh middleware, an expiring access token would go stale until the user next hits a Route Handler or
-Server Action — so server-side `getUser()` reads would start returning null well before the refresh
-token expires, degrading the session-only UX even with no gated pages. The middleware is therefore
-kept as required infrastructure, with the redirect/protection logic omitted.
-
-## Server-side identity: `getUser()` not `getSession()`
-
-`getSession()` returns whatever is in the cookie without re-verifying it against the Auth server and is
-documented as insecure server-side. All server reads of "who is logged in" use `getUser()` (network
-round-trip, authoritative). `getClaims()` (local JWKS signature verification) is a faster equivalent
-where the project uses asymmetric JWT signing — a candidate follow-up, not adopted in F005.
-
-## Boundaries / non-goals
-
-No persisted user schema (`auth.users` is authoritative), no protected routes, no multi-provider auth.
-Adding any of those is a separate feature. **RLS + migrations were introduced by F007** (below).
-
----
-
-# Kudos data layer (F007)
-
-> Promoted from the F007 forward-draft. The first application-owned Postgres schema (previously only
-> `auth.users` existed). Moves the Sun* Kudos board (F003) + composer (F006) from static TS mocks to
-> Supabase reads/writes.
-
-## Schema (Supabase `public`)
-`sunners`, `kudos` (arrays for `hashtags` / `image_urls`, denormalized `department` + `like_count`),
-`recent_gifts`, and a single-row `kudos_stats` backing the sidebar. Delivered as
-`supabase/migrations/0001_kudos_schema.sql` + `supabase/seed.sql` — **applied by the operator in the
-Dashboard SQL Editor** (this environment has only the anon key: no DDL, no CLI, no psql).
-
-## RLS
-First use of Row-Level Security in the project. Public **SELECT** on all board tables (public
-recognition wall). Kudos **INSERT** is restricted to **`authenticated`** (migration `0002`): a Kudo must
-have a real sender, so the composer's `createKudo` Server Action reads `auth.getUser()` and refuses
-without a session. The sender's display name + avatar are denormalized onto `kudos`
-(`sender_name`/`sender_avatar`) since the logged-in user isn't in the seeded `sunners` directory;
-anonymous submissions hide them at render.
-
-## Data access
-Server Components read via the existing async server client (`app/_lib/supabase/server.ts`) through a
-typed query module (`app/_lib/kudos/queries.ts`, pure mappers in `map.ts`, row types in `types.ts`).
-`app/sun-kudos/page.tsx` fetches all sections in parallel and passes data down as props; the Highlight
-filter/sort + carousel stay client-side over the fetched set. Writes go through the Server Action
-`app/sun-kudos/actions.ts` (`createKudo`) then `revalidatePath('/sun-kudos')`.
-
-## Failure posture
-Every board query fails safe — a DB/network error or empty result returns an empty view shape and the
-sections render a graceful empty state, never a crash (mirrors the countdown's "safe empty state").
-
----
-
-# Live Spotlight Board realtime channel (F008)
-
-> Promoted from the F008 forward-draft. Scope: the one new architectural element this feature
-> introduces — a client-side Supabase Realtime channel layered over the existing server snapshot
-> read path. Everything else (server read path, RLS, fail-safe) is unchanged from F007 above.
-
-## New data-flow: server snapshot + client realtime overlay
-
-Until F008, all Kudos data flowed **server → RSC → HTML** (one-shot reads through the anon
-`@supabase/ssr` server client, RLS `public read`). The Live Board adds a **second, client-side
-channel** layered on top of that same initial snapshot:
-
-```
-                 initial render (unchanged)
-  Supabase ──(anon server client, RLS SELECT)──▶ getSpotlight() ──▶ <SpotlightBoard> (RSC shell)
-                                                                          │ props: count, sunners[], activity[]
-                                                                          ▼
-                                                              <SpotlightBoard client island>
-  Supabase Realtime ──(browser client singleton)──▶ channel('kudos-live-board')
-      .on('postgres_changes', INSERT public.kudos) ──▶ count++, prepend activity, (names live)
+    Browser -->|HTTP request| Proxy
+    Proxy -->|updateSession, refresh cookies| Auth
+    Proxy --> RSC
+    Browser -->|invoke| Actions
+    Browser -->|OAuth redirect| RouteHandler
+    RSC -->|createClient server| DB
+    Actions -->|createClient server| DB
+    Actions -->|getUser| Auth
+    RouteHandler -->|exchangeCodeForSession| Auth
+    Browser -->|createClient browser,<br/>channel subscribe| Realtime
+    Realtime -->|postgres_changes INSERT| Browser
 ```
 
-- **Initial state**: server-fetched (fail-safe preserved — DB down → empty board, no crash).
-- **Live overlay**: a Client Component subscribes in `useEffect` via the existing browser client
-  singleton (`app/_lib/supabase/client.ts`), cleans up with `supabase.removeChannel(channel)`.
-- **Boundary**: the browser client uses only `NEXT_PUBLIC_*` env vars (already present). No secrets
-  cross to the client; realtime reads are gated by the same `"public read kudos"` RLS SELECT policy
-  from F007.
+- `proxy.ts` is refresh-only (`app/_lib/supabase/middleware.ts:updateSession`) — it calls
+  `supabase.auth.getUser()` on every matched request to rotate an expiring access token and write
+  the refreshed cookies onto the response; it does **not** gate routes (no `if (!user) redirect(...)`
+  anywhere in it). Matcher excludes `_next/static`, `_next/image`, `favicon.ico`, and static image
+  extensions (`proxy.ts:12-14`).
+- Server Components read Supabase through `app/_lib/supabase/server.ts:createClient` — a **new**
+  `createServerClient` instance per request (never a server-side singleton), built on `@supabase/ssr`
+  and Next's async `cookies()`.
+- Client Components read/write through `app/_lib/supabase/client.ts:createClient` — a **module-level
+  singleton** `createBrowserClient`, deliberately reused across remounts (the header re-renders per
+  page) to avoid churning the `onAuthStateChange` listener.
+- Only one Route Handler exists in the app: `app/auth/callback/route.ts` (`GET`), the OAuth PKCE
+  callback. Everything else that mutates data is a Server Action (`"use server"`): `app/auth/actions.ts`
+  (`signOut`) and `app/sun-kudos/actions.ts` (`createKudo`, `toggleHeart`).
+- Realtime is client-only: `app/_components/sun-kudos/use-kudos-realtime.ts` opens one
+  `postgres_changes` channel (`kudos-live-board`) on the browser singleton client to push new Kudos
+  onto the live board without a page reload.
 
-## DB change
+### Module import graph (code, verified)
 
-`public.kudos` is added to the `supabase_realtime` publication (migration `0003_kudos_realtime.sql`,
-idempotent). INSERT-only use → no `REPLICA IDENTITY` change needed. RLS unchanged.
+Derived from the extracted import graph (37 scanned modules; 11 of them carry cross-file import
+edges — the other 26, `docs/**`, `README.md`, `AGENTS.md`, `CLAUDE.md`, and the root config files
+(`package.json`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `postcss.config.mjs`), plus
+the 10 standalone `e2e/*.spec.ts` files and `playwright.config.ts`/`vitest.config.ts`/
+`vitest.setup.ts`, are leaf nodes with no detected cross-file import edges — they are docs/config/
+single-file-test artifacts, not part of the runtime dependency graph). The graph below keeps only the
+connected, code-import edges; each was spot-checked against source:
 
-## Payload limitation (design consequence)
+```mermaid
+graph TD
+  components["app/_components"]
+  lib["app/_lib"]
+  sunKudos["app/sun-kudos"]
+  auth["app/auth"]
+  prelaunch["app/prelaunch"]
+  profile["app/profile"]
+  awardsInfo["app/awards-information"]
+  login["app/login"]
+  layout["app/layout.tsx"]
+  rootPage["app/page.tsx"]
+  proxy["proxy.ts"]
 
-`postgres_changes` delivers the **raw row** (`payload.new`) — no PostgREST embedded joins. The
-Kudos row has `receiver_id` but no `receiver_name`, so the client resolves names via an id→name map
-built from the server-fetched `sunners` list (why `getSpotlight()` now selects `id,name`).
+  components -->|221| lib
+  sunKudos -->|12| components
+  prelaunch -->|8| lib
+  sunKudos -->|8| lib
+  rootPage -->|7| components
+  profile -->|7| components
+  awardsInfo -->|6| components
+  components -->|6| sunKudos
+  auth -->|6| lib
+  profile -->|5| lib
+  login -->|4| components
+  lib -->|4| components
+  lib -->|4| sunKudos
+  components -->|3| auth
+  auth -->|2| components
+  layout -->|2| components
+  awardsInfo -->|2| lib
+  proxy -->|2| lib
+  prelaunch -->|1| components
+  components -->|1| prelaunch
+```
 
-## Risks
+Notes on the shape (verified against source, not just the raw counts):
+- `app/_components` (204 symbols) is the largest module and the import hub — every route module
+  (`sun-kudos`, `page.tsx`, `profile`, `awards-information`, `login`, `layout.tsx`, `prelaunch`) imports
+  UI from it, and it imports heavily (221 edges) from `app/_lib` for content/types/data helpers (e.g.
+  `app/_lib/sun-kudos-content.ts`, `app/_lib/kudos/types.ts`).
+- The `lib → components` (4) inverse edge is real but narrow: e.g.
+  `app/_lib/i18n/test-utils.tsx` and `app/_lib/i18n/use-translation.test.tsx` import
+  `LanguageProvider` from `app/_components/i18n/language-provider.tsx` for test harnesses — a
+  test-only lib→component dependency, not a runtime layering violation.
+- The `auth ↔ components` bidirectional edges are both real: `app/_components/homepage-saa/account-menu.tsx`
+  imports from `app/auth` (sign-out action), while `app/auth/auth-code-error/page.tsx` imports
+  `Header`/`Footer` from `app/_components/homepage-saa/`.
+- `proxy.ts → app/_lib` (2) is the single import of `updateSession` from
+  `app/_lib/supabase/middleware.ts`.
+- Self-contained leaf routes with **no outgoing edges into other route modules**: `app/awards-information`,
+  `app/login`, `app/prelaunch`, `app/profile` — each depends only on `app/_components` / `app/_lib`,
+  never on a sibling route module (no route-to-route coupling detected).
 
-- Postgres Changes broadcasts to every subscriber (no server-side row filtering); acceptable at this
-  scale. Broadcast-from-DB is the higher-volume alternative (YAGNI now).
-- No reconnect/backoff logic (v1). A dropped socket degrades to the static server snapshot.
+## Tech Stack
 
-## Internationalization (i18n)
+| Layer | Technology | Version | Notes |
+|-------|------------|---------|-------|
+| Framework | Next.js (App Router) | 16.2.9 | `middleware.ts` → `proxy.ts` rename adopted (`proxy.ts`) |
+| UI runtime | React / React DOM | 19.2.4 | Server Components + Client Components (`"use client"`) |
+| Language | TypeScript | 5.9.3 (`^5` in `package.json`) | `strict: true`, path alias `@/*` (`tsconfig.json`) |
+| Styling | Tailwind CSS | 4.3.2 (`^4`) via `@tailwindcss/postcss` | `postcss.config.mjs` |
+| Backend-as-a-service | Supabase (`@supabase/ssr`, `@supabase/supabase-js`) | 0.12.0 / 2.110.0 | Anon/publishable key only — no service-role key in app code (`.env.example`) |
+| Database | Postgres (Supabase-managed) | — | 5 migrations under `supabase/migrations/`: `0001_kudos_schema`, `0002_kudos_sender_identity`, `0003_kudos_realtime`, `0004_kudos_likes`, `0005_sunners_auth_link` |
+| Realtime | Supabase Realtime (`postgres_changes`) | via `@supabase/supabase-js` 2.110.0 | One channel, `kudos-live-board` (`use-kudos-realtime.ts`) |
+| Auth | Supabase Auth — Google OAuth (PKCE) | via `@supabase/ssr` 0.12.0 | Callback: `app/auth/callback/route.ts` |
+| Unit/component testing | Vitest + Testing Library + jsdom | 4.1.9 / 16.3.2 / 29.1.1 | `vitest.config.ts`, `vitest.setup.ts` |
+| E2E testing | Playwright | 1.61.1 | `playwright.config.ts`, 10 specs under `e2e/` |
+| Lint | ESLint (`eslint-config-next`) | 9.39.4 / 16.2.9 | `eslint.config.mjs` |
+| i18n | Custom (no library) | — | `app/_components/i18n/language-provider.tsx` (client), string catalogs under `app/_lib/i18n/messages/{en,vi}-*.ts` |
 
-The app uses a **dependency-free, client-side i18n layer** (no `next-intl`,
-`react-i18next`, and no locale-prefixed routing — Next 16 App Router has no
-built-in i18n routing).
+No queue, cache layer, or separate API gateway exists — Server Components/Actions call Supabase
+directly; there is no service to document at those layers (`{CACHE_TYPE}`/`{QUEUE_TYPE}` from the
+generic template are intentionally omitted as not-applicable rather than fabricated).
 
-### Shape
+DB-side automation (the only "background" logic in the system) lives in two SECURITY DEFINER
+Postgres functions: `kudo_likes_count_sync()` keeps `kudos.like_count` in sync on like/unlike
+(`0004_kudos_likes.sql`), and `handle_new_member()` on `auth.users` AFTER INSERT auto-creates a
+linked `sunners` row (`auth_user_id`) on a member's first Google login — non-blocking by design
+(`EXCEPTION WHEN OTHERS THEN RETURN NEW`) with a backfill for earlier logins
+(`0005_sunners_auth_link.sql`). Field-level detail: `docs/generated/entities.md` (MODEL001/MODEL003).
 
-- **`LanguageProvider`** (`app/_components/i18n/language-provider.tsx`, `"use client"`)
-  — React Context holding `lang: "vi" | "en"` (default `"vi"`). Mounted in
-  `app/layout.tsx` (a Server Component) as a client wrapper around `{children}`,
-  so the whole tree can read the active locale.
-- **Catalogs** (`app/_lib/i18n/vi.ts`, `en.ts`) — plain typed objects, keyed by
-  UI area (`header.*`, `footer.*`, `hero.*`, `awards.*`, `fab.*`, `rules.*`,
-  `spotlight.*`, …). `vi` is the source of truth; the `Messages` type is
-  derived from `vi` and `en` is compile-checked against it (missing EN key =
-  TS error). Each catalog is now a thin composer over per-area fragment files
-  under `app/_lib/i18n/messages/` (`{vi,en}-core.ts` for chrome/homepage/
-  Profile/Awards-information, `{vi,en}-kudos.ts` for the FAB, rules drawer,
-  and `/sun-kudos` screen) — the fragment split keeps every file under the
-  200-line budget while `vi.ts`/`en.ts` still expose the single merged
-  `Messages`/`MessageKey` shape the rest of the app imports.
-- **`useTranslation()`** (`app/_lib/i18n/use-translation.ts`) — returns
-  `{ t, lang, setLang }`. `t(key)` resolves a dot-path against the active
-  catalog, falls back to the `vi` value (never a raw key), and does `{name}`
-  interpolation.
+## Data Flow
 
-### Server-produced UI labels (Profile + sun-kudos stats)
+### 1. Google OAuth sign-in (F005)
 
-Not every translated string starts life as client-side copy. `mapStats()`
-(`app/_lib/kudos/map.ts`, part of the F007 data layer) maps the single
-`kudos_stats` row to the sidebar's five stat rows, and now returns each row's
-`label` as a `MessageKey` (e.g. `"stats.received"`) rather than fixed VI text.
-The client resolves it at render time — `profile-stats.tsx` (Profile screen)
-and `sun-kudos/kudos-sidebar.tsx` both call `t(stat.label)` against the same
-`SunnerStat[]` shape, so the one server-side change translates the stats panel
-in both places without duplicating logic.
+```mermaid
+sequenceDiagram
+    participant U as User (Browser)
+    participant L as login/page.tsx
+    participant G as Google
+    participant CB as auth/callback/route.ts
+    participant SB as Supabase Auth
 
-### Server-action error codes (Write Kudo composer)
+    U->>L: GET /login
+    L->>U: render GoogleLoginButton
+    U->>G: OAuth consent (PKCE)
+    G->>CB: redirect ?code=...&next=...
+    CB->>SB: exchangeCodeForSession(code)
+    SB-->>CB: session (sets cookies via createClient)
+    CB->>U: redirect to sanitized `next` (or /auth/auth-code-error on failure)
+```
 
-A second server-boundary pattern, alongside `mapStats()` above: the
-`createKudo` server action (`app/sun-kudos/actions.ts`, F007) has no React
-context either, so on a known failure it returns a stable
-`CreateKudoErrorCode` (`"missing_fields" | "auth_required" | "unknown"`)
-instead of a VN string. The client-side helper `app/_lib/write-kudo-error.ts`'s
-`resolveComposerError(t, error)` maps each code to a `composer.error.*`
-catalog key; any other error value (a dynamic Supabase/`Error.message`
-string) passes through untranslated, since it's already human-readable and
-not one of the known codes. `write-kudo-content.ts`'s `WRITE_KUDO_COPY` and
-`write-kudo-form.ts`'s `missingRequired()` follow the same
-key-not-string convention — the modal translates and joins the returned
-`MessageKey[]` into `composer.missingHint`'s `{fields}` interpolation.
+### 2. Every request — session refresh (proxy.ts, F005)
 
-### RSC pages with a client leaf (login, prelaunch, auth-code-error)
+```mermaid
+sequenceDiagram
+    participant U as User (Browser)
+    participant P as proxy.ts
+    participant M as _lib/supabase/middleware.ts
+    participant SB as Supabase Auth
+    participant RSC as page.tsx (Server Component)
 
-A third pattern, alongside the two server-boundary ones above: `/login`,
-`/prelaunch`, and `/auth/auth-code-error` are Server Components that export
-`metadata`, so none of them can call `useTranslation()` directly. Each page
-stays a Server Component and delegates its translated copy to a small new
-`"use client"` leaf — `login-welcome.tsx`, `prelaunch-heading.tsx`,
-`auth-error-content.tsx` — that reads the context and renders the
-`t()`-resolved text; the page composes the leaf alongside its existing
-chrome/keyvisual markup, unchanged. `app/_lib/login-content.ts` (the F004
-static-copy module) is deleted — its two strings now live as
-`login.subtitle1`/`login.subtitle2` in the catalog, read by `login-welcome.tsx`.
+    U->>P: request (matches config.matcher)
+    P->>M: updateSession(request)
+    M->>SB: auth.getUser()
+    SB-->>M: refreshed session + Set-Cookie
+    M-->>P: NextResponse (refreshed cookies)
+    P->>RSC: continue request
+    RSC->>U: rendered HTML (no redirect/gating in proxy)
+```
 
-### Hook-free modules stay hook-free
+### 3. Create a Kudo (F007) + live board push (F008)
 
-Some translated copy lives in plain data/helper modules that must not import
-React hooks (e.g. `rules-content.ts`'s `RULES_COPY`/`RULE_TIERS`, and
-`spotlight-fns.ts`'s pure helpers for the live board). The pattern: the
-module holds `MessageKey`s (or takes a translated value as a parameter)
-instead of calling `t()` itself, and the consuming component resolves the
-active-locale text. Concretely, `buildActivityEntry()` takes a third
-`receivedLabel: string` argument rather than hardcoding the VN ticker suffix
-or importing `useTranslation()`; `spotlight-board-live.tsx` supplies
-`t("spotlight.receivedKudos")` at the call site, keeping `spotlight-fns.ts`
-importable from Node test files with no React runtime.
+```mermaid
+sequenceDiagram
+    participant U as User (Composer, Client Component)
+    participant A as sun-kudos/actions.ts (Server Action)
+    participant DB as Supabase Postgres (kudos, sunners)
+    participant RT as Supabase Realtime
+    participant B as Other browsers (live board)
 
-### Persistence & hydration
+    U->>A: createKudo(input)
+    A->>DB: auth.getUser() (must be logged in)
+    A->>DB: select sunners.id by auth_user_id (sender_id)
+    A->>DB: select receiver department
+    A->>DB: insert into kudos
+    DB-->>A: insert result
+    A->>U: revalidatePath('/sun-kudos'); {ok, error?}
+    DB->>RT: postgres_changes INSERT on kudos
+    RT->>B: push new row (kudos-live-board channel)
+```
 
-Locale persists in `localStorage` (`saa-lang`). The server always renders the
-default `vi`; after mount the provider reads storage and updates state. This
-accepts a one-frame flash of Vietnamese on an EN-persisted reload — a deliberate
-KISS tradeoff over cookie-based SSR reads for an internal, no-SEO app.
+### 4. Toggle a heart / like (F015)
 
-### Boundaries
+```mermaid
+sequenceDiagram
+    participant U as User (kudo card)
+    participant A as sun-kudos/actions.ts:toggleHeart
+    participant DB as Supabase Postgres (kudo_likes)
 
-Server Components that export `metadata` (`login/page.tsx`, `prelaunch/page.tsx`,
-`auth-code-error/page.tsx`) cannot read the Context, so their `title`/
-`description` stay Vietnamese-only — a structural boundary (Server Component
-`metadata` vs. Context), not a content gap, since round 5 migrated every
-visible string on those three pages via the client-leaf pattern above. Mock/
-seed data (real names, user-authored kudos bodies) is never translated. As of
-round 5, the entire app's visible UI is migrated (see the server-key
-pipeline, the server-action error-code pattern, and the client-leaf pattern
-above); the only strings left untranslated are page `metadata`, mock/seed
-data, and the handful below that stay English by design.
-A handful of sun-kudos/highlight/all-kudos strings stay English **by
-design** (section headings, their landmark aria-labels, the "Hashtag" filter
-label, kudo-card's "Copy Link"/"Spam") — not a migration gap. Right after a
-locale switch, the live activity ticker can briefly mix English (new
-realtime rows) with Vietnamese (older static seed rows) until the seed rows
-scroll off, since seed data is never translated.
-
-## Kudos Hearts (F015)
-
-### Schema addition (Supabase `public`)
-
-- **`kudo_likes`** (migration `0004_kudos_likes.sql`): `(kudo_id uuid FK→kudos
-  ON DELETE CASCADE, user_id uuid FK→auth.users ON DELETE CASCADE, created_at,
-  PRIMARY KEY (kudo_id, user_id))` — one like per user per kudo by
-  construction.
-- `kudos.like_count` remains the denormalized read column; it is maintained
-  exclusively by `AFTER INSERT/DELETE` triggers on `kudo_likes` (SECURITY
-  DEFINER function). Clients never gain an UPDATE policy on `kudos`.
-
-### RLS
-
-- `kudo_likes`: SELECT for anon+authenticated (board is public-read);
-  INSERT only `auth.uid() = user_id`; DELETE only own row; no UPDATE.
-- Preserves the `0002` hardening posture: every write has a real actor.
-
-### Write path
-
-`HeartButton` (client, optimistic ±1 with rollback) → `toggleHeart` server
-action (mirrors `createKudo`: `getUser()` → stable error codes
-`auth_required`/`unknown` → insert-or-delete on unique violation → fresh count
-returned → `revalidatePath`). Signed-out taps roll back and show a translated
-inline prompt — no route gating.
-
-### Read path
-
-List queries also fetch the signed-in user's liked ids in one `kudo_likes`
-SELECT and map `likedByMe` onto each kudo row; anon ⇒ `false`.
+    U->>A: toggleHeart(kudoId)
+    A->>DB: auth.getUser()
+    A->>DB: insert into kudo_likes(kudo_id, user_id)
+    alt insert conflicts (23505 unique_violation)
+        A->>DB: delete from kudo_likes (un-like)
+    end
+    DB-->>A: like_count (DB trigger keeps it in sync, not written by the action)
+    A->>U: revalidatePath('/sun-kudos', '/profile'); {ok, liked, likeCount}
+```

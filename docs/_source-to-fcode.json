@@ -1,4 +1,14 @@
 {
-  "generated_at": "2026-07-02T02:58:44Z",
-  "index": {}
+  "generated_at": "2026-07-17T13:57:59Z",
+  "index": {
+    "N/A \u2014 no source code written yet.": [
+      "F001"
+    ],
+    "N/A \u2014 not yet implemented.": [
+      "F001"
+    ],
+    "N/A \u2014 not yet implemented; enforce at build time.": [
+      "F001"
+    ]
+  }
 }
