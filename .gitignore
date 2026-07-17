@@ -52,3 +52,4 @@ release-manifest.json
 
 # takumi working artifacts (plan drafts, specs, evidence, debug screenshots)
 /plans
+graphify-out/

@@ -1,0 +1,46 @@
+{
+  "commands": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "no type errors",
+      "ts": "2026-07-17T11:51:19.845Z"
+    },
+    {
+      "command": "npx eslint app/sun-kudos/actions.ts app/sun-kudos/actions.test.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "changed code files lint clean",
+      "ts": "2026-07-17T11:51:19.845Z"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "vitest 227 passed (223 prior + 4 new createKudo FR-011 tests)",
+      "ts": "2026-07-17T11:51:19.845Z"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "next build compiled successfully",
+      "ts": "2026-07-17T11:51:19.845Z"
+    },
+    {
+      "command": "KUDOS_DB_SEEDED=1 npx playwright test sun-kudos.spec.ts write-kudo.spec.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "19/25 passed; all 6 failures proven PRE-EXISTING (identical on HEAD with change stashed): 3 sun-kudos seed-drift + 3 write-kudo composer timeouts",
+      "ts": "2026-07-17T11:51:19.845Z"
+    },
+    {
+      "command": "code review: 0005_sunners_auth_link.sql (SC-010)",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "security definer + set search_path=public + exception-when-others-return-new + fully idempotent statements confirmed by tester report",
+      "ts": "2026-07-17T11:51:19.845Z"
+    }
+  ]
+}

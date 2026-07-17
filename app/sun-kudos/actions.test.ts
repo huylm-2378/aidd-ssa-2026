@@ -22,7 +22,80 @@ vi.mock("../_lib/supabase/server", () => ({
 }));
 
 // Imported after mocks so the mocked modules are wired up first.
-import { toggleHeart } from "./actions";
+import { createKudo, toggleHeart } from "./actions";
+
+const VALID_INPUT = {
+  receiverId: "sunner-2",
+  title: "TITLE",
+  body: "body",
+  hashtags: ["#Teamwork"],
+  imageCount: 0,
+  isAnonymous: false,
+};
+
+describe("createKudo (F007 FR-011 — sender_id via auth_user_id link)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns missing_fields before any client call", async () => {
+    const result = await createKudo({ ...VALID_INPUT, title: "  " });
+
+    expect(result).toEqual({ ok: false, error: "missing_fields" });
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
+  it("returns auth_required when signed out, without lookups or insert", async () => {
+    getUser.mockResolvedValue({ data: { user: null } });
+
+    const result = await createKudo(VALID_INPUT);
+
+    expect(result).toEqual({ ok: false, error: "auth_required" });
+    expect(maybeSingle).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("sets sender_id when the caller has a linked sunner row", async () => {
+    getUser.mockResolvedValue({
+      data: { user: { id: "auth-9", email: "m@sun.com", user_metadata: { full_name: "Mai" } } },
+    });
+    // Call order inside createKudo: sender lookup (auth_user_id) → receiver department.
+    maybeSingle
+      .mockResolvedValueOnce({ data: { id: "sunner-9" } })
+      .mockResolvedValueOnce({ data: { department: "EUV" } });
+    insert.mockResolvedValue({ error: null });
+
+    const result = await createKudo(VALID_INPUT);
+
+    expect(result).toEqual({ ok: true });
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sender_id: "sunner-9",
+        sender_name: "Mai",
+        receiver_id: "sunner-2",
+        department: "EUV",
+      }),
+    );
+    expect(revalidatePath).toHaveBeenCalledWith("/sun-kudos");
+  });
+
+  it("keeps sender_id null on a lookup miss and still succeeds (0005 not applied yet)", async () => {
+    getUser.mockResolvedValue({
+      data: { user: { id: "auth-9", email: "m@sun.com", user_metadata: {} } },
+    });
+    maybeSingle
+      .mockResolvedValueOnce({ data: null })
+      .mockResolvedValueOnce({ data: { department: "CEVC" } });
+    insert.mockResolvedValue({ error: null });
+
+    const result = await createKudo(VALID_INPUT);
+
+    expect(result).toEqual({ ok: true });
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({ sender_id: null, sender_name: "m@sun.com" }),
+    );
+  });
+});
 
 describe("toggleHeart", () => {
   beforeEach(() => {

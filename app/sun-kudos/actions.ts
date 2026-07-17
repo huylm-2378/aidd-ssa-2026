@@ -34,9 +34,12 @@ export interface CreateKudoResult {
  * Insert a Kudo and revalidate the board so it appears in All Kudos.
  * The sender is the CURRENTLY LOGGED-IN user (auth.users) — a Kudo must have a
  * real sender, so this requires a session. The user's display name + avatar are
- * denormalized onto the row (they aren't in the `sunners` directory); anonymous
- * submissions hide them at render time. `department` is copied from the receiver
- * so the Highlight filters keep working on real rows.
+ * denormalized onto the row; additionally (F007 FR-011) the caller's own
+ * `sunners` row — created by the `0005` first-login trigger — is looked up via
+ * `auth_user_id` to set `sender_id`. A lookup miss (e.g. `0005` not applied
+ * yet) leaves `sender_id` NULL and never fails the submit. Anonymous
+ * submissions hide the sender at render time. `department` is copied from the
+ * receiver so the Highlight filters keep working on real rows.
  */
 export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResult> {
   const title = input.title?.trim();
@@ -64,6 +67,14 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
     const senderAvatar =
       (meta.avatar_url as string) || (meta.picture as string) || null;
 
+    // FR-011: the caller's own sunner row (0005 trigger/backfill) → sender_id.
+    // `.maybeSingle()` returns { data: null } on zero rows, so a miss can't throw.
+    const { data: senderRow } = await supabase
+      .from("sunners")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
     // Copy the receiver's department onto the kudo (used by filters).
     const { data: receiver } = await supabase
       .from("sunners")
@@ -78,6 +89,7 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
 
     const { error } = await supabase.from("kudos").insert({
       receiver_id: input.receiverId,
+      sender_id: senderRow?.id ?? null,
       sender_name: senderName,
       sender_avatar: senderAvatar,
       title,
