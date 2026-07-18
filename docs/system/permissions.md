@@ -38,8 +38,9 @@ never someone else's. Everything else reduces to a single question: is this visi
   cannot like/unlike one. Trying either from a signed-out state (should the UI ever allow it to be
   attempted) is rejected by the database itself, not just the app.
 - **Authenticated Sunners** can do everything an anonymous visitor can, plus: post a new Kudo to any
-  recipient, and like or unlike any Kudo. They cannot like or unlike on someone else's behalf — only their
-  own like can be toggled.
+  recipient, like or unlike any Kudo, and open any Secret Box they've earned (one per 5 hearts received on
+  their Kudos). They cannot like or unlike on someone else's behalf — only their own like can be toggled —
+  and they can only ever open their own entitlement, never another Sunner's.
 - **No one** — signed in or not — has admin, moderator, or elevated privileges of any kind. There is no
   such role in this system.
 
@@ -47,9 +48,10 @@ never someone else's. Everything else reduces to a single question: is this visi
 
 There is exactly one boundary in this system: **signed in vs. not**. It is not enforced by hiding pages —
 every page is reachable by everyone, with no login wall and no redirect-if-logged-out behavior anywhere.
-Instead, the boundary sits at the two actions that change data: creating a Kudo and toggling a like. Both
-are blocked for a signed-out visitor at the database level (the actual authorization boundary), with the
-application code adding its own matching check as a second, redundant layer.
+Instead, the boundary sits at the three actions that change data: creating a Kudo, toggling a like, and
+opening a Secret Box. All three are blocked for a signed-out visitor at the database level (the actual
+authorization boundary), with the application code adding its own matching check as a second, redundant
+layer.
 
 The only other place identity affects what's on screen is cosmetic: the account menu in the header shows
 a name, a link to your profile, and a sign-out button when you're signed in, or just a sign-in link when
@@ -70,6 +72,18 @@ opened on `sunners`); it can never block a signup (any error is swallowed and th
 and it introduces no service-role key — the app keeps running on the anon key only. Trade-off
 accepted by decision (2026-07-17): `sunners` stays publicly readable, so real member display
 names/avatars are visible without signing in. Email is never stored in `sunners`.
+
+## DB-Side Badge Grant (Secret Box RPC)
+
+A new table, `public.sunner_badges`, records every badge a Sunner has earned by opening a Secret Box
+(migration `0006_secret_box.sql`, pending operator apply as of 2026-07-18). Its RLS is deliberately
+asymmetric: `SELECT` is open to `public` (so badge history can be shown), but there is no
+`INSERT`/`UPDATE`/`DELETE` policy at all — the anon and authenticated roles have no direct write path to
+this table. The only way a row is ever created is the SECURITY DEFINER RPC `open_secret_box()`, which
+re-derives the caller's entitlement from `kudos`/`kudo_likes` itself (never trusts a client-supplied
+count) and takes a per-sunner advisory lock before picking a weighted-random badge and inserting it — so
+a signed-in Sunner can only ever open their *own* earned boxes, never more than they're entitled to, and
+never on another Sunner's behalf, even under concurrent clicks.
 
 ## Special Conditions
 

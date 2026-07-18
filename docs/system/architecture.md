@@ -24,7 +24,7 @@ graph TB
     end
     subgraph Backend["Supabase"]
         Auth["Auth (Google OAuth, PKCE)"]
-        DB["Postgres (kudos, sunners, kudo_likes)"]
+        DB["Postgres (kudos, sunners, kudo_likes,<br/>sunner_badges)"]
         Realtime["Realtime (postgres_changes)"]
     end
 
@@ -132,7 +132,7 @@ Notes on the shape (verified against source, not just the raw counts):
 | Language | TypeScript | 5.9.3 (`^5` in `package.json`) | `strict: true`, path alias `@/*` (`tsconfig.json`) |
 | Styling | Tailwind CSS | 4.3.2 (`^4`) via `@tailwindcss/postcss` | `postcss.config.mjs` |
 | Backend-as-a-service | Supabase (`@supabase/ssr`, `@supabase/supabase-js`) | 0.12.0 / 2.110.0 | Anon/publishable key only — no service-role key in app code (`.env.example`) |
-| Database | Postgres (Supabase-managed) | — | 5 migrations under `supabase/migrations/`: `0001_kudos_schema`, `0002_kudos_sender_identity`, `0003_kudos_realtime`, `0004_kudos_likes`, `0005_sunners_auth_link` |
+| Database | Postgres (Supabase-managed) | — | 6 migrations under `supabase/migrations/`: `0001_kudos_schema`, `0002_kudos_sender_identity`, `0003_kudos_realtime`, `0004_kudos_likes`, `0005_sunners_auth_link`, `0006_secret_box` (pending operator apply as of 2026-07-18) |
 | Realtime | Supabase Realtime (`postgres_changes`) | via `@supabase/supabase-js` 2.110.0 | One channel, `kudos-live-board` (`use-kudos-realtime.ts`) |
 | Auth | Supabase Auth — Google OAuth (PKCE) | via `@supabase/ssr` 0.12.0 | Callback: `app/auth/callback/route.ts` |
 | Unit/component testing | Vitest + Testing Library + jsdom | 4.1.9 / 16.3.2 / 29.1.1 | `vitest.config.ts`, `vitest.setup.ts` |
@@ -144,12 +144,18 @@ No queue, cache layer, or separate API gateway exists — Server Components/Acti
 directly; there is no service to document at those layers (`{CACHE_TYPE}`/`{QUEUE_TYPE}` from the
 generic template are intentionally omitted as not-applicable rather than fabricated).
 
-DB-side automation (the only "background" logic in the system) lives in two SECURITY DEFINER
+DB-side automation (the only "background" logic in the system) lives in three SECURITY DEFINER
 Postgres functions: `kudo_likes_count_sync()` keeps `kudos.like_count` in sync on like/unlike
 (`0004_kudos_likes.sql`), and `handle_new_member()` on `auth.users` AFTER INSERT auto-creates a
 linked `sunners` row (`auth_user_id`) on a member's first Google login — non-blocking by design
 (`EXCEPTION WHEN OTHERS THEN RETURN NEW`) with a backfill for earlier logins
-(`0005_sunners_auth_link.sql`). Field-level detail: `docs/generated/entities.md` (MODEL001/MODEL003).
+(`0005_sunners_auth_link.sql`). The third, `open_secret_box()`, is not trigger-driven but a
+client-invoked RPC (`supabase.rpc('open_secret_box')`): it takes a per-sunner advisory xact lock,
+re-derives entitlement (`GREATEST(0, FLOOR(hearts received / 5) − opened)`), picks one
+weighted-random badge (30/25/10/5/20/10 across six fixed codes), and inserts it into the new
+`sunner_badges` table — all inside one transaction, so a client can never forge a count or a badge
+(`0006_secret_box.sql`, migration pending operator apply as of 2026-07-18). Field-level detail:
+`docs/generated/entities.md` (MODEL001/MODEL003).
 
 ## Data Flow
 
@@ -228,4 +234,25 @@ sequenceDiagram
     end
     DB-->>A: like_count (DB trigger keeps it in sync, not written by the action)
     A->>U: revalidatePath('/sun-kudos', '/profile'); {ok, liked, likeCount}
+```
+
+### 5. Open a Secret Box (F016)
+
+```mermaid
+sequenceDiagram
+    participant U as User (SecretBoxModal, Client Component)
+    participant A as sun-kudos/secret-box-actions.ts:openSecretBox
+    participant DB as Supabase Postgres (sunner_badges, kudos, sunners)
+
+    U->>A: openSecretBox()
+    A->>DB: auth.getUser() (must be logged in)
+    A->>DB: rpc open_secret_box()
+    DB->>DB: advisory xact lock (per sunner) + re-derive unopened (BR-001)
+    alt unopened > 0
+        DB->>DB: weighted-random badge pick + insert into sunner_badges
+        DB-->>A: {badge_code, remaining}
+    else unopened <= 0
+        DB-->>A: error 'no_boxes'
+    end
+    A->>U: {ok, badgeCode?, remaining?, error?}
 ```

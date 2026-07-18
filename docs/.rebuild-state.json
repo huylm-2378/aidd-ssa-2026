@@ -15,7 +15,7 @@
   "fcode_index_sha": "c9f59fc267ca24ad76bd3ad55b804498e1fb55689df2c0b5270ebc5e9da3f082",
   "last_api_contracts_run_sha": "",
   "last_design_intent_run_sha": "",
-  "last_feature_spec_run_sha": "718cf4d2adc717549e47cc2efef184ba383c5668",
+  "last_feature_spec_run_sha": "3751ecb794792ffdeb3be192d199c204599b49f7",
   "last_flows_run_sha": "36dee9f3b2ed041f5ba45c593c664cab2950f160",
   "last_glossary_run_sha": "",
   "last_jobs_run_sha": "",
@@ -25,6 +25,8 @@
   "primary_lang": "en",
   "rebuilt_at": "2026-07-17T13:57:59Z",
   "schema_version": "21.0.0",
-  "screen_spec_shas": {},
+  "screen_spec_shas": {
+    "SCR008": "40822a92a7a53f6478d54c150ec029eff989b68850325f08eb7bf1c792824e76"
+  },
   "translations": {}
 }

@@ -143,6 +143,45 @@ the live connection drops, the board doesn't show an error — it just keeps sho
 silently, until it can reconnect or the page is reloaded.
 **Source artifact:** [behavior-logic.md](behavior-logic.md)
 
+---
+
+### Five hearts earn one Secret Box, and the count never goes negative
+
+**Applies when:** the Secret Box modal shows a Sunner how many boxes they have left to open.
+**Says:** every 5 hearts a Sunner's Kudos have received count toward one Secret Box; the number shown is
+that total minus however many boxes they've already opened. It's never shown as negative — if hearts are
+ever removed after boxes were opened, the count freezes at zero instead of going below it.
+**Source artifact:** [technical-spec.md](../features/F016_OpenSecretBox/technical-spec.md)
+
+---
+
+### Opening a Secret Box always grants exactly one badge, chosen at random
+
+**Applies when:** a Sunner with at least one unopened box clicks it.
+**Says:** the system picks exactly one badge from six fixed designs, weighted so some are rarer than
+others (roughly 30% / 25% / 20% / 10% / 10% / 5% chance). A single click can never grant two badges, and
+never grants zero when a box is actually owed.
+**Source artifact:** [technical-spec.md](../features/F016_OpenSecretBox/technical-spec.md)
+
+---
+
+### Secret Box counts and badges can only be written by the server, never a client
+
+**Applies when:** any Secret Box is opened, anywhere in the system.
+**Says:** the app can never fake how many boxes someone has or which badge they received — every badge
+grant is decided and recorded inside the database itself, the same moment the entitlement is checked, so
+a tampered request can never award an extra box or force a specific badge.
+**Source artifact:** [technical-spec.md](../features/F016_OpenSecretBox/technical-spec.md)
+
+---
+
+### A Sunner with zero boxes left sees an inert box, not an error
+
+**Applies when:** a Sunner with 0 unopened boxes clicks the Secret Box illustration.
+**Says:** nothing happens — no request is sent, no badge appears, and the counter stays at zero. The box
+only becomes an active control again once the Sunner earns enough new hearts for another box.
+**Source artifact:** [technical-spec.md](../features/F016_OpenSecretBox/technical-spec.md)
+
 ## Unresolved / Not Covered
 
 - Photo attachments on a Kudo are not actually uploaded or stored anywhere — the app only remembers *how

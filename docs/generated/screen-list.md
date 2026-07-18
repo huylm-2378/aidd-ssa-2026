@@ -286,3 +286,11 @@ Landing page (`app/page.tsx`) — keyvisual hero, event countdown, "Root Further
 - [x] All route URLs are properly formatted (route-view stack)
 - [ ] All SCR### codes are referenced in FeatureList.md — **N/A this wave**: `feature-list.md` does not exist yet in this pipeline run (Wave 1 artifacts only: system-overview, architecture, route-list, data-model). Region `Owner` fields are marked `TBD` per Trap 6 (owner annotation present, citing the source-code F### comment for future reconciliation).
 - [x] No orphaned screen references
+
+## SCR008_SecretBoxModal: SecretBoxModal
+
+**Feature:** F016 — Open Secret Box
+**Type**: composite
+**Route:** N/A — modal overlay (opened over `/sun-kudos` and `/profile`)
+**Description:** Centered dark modal ("KHÁM PHÁ SECRET BOX CỦA BẠN") where a logged-in Sunner opens earned Secret Boxes: gift-box illustration (click to open while unopened > 0), instruction line hidden at 0, bottom counter "Secretbox chưa mở" + gold count, X close. Design: MoMorph frame J3-4YFIpMM.
+**States:** anon (sign-in prompt), zero-boxes (inert box, instruction hidden), openable, opening (in-flight), badge-revealed, error-fallback
