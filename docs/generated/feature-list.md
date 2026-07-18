@@ -40,6 +40,7 @@
 | F013_RulesModal | Rules Modal | ui | TypeScript/TSX | web (`app/`) | P3 |
 | F014_Internationalization | Internationalization | background | TypeScript | web (`app/`) | P2 |
 | F015_KudosHearts | Kudos Hearts | mixed | TypeScript + SQL | web (`app/` + `supabase/`) | P1 |
+| F016_OpenSecretBox | Open Secret Box | mixed | TypeScript + SQL | web (`app/` + `supabase/`) | P1 |
 
 ## Feature Details
 
@@ -495,6 +496,35 @@
 **Related Permissions**:
 - PERM002_ToggleLike: Like / unlike a Kudo (insert/delete `kudo_likes`)
 - PERM006_ReadKudoLikes: Public SELECT on `kudo_likes`
+
+---
+
+### F016_OpenSecretBox: Open Secret Box
+
+**Type**: mixed
+**Description**: Logged-in Sunners open earned Secret Boxes from a shared modal (both existing CTAs: kudos sidebar + profile stats). Input: hearts received on the Sunner's kudos (5 ❤️ = 1 box; unopened = GREATEST(0, FLOOR(hearts/5) − opened)). Process: `SECURITY DEFINER` RPC `open_secret_box()` re-derives entitlement, picks one weighted-random badge (STAY_GOLD 30% / FLOW_TO_HORIZON 25% / BEYOND_THE_BOUNDARY 10% / ROOT_FURTHER 5% / TOUCH_OF_LIGHT 20% / REVIVAL 10%), inserts into `sunner_badges` atomically. Output: badge revealed in the modal box frame, counter decremented; anon key cannot forge counts or badges. Design: MoMorph frame J3-4YFIpMM ("Open secret box- chưa mở").
+
+**Workspace**: web (`app/` + `supabase/`)
+**Languages**: TypeScript + SQL
+**Components**: 4 (SecretBoxModal, entitlement read helper, `openSecretBox` server action, migration 0006: `sunner_badges` + RPC)
+
+**Related Screens**:
+- SCR008_SecretBoxModal (modal overlay on SCR003_ProfilePage / SCR004_SunKudosPage)
+
+**Related User Stories**:
+- US001–US004 (see `docs/features/F016_OpenSecretBox/technical-spec.md`)
+
+**Related APIs/Routes**:
+- Supabase RPC `open_secret_box()` (SECURITY DEFINER)
+
+**Related Data Models**:
+- `sunner_badges` (new, migration 0006)
+
+**Related Background Logic**:
+- Entitlement derivation from `kudos.like_count` (F015 hearts) + `sunner_badges` count
+
+**Related Permissions**:
+- `sunner_badges`: public SELECT, no client writes (RPC-only insert)
 
 ---
 

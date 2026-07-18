@@ -68,4 +68,15 @@ export const enKudos: Record<keyof typeof viKudos, string> = {
   "hearts.unlike": "Unlike this Kudos",
   "hearts.signInRequired": "Sign in to heart this Kudos.",
   "hearts.error": "Couldn't update. Please try again.",
+
+  "secretBox.title": "DISCOVER YOUR SECRET BOX",
+  "secretBox.instruction": "Click the box to open it",
+  "secretBox.counterLabel": "Unopened Secret Boxes",
+  "secretBox.closeLabel": "Close",
+  "secretBox.boxAria": "Open one Secret Box",
+  "secretBox.badgeAlt": "Badge received",
+  "secretBox.counterAria": "Unopened Secret Boxes: {count}, opened {opened}",
+  "secretBox.signInPrompt": "You need to sign in to open your Secret Box.",
+  "secretBox.noBoxes": "You don't have a Secret Box to open right now.",
+  "secretBox.error": "Couldn't open the Secret Box. Please try again.",
 };

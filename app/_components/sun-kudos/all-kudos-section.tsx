@@ -2,6 +2,7 @@
 
 import type { KudoCard as KudoCardData } from "../../_lib/kudos-shared";
 import type { SunnerStat, RecentGiftSunner } from "../../_lib/sun-kudos-content";
+import type { SecretBoxState } from "../../_lib/secret-box/queries";
 import { SECTION_EYEBROW } from "../../_lib/sun-kudos-content";
 import { useTranslation } from "../../_lib/i18n/use-translation";
 import KudoCard from "./kudo-card";
@@ -19,10 +20,12 @@ export default function AllKudosSection({
   kudos,
   stats,
   recentGifts,
+  secretBox,
 }: {
   kudos: readonly KudoCardData[];
   stats: readonly SunnerStat[];
   recentGifts: readonly RecentGiftSunner[];
+  secretBox: SecretBoxState;
 }) {
   const { t } = useTranslation();
   return (
@@ -53,7 +56,7 @@ export default function AllKudosSection({
             kudos.map((kudo) => <KudoCard key={kudo.id} kudo={kudo} />)
           )}
         </div>
-        <KudosSidebar stats={stats} recentGifts={recentGifts} />
+        <KudosSidebar stats={stats} recentGifts={recentGifts} secretBox={secretBox} />
       </div>
     </section>
   );

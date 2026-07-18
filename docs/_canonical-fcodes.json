@@ -11,10 +11,28 @@
       "type": "ui",
       "related": {
         "screens": [],
-        "user_stories": ["US001", "US002", "US003", "US004", "US005"],
-        "routes": ["/", "/awards-information", "/sun-kudos"],
+        "user_stories": [
+          "US001",
+          "US002",
+          "US003",
+          "US004",
+          "US005"
+        ],
+        "routes": [
+          "/",
+          "/awards-information",
+          "/sun-kudos"
+        ],
         "models": [],
-        "bl": ["BR001", "BR002", "BR003", "BR004", "BR005", "BR006", "BR007"],
+        "bl": [
+          "BR001",
+          "BR002",
+          "BR003",
+          "BR004",
+          "BR005",
+          "BR006",
+          "BR007"
+        ],
         "perms": []
       }
     },
@@ -27,8 +45,12 @@
       "related": {
         "screens": [],
         "user_stories": [],
-        "routes": ["/awards-information"],
-        "models": ["AwardCategory"],
+        "routes": [
+          "/awards-information"
+        ],
+        "models": [
+          "AwardCategory"
+        ],
         "bl": [],
         "perms": []
       }
@@ -42,8 +64,15 @@
       "related": {
         "screens": [],
         "user_stories": [],
-        "routes": ["/sun-kudos"],
-        "models": ["KudoCard", "SunnerStat", "SpotlightName", "RecentGiftSunner"],
+        "routes": [
+          "/sun-kudos"
+        ],
+        "models": [
+          "KudoCard",
+          "SunnerStat",
+          "SpotlightName",
+          "RecentGiftSunner"
+        ],
         "bl": [],
         "perms": []
       }
@@ -57,7 +86,9 @@
       "related": {
         "screens": [],
         "user_stories": [],
-        "routes": ["/login"],
+        "routes": [
+          "/login"
+        ],
         "models": [],
         "bl": [],
         "perms": []
@@ -72,7 +103,11 @@
       "related": {
         "screens": [],
         "user_stories": [],
-        "routes": ["/login", "/auth/callback", "/auth/auth-code-error"],
+        "routes": [
+          "/login",
+          "/auth/callback",
+          "/auth/auth-code-error"
+        ],
         "models": [],
         "bl": [],
         "perms": []
@@ -85,10 +120,17 @@
       "priority": "P1",
       "type": "ui",
       "related": {
-        "screens": ["ihQ26W78P2"],
+        "screens": [
+          "ihQ26W78P2"
+        ],
         "user_stories": [],
-        "routes": ["/sun-kudos"],
-        "models": ["SunnerOption", "WriteKudoForm"],
+        "routes": [
+          "/sun-kudos"
+        ],
+        "models": [
+          "SunnerOption",
+          "WriteKudoForm"
+        ],
         "bl": [],
         "perms": []
       }
@@ -100,12 +142,42 @@
       "priority": "P1",
       "type": "data",
       "related": {
-        "screens": ["MaZUn5xHXZ", "ihQ26W78P2"],
+        "screens": [
+          "MaZUn5xHXZ",
+          "ihQ26W78P2"
+        ],
         "user_stories": [],
-        "routes": ["/sun-kudos"],
-        "models": ["sunners", "kudos", "recent_gifts", "kudos_stats"],
+        "routes": [
+          "/sun-kudos"
+        ],
+        "models": [
+          "sunners",
+          "kudos",
+          "recent_gifts",
+          "kudos_stats"
+        ],
         "bl": [],
-        "perms": ["public read (RLS)", "demo insert kudos (RLS)"]
+        "perms": [
+          "public read (RLS)",
+          "demo insert kudos (RLS)"
+        ]
+      }
+    },
+    {
+      "fcode": "F016",
+      "name": "Open Secret Box",
+      "slug": "F016_OpenSecretBox",
+      "priority": "P1",
+      "type": "mixed",
+      "related": {
+        "screens": [
+          "SCR008_SecretBoxModal"
+        ],
+        "user_stories": [],
+        "routes": [],
+        "models": [],
+        "bl": [],
+        "perms": []
       }
     }
   ]
