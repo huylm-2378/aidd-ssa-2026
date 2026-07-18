@@ -37,21 +37,26 @@ export default function SpotlightCanvas({
   const liveIds = new Set(liveNotes.map((n) => n.id).filter((id): id is string => id != null));
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
+      {/* Design B.7: names float directly on the photo panel — no inner framed box. */}
       <div
         ref={containerRef}
         role="application"
         aria-label={t("spotlight.canvasAria")}
         tabIndex={0}
-        className="relative h-[540px] w-full touch-none overflow-hidden rounded-xl border border-[#2e3940]/60 bg-black/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
+        className="relative h-full w-full touch-none overflow-hidden rounded-3xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffea9e]"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         onKeyDown={onKeyDown}
       >
+        {/* Node field is inset so names never collide with the count/search
+            band (top) or the activity stack (bottom) — mirrors the design's
+            empty margins around the cloud (names span ~y1707-2082 of the
+            1658-2206 panel). */}
         <div
-          className="absolute inset-0 motion-safe:transition-transform motion-safe:duration-75"
+          className="absolute inset-x-4 bottom-24 top-[76px] motion-safe:transition-transform motion-safe:duration-75 sm:inset-x-8"
           style={{ transform, transformOrigin: "0 0" }}
         >
           {nodes.map((node, index) => {
@@ -61,13 +66,16 @@ export default function SpotlightCanvas({
             const dim = isFiltering && !hit;
             const isLive = liveIds.has(node.id);
             // Gold ONLY for a search match. Default names stay white shades
-            // (varied by weight); the live recipient is brightest white + pulse.
+            // (varied by weight); the live recipient takes the design's
+            // highlight red (#F17676 — the one non-white name in frame B.7).
             const tone =
               isFiltering && hit
                 ? "text-[#ffea9e]"
-                : isLive || weight >= 4
-                  ? "text-white"
-                  : "text-white/70";
+                : isLive
+                  ? "text-[#f17676]"
+                  : weight >= 4
+                    ? "text-white"
+                    : "text-white/70";
             return (
               <span
                 key={index}
@@ -83,7 +91,7 @@ export default function SpotlightCanvas({
         </div>
 
         {liveNotes.length > 0 && (
-          <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
+          <div className="pointer-events-none absolute left-4 top-[76px] z-10 flex flex-col gap-2 sm:left-6 sm:top-20">
             {liveNotes.map((note) => (
               <div
                 key={note.key}
@@ -101,7 +109,9 @@ export default function SpotlightCanvas({
         )}
       </div>
 
-      <div className="absolute bottom-3 left-3 flex gap-1.5">
+      {/* Design shows a single pan-zoom affordance bottom-right (B.7.2); the
+          zoom cluster sits just above the expand button, same corner. */}
+      <div className="absolute bottom-14 right-4 flex gap-1.5">
         <button type="button" aria-label={t("spotlight.zoomOut")} onClick={() => zoomBy(-ZOOM_STEP)} className={CTRL_BTN}>
           −
         </button>
