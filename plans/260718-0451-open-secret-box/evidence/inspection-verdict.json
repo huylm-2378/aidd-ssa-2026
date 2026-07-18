@@ -1,0 +1,25 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "SC-001 — the unopened count shown in the modal always equals FLOOR(received_hearts / 5) - opened, never negative (covers FR-004, BR-001) — PROVEN BY: supabase/migrations/0006_secret_box.sql RPC line `v_unopened := greatest(0, floor(v_received / 5.0)::int - v_opened);` and app/_lib/secret-box/queries.ts mirroring `Math.max(0, Math.floor(hearts / 5) - opened)`, verified by queries.test.ts's floor-at-zero and floor(23/5)-1=3 cases (5/5 pass)",
+    "SC-002 — a box click while unopened > 0 always results in exactly one new sunner_badges row and a counter decrease of exactly 1 (covers FR-005, FR-006, BR-003) — PROVEN BY: 0006_secret_box.sql's single-transaction check-then-insert-then-return (`insert into public.sunner_badges ...; return query select v_badge, v_unopened - 1;`) serialized by `pg_advisory_xact_lock`, exercised by secret-box-actions.test.ts's success case asserting badgeCode+remaining and by e2e/sun-kudos-secret-box.spec.ts structural pass",
+    "SC-003 — a box click while unopened <= 0 never calls the RPC and never changes any count (covers FR-007, DEC-001) — PROVEN BY: app/_components/sun-kudos/use-secret-box.ts's `if (unopened <= 0 || opening) return;` guard before `openSecretBox()` is ever invoked, and secret-box-illustration.tsx's `disabled` prop gating the click handler, plus the RPC's own redundant `if v_unopened <= 0 then raise exception 'no_boxes'` server-side backstop",
+    "SC-004 — no client-supplied count or badge value is ever persisted without passing through open_secret_box(); RLS on sunner_badges rejects every client INSERT/UPDATE/DELETE (covers BR-002) — PROVEN BY: 0006_secret_box.sql defines only a single `for select using (true)` policy on sunner_badges with no INSERT/UPDATE/DELETE policy (denied by default under RLS), and `open_secret_box()` takes zero parameters (no client-input surface) while resolving identity solely via `auth.uid()`",
+    "SC-005 — a signed-out request never computes a real count nor calls open_secret_box(); it always short-circuits to auth_required (covers FR-008) — PROVEN BY: app/_lib/secret-box/queries.ts returning ANON_STATE before any DB read when `!user`, app/sun-kudos/secret-box-actions.ts returning `{ok:false,error:'auth_required'}` before calling `supabase.rpc` when `!user`, confirmed by secret-box-actions.test.ts's 'returns auth_required when signed out, without calling the RPC' (asserts rpc not called) and e2e's signed-out sign-in-prompt test"
+  ],
+  "regressionChecked": [
+    "existing kudos-sidebar.tsx and profile-stats.tsx CTA markup/tests updated and green (kudos-sidebar.test.tsx, profile-stats.test.tsx) — no loss of prior i18n/label assertions",
+    "app/sun-kudos/page.tsx and app/profile/page.tsx prop-threading (secretBox added to existing Promise.all fetch) does not alter existing getAllKudos/getSidebarStats/getSpotlight/getRecentGifts/getSunnerOptions call shapes",
+    "all-kudos-section.tsx prop threading is additive (secretBox passed through to KudosSidebar) with no change to kudo feed rendering",
+    "no change to createKudo/toggleHeart paths in app/sun-kudos/actions.ts — new secret-box-actions.ts is a separate file following the same 'use server' shape",
+    "no change to kudo_likes/kudos RLS or triggers from 0004/0005 — 0006 only adds a new table+RPC, additive migration",
+    "full e2e suite's 4 pre-existing failures (FAB i18n aria-label x2, PR#25 spotlight DOM x1, composer hashtag x1) verified via `git diff main --name-only` to touch zero files on this branch (no fab/spotlight/composer paths in the diff) — confirmed independently, not just taken on the tester's word",
+    "F016 e2e structural suite (sidebar CTA opens/closes modal, anon sign-in prompt, Escape+focus-restore, profile CTA opens same modal) 4/4 pass against a production build"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

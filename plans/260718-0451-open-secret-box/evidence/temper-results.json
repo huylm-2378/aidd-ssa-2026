@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "mise exec -- npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "TypeScript: no errors across the repo (F016 files included).",
+      "ts": "2026-07-18T08:16:54.300Z"
+    },
+    {
+      "command": "mise exec -- npx vitest run",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Unit: 37 files / 239 tests pass, incl. F016 secret-box-actions.test.ts 7/7 (SC-005 auth short-circuit, no_boxes mapping) and secret-box queries.test.ts 5/5 (SC-001 entitlement math, BR-001 floor-at-zero).",
+      "ts": "2026-07-18T08:16:54.300Z"
+    },
+    {
+      "command": "mise exec -- npx playwright test e2e/sun-kudos-secret-box.spec.ts (production build, npm run start)",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "E2E F016: 4/4 pass — sidebar CTA opens modal w/ design title + X close; anon sign-in prompt replaces counter/box (FR-008); Escape closes + focus restore; profile CTA opens same modal. Full-suite run also executed: 58 pass / 12 skip / 4 fail, all 4 failures proven pre-existing main test debt (files not in git diff main: FAB aria-label i18n drift x2, PR#25 spotlight DOM x1, composer hashtag x1) — see tester-report.md.",
+      "ts": "2026-07-18T08:16:54.300Z"
+    },
+    {
+      "command": "mise exec -- npx eslint <11 F016 files>",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ESLint: 0 errors 0 warnings on all F016 implementation + test files.",
+      "ts": "2026-07-18T08:16:54.300Z"
+    },
+    {
+      "command": "mise exec -- npx next build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Production build succeeds; no server/client boundary violations from the type-only SecretBoxState import.",
+      "ts": "2026-07-18T08:16:54.300Z"
+    }
+  ]
+}

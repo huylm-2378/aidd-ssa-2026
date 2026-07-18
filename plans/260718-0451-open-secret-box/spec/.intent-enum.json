@@ -1,0 +1,5 @@
+{
+  "mode": "single",
+  "intents": ["Logged-in Sunner opens the Secret Box modal and opens earned boxes to receive a weighted-random badge"],
+  "justification": ""
+}

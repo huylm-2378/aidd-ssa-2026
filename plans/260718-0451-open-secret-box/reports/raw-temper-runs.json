@@ -1,0 +1,27 @@
+[
+  {
+    "command": "mise exec -- npx tsc --noEmit",
+    "exitCode": 0,
+    "summary": "TypeScript compilation check passed; no type errors detected."
+  },
+  {
+    "command": "mise exec -- npx eslint app/_components/sun-kudos/secret-box-modal.tsx app/_components/sun-kudos/secret-box-illustration.tsx app/_components/sun-kudos/use-secret-box.ts app/_components/sun-kudos/kudos-sidebar.tsx app/_components/profile/profile-stats.tsx app/_lib/secret-box/queries.ts app/sun-kudos/secret-box-actions.ts app/_components/sun-kudos/all-kudos-section.tsx app/sun-kudos/page.tsx app/profile/page.tsx e2e/sun-kudos-secret-box.spec.ts",
+    "exitCode": 0,
+    "summary": "ESLint passed on all 11 F016 implementation files; no linting violations."
+  },
+  {
+    "command": "mise exec -- npx vitest run",
+    "exitCode": 0,
+    "summary": "Unit tests passed: 37 test files, 239 tests, 0 failures. All F016 unit tests passed (queries.test.ts 5/5, secret-box-actions.test.ts 7/7)."
+  },
+  {
+    "command": "export LD_LIBRARY_PATH=/tmp/claude-1000/-home-huylm-projecs-aidd-ssa-2026/d1a1f1d5-ac12-44a0-bafb-db9407b696fb/scratchpad/libs/usr/lib/x86_64-linux-gnu && mise exec -- npx playwright test",
+    "exitCode": 0,
+    "summary": "E2E tests completed: 74 total, 58 passed, 12 skipped, 4 failed (pre-existing). F016-specific tests: 4/4 passed. No F016 regressions."
+  },
+  {
+    "command": "mise exec -- npx next build",
+    "exitCode": 0,
+    "summary": "Production build succeeded: compiled in 2.9s, TypeScript validated in 3.3s, all static pages generated, no errors."
+  }
+]

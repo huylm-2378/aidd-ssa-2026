@@ -1,0 +1,26 @@
+{
+  "task": "F016 Open Secret Box — build the 'chưa mở' modal (MoMorph frame J3-4YFIpMM) + real open backend: sunner_badges table + SECURITY DEFINER open_secret_box() RPC (weighted random 30/25/10/5/20/10), entitlement = GREATEST(0, FLOOR(hearts received / 5) - opened), wired to both existing CTAs (kudos sidebar + profile stats).",
+  "acceptanceCriteria": [
+    "SC-001 — the unopened count shown in the modal always equals FLOOR(received_hearts / 5) - opened, never negative (covers FR-004, BR-001)",
+    "SC-002 — a box click while unopened > 0 always results in exactly one new sunner_badges row and a counter decrease of exactly 1 (covers FR-005, FR-006, BR-003)",
+    "SC-003 — a box click while unopened <= 0 never calls the RPC and never changes any count (covers FR-007, DEC-001)",
+    "SC-004 — no client-supplied count or badge value is ever persisted without passing through open_secret_box(); RLS on sunner_badges rejects every client INSERT/UPDATE/DELETE (covers BR-002)",
+    "SC-005 — a signed-out request never computes a real count nor calls open_secret_box(); it always short-circuits to auth_required (covers FR-008)"
+  ],
+  "touchpoints": [
+    "supabase/migrations/0006_secret_box.sql",
+    "app/_lib/secret-box/queries.ts",
+    "app/sun-kudos/secret-box-actions.ts",
+    "app/_components/sun-kudos/secret-box-modal.tsx",
+    "app/_components/sun-kudos/secret-box-illustration.tsx",
+    "app/_components/sun-kudos/use-secret-box.ts",
+    "app/_components/sun-kudos/kudos-sidebar.tsx",
+    "app/_components/profile/profile-stats.tsx",
+    "app/_components/sun-kudos/all-kudos-section.tsx",
+    "app/sun-kudos/page.tsx",
+    "app/profile/page.tsx",
+    "app/_lib/i18n/messages/vi-kudos.ts",
+    "app/_lib/i18n/messages/en-kudos.ts",
+    "e2e/sun-kudos-secret-box.spec.ts"
+  ]
+}
