@@ -14,6 +14,7 @@ import {
   getSpotlight,
   getSunnerOptions,
 } from "../_lib/kudos/queries";
+import { getSecretBoxState } from "../_lib/secret-box/queries";
 
 export const metadata: Metadata = {
   title: "Sun* Kudos — Sun* Annual Awards 2025",
@@ -29,12 +30,13 @@ export const metadata: Metadata = {
  * — sections render their own empty states. Reuses the homepage Header + Footer.
  */
 export default async function SunKudosPage() {
-  const [allKudos, spotlight, stats, recentGifts, sunnerOptions] = await Promise.all([
+  const [allKudos, spotlight, stats, recentGifts, sunnerOptions, secretBox] = await Promise.all([
     getAllKudos(),
     getSpotlight(),
     getSidebarStats(),
     getRecentGifts(),
     getSunnerOptions(),
+    getSecretBoxState(),
   ]);
 
   return (
@@ -48,7 +50,7 @@ export default async function SunKudosPage() {
         </div>
         <HighlightKudosSection kudos={allKudos} />
         <SpotlightBoard count={spotlight.count} nodes={spotlight.nodes} roster={spotlight.roster} />
-        <AllKudosSection kudos={allKudos} stats={stats} recentGifts={recentGifts} />
+        <AllKudosSection kudos={allKudos} stats={stats} recentGifts={recentGifts} secretBox={secretBox} />
       </main>
       <Footer />
     </div>

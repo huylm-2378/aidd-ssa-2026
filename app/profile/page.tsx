@@ -6,6 +6,7 @@ import ProfileIdentity from "../_components/profile/profile-identity";
 import ProfileStats from "../_components/profile/profile-stats";
 import ProfileKudosSection from "../_components/profile/profile-kudos-section";
 import { getAllKudos, getSidebarStats } from "../_lib/kudos/queries";
+import { getSecretBoxState } from "../_lib/secret-box/queries";
 import { createClient } from "../_lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -54,10 +55,11 @@ async function getCurrentUserIdentity(): Promise<CurrentUserIdentity> {
  * or placeholder view instead of crashing).
  */
 export default async function ProfilePage() {
-  const [{ name, avatarUrl }, kudos, stats] = await Promise.all([
+  const [{ name, avatarUrl }, kudos, stats, secretBox] = await Promise.all([
     getCurrentUserIdentity(),
     getAllKudos(),
     getSidebarStats(),
+    getSecretBoxState(),
   ]);
 
   return (
@@ -76,7 +78,7 @@ export default async function ProfilePage() {
           </div>
         </div>
         <div className="mx-auto flex w-[680px] max-w-full flex-col gap-10 px-4 pb-16">
-          <ProfileStats stats={stats} />
+          <ProfileStats stats={stats} secretBox={secretBox} />
           <ProfileKudosSection kudos={kudos} currentUserName={name} />
         </div>
       </main>

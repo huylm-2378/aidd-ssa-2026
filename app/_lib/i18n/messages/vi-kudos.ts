@@ -73,4 +73,15 @@ export const viKudos = {
   "hearts.unlike": "Bỏ tim",
   "hearts.signInRequired": "Đăng nhập để thả tim.",
   "hearts.error": "Không thể cập nhật. Vui lòng thử lại.",
+
+  "secretBox.title": "KHÁM PHÁ SECRET BOX CỦA BẠN",
+  "secretBox.instruction": "Click vào box để mở",
+  "secretBox.counterLabel": "Secretbox chưa mở",
+  "secretBox.closeLabel": "Đóng",
+  "secretBox.boxAria": "Mở một Secret Box",
+  "secretBox.badgeAlt": "Huy hiệu nhận được",
+  "secretBox.counterAria": "Secretbox chưa mở: {count}, đã mở {opened}",
+  "secretBox.signInPrompt": "Bạn cần đăng nhập để mở Secret Box.",
+  "secretBox.noBoxes": "Bạn chưa có Secret Box nào để mở.",
+  "secretBox.error": "Không thể mở Secret Box. Vui lòng thử lại.",
 };
