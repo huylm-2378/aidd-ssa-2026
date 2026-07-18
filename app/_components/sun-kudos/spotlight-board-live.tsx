@@ -9,6 +9,8 @@ import { useKudosRealtime, type KudosInsertRow } from "./use-kudos-realtime";
 import { useLiveNotes } from "./use-live-notes";
 
 const ACTIVITY_CAP = 10;
+/** Design shows 6 stacked activity lines (nodes 3004:15995-15999 + 2940:14230). */
+const ACTIVITY_CAP_VISIBLE = 6;
 
 /**
  * Client island (F008) for the Spotlight Board's dark panel: owns the live
@@ -57,15 +59,27 @@ export default function SpotlightBoardLive({
 
   useKudosRealtime(onInsert);
 
+  // Design frame B.7 (node 2940:14174): everything overlays one fixed-height
+  // photo panel — count centered top (all white, 36px), search pill top-left
+  // (gold-tint + #998C5F border), names float directly on the background, and
+  // the activity log is a bottom-left vertical stack fading upward (newest at
+  // the bottom, full opacity; oldest ~0.1 — nodes 3004:15995-15999).
+  const visibleActivity = activity.slice(0, ACTIVITY_CAP_VISIBLE).slice().reverse();
+
   return (
-    <div className="relative isolate overflow-hidden rounded-3xl border border-[#998c5f]/40 bg-[#080c10] px-6 py-8 sm:px-8 sm:py-10">
+    <div className="relative isolate h-[420px] overflow-hidden rounded-3xl border border-[#998c5f] bg-[#080c10] sm:h-[548px]">
       <SpotlightBoardBg />
-      <p className="text-center font-montserrat text-4xl font-bold leading-tight sm:text-5xl">
-        <span className="text-[#ffea9e]">{count}</span> <span className="text-white">KUDOS</span>
+
+      <div className="absolute inset-0">
+        <SpotlightCanvas nodes={nodes} query={query} liveNotes={liveNotes} />
+      </div>
+
+      <p className="pointer-events-none absolute inset-x-0 top-4 text-center font-montserrat text-3xl font-bold leading-[44px] text-white sm:text-[36px]">
+        {count} KUDOS
       </p>
 
-      <div className="mt-6 flex w-full max-w-[220px] items-center gap-2 rounded-full border border-[#2e3940] bg-white/5 px-3 py-1.5">
-        <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/60" fill="none" stroke="currentColor" aria-hidden>
+      <div className="absolute left-4 top-5 flex h-[39px] w-[190px] items-center gap-1.5 rounded-full border border-[#998c5f] bg-[#ffea9e]/10 px-3 sm:left-6 sm:top-6 sm:w-[219px]">
+        <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-white/70" fill="none" stroke="currentColor" aria-hidden>
           <circle cx="11" cy="11" r="7" strokeWidth={1.8} />
           <path d="m20 20-3.5-3.5" strokeWidth={1.8} strokeLinecap="round" />
         </svg>
@@ -82,18 +96,15 @@ export default function SpotlightBoardLive({
         />
       </div>
 
-      <div className="mt-6">
-        <SpotlightCanvas nodes={nodes} query={query} liveNotes={liveNotes} />
-      </div>
-
       <div
-        className="mt-8 flex gap-8 overflow-x-auto border-t border-[#2e3940] pt-4"
+        className="pointer-events-none absolute bottom-5 left-4 right-16 flex flex-col sm:left-6"
         aria-label={t("spotlight.recentActivity")}
       >
-        {activity.map((line, index) => (
+        {visibleActivity.map((line, index, arr) => (
           <p
             key={`${line}-${index}`}
-            className="shrink-0 whitespace-nowrap font-montserrat text-xs text-white/50"
+            style={{ opacity: Math.max(0.1, (index + 1) / arr.length) }}
+            className="truncate font-montserrat text-sm font-bold leading-5 tracking-[0.1px] text-white"
           >
             {line}
           </p>

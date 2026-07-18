@@ -28,6 +28,47 @@ test.describe("Sun* Kudos — Live Spotlight Board (F008)", () => {
     await expect(board.getByRole("application")).toBeVisible();
   });
 
+  test("panel matches design frame B.7: white centered count, gold-tint search pill, fading vertical activity stack", async ({
+    page,
+  }) => {
+    const board = page.locator("section[aria-label='Spotlight Board']");
+
+    // Count is a single all-white line (design node 3007:17482 — no gold split).
+    const count = board.getByText(/^\d+ KUDOS$/);
+    await expect(count).toHaveCSS("color", "rgb(255, 255, 255)");
+
+    // Search pill: gold-tint fill + #998C5F border (design instance 2940:14833).
+    const pill = board.locator("div").filter({ has: page.locator("#spotlight-search") }).last();
+    await expect(pill).toHaveCSS("border-top-color", "rgb(153, 140, 95)");
+    // Tailwind v4 resolves opacity-modified colors into lab() — normalize both
+    // sides through a canvas fill to compare actual pixels, not string syntax.
+    const pillBg = await pill.evaluate((el) => {
+      const px = (css: string) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = css;
+        ctx.fillRect(0, 0, 1, 1);
+        return [...ctx.getImageData(0, 0, 1, 1).data];
+      };
+      return { actual: px(getComputedStyle(el).backgroundColor), expected: px("rgba(255, 234, 158, 0.1)") };
+    });
+    // ±1 per channel tolerance for lab()->sRGB rounding.
+    pillBg.expected.forEach((v, i) => expect(Math.abs(pillBg.actual[i] - v)).toBeLessThanOrEqual(1));
+
+    // Activity log is a vertical stack whose lines fade upward: first (oldest)
+    // line more transparent than the last (newest) — design nodes 3004:15995-99.
+    const ticker = board.locator("[aria-label='Hoạt động gần đây']");
+    await expect(ticker).toHaveCSS("flex-direction", "column");
+    const lines = ticker.locator("p");
+    const n = await lines.count();
+    expect(n).toBeGreaterThanOrEqual(2);
+    const firstOpacity = parseFloat(await lines.first().evaluate((el) => getComputedStyle(el).opacity));
+    const lastOpacity = parseFloat(await lines.last().evaluate((el) => getComputedStyle(el).opacity));
+    expect(firstOpacity).toBeLessThan(lastOpacity);
+    expect(lastOpacity).toBe(1);
+  });
+
   test("typing filters/highlights matching names; clearing restores the full cloud", async ({ page }) => {
     test.skip(!process.env.KUDOS_DB_SEEDED, SEED_GUARD);
     const board = page.locator("section[aria-label='Spotlight Board']");

@@ -1,0 +1,25 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "count renders as a single all-white centered line over the panel — verified in spotlight-board-live.tsx:77-79 (plain `{count} KUDOS`, text-white, no gold span split) and e2e color assertion rgb(255,255,255)",
+    "search pill uses gold-tint background and #998C5F border, top-left overlay — verified in spotlight-board-live.tsx:81 (border-[#998c5f], bg-[#ffea9e]/10, left-4/top-5) and e2e canvas-normalized pixel comparison",
+    "activity log renders as a vertical bottom-left stack with opacity fading upward (newest bottom, opacity 1) — traced the full data path: onInsert prepends newest to activity[0]; visibleActivity = activity.slice(0,6).slice().reverse() puts oldest-of-6 first/newest-of-6 last; opacity=(index+1)/arr.length gives oldest≈0.167, newest=1; flex-col renders index-0 at top, last at bottom → newest-bottom-full-opacity confirmed",
+    "names float directly on the panel background with no inner framed box, inset from the top band and activity stack — spotlight-canvas.tsx:47 dropped border/bg/h-[540px] for h-full+rounded-3xl; node field uses inset-x-4 top-[76px] bottom-24 clearing both bands",
+    "e2e regression test 'panel matches design frame B.7' fails without the fix and passes with it — confirmed unconditional (no test.skip, unlike the seeded-DB test at line 73) and temper-results.json logs it red-with-fix-stashed, green-with-fix",
+    "existing live-board behaviors intact: keyboard pan/zoom, search filter opacity semantics, realtime ticker aria — 4/4 e2e pass; traced usePanZoom hook (use-pan-zoom.ts) and confirmed it is purely event-delta based (clientX/Y, no container-size dependency) so the height/inset changes cannot affect pan/zoom math; tone-priority logic (isFiltering&&hit → gold, then isLive → red, then weight) still checks the search-match branch first, so filter highlighting is unaffected by the isLive reorder",
+    "vitest, tsc --noEmit, eslint (changed files), next build all pass — temper-results.json shows all green (227 vitest, tsc clean, eslint clean, build clean)",
+    "existing live-board behaviors intact: keyboard pan/zoom, search filter opacity semantics, realtime ticker aria (4/4 e2e pass) — proof: (1) keyboard pan/zoom — use-pan-zoom.ts traced in full, state is purely clientX/Y deltas + CSS transform with zero dependency on container dimensions, so the h-[540px]→h-full/inset layout change cannot affect it; e2e keyboard-pan test passes. (2) search filter opacity semantics — tone-priority order re-verified: isFiltering&&hit (gold, opacity-100) is still checked before isLive (red) and weight, and the dim branch (isFiltering && !hit → opacity-20) is untouched by this diff, so filter dimming/highlighting is unaffected by the isLive color swap. (3) realtime ticker aria — aria-label key spotlight.recentActivity ('Hoạt động gần đây') unchanged in both en/vi message files and in the JSX, confirmed by grep. (4) 4/4 e2e pass — temper-results.json logs the full playwright run green including the keyboard-pan and seeded-filter tests alongside the new design-fidelity test"
+  ],
+  "regressionChecked": [
+    "Spotlight Board panel layout and overlays — read both component diffs in full; overlay stacking (DOM-order painting, no explicit z-index conflicts), pointer-events-none scoped correctly to count/activity only (pill and expand button remain interactive), SpotlightBoardBg confirmed pointer-events-none+aria-hidden so it never intercepts input",
+    "pan/zoom canvas interaction (keyboard + pointer) — use-pan-zoom.ts hook has zero dependency on container dimensions (pure clientX/Y deltas + CSS transform), so switching from fixed h-[540px] to h-full + inset changes cannot regress drag/keyboard/wheel zoom; e2e keyboard-pan test passes",
+    "realtime activity ticker rendering and live-note toasts — traced onInsert prepend → slice(0,6).reverse() → render order end-to-end (see acceptanceCovered above); live-note toast reposition (left-4/top-[76px]) checked against search pill footprint (top-5, h-39px ends ~top-59/63px) — no overlap at either breakpoint",
+    "search filter node highlighting — tone-priority order re-verified: isFiltering&&hit (gold) still evaluated before isLive (red) and weight (white/white-70), so search-match gold highlighting is unaffected by the isLive color swap from white to #f17676"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

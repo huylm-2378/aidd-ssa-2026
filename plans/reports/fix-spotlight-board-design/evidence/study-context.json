@@ -1,0 +1,29 @@
+{
+  "task": "Spotlight Board UI diverged from design frame B.7 (MoMorph MaZUn5xHXZ, node 2940:14174): count was gold+white split instead of all-white 36px centered; search pill was dark-grey instead of gold-tint rgba(255,234,158,.10) with #998C5F border; names sat inside an inner framed box instead of floating directly on the photo panel; activity was a horizontal ticker instead of a bottom-left vertical stack fading upward (14px bold, opacity 1 at newest bottom to 0.1 oldest, 6 lines); zoom controls sat bottom-left instead of the design's bottom-right corner; stacked layout made the panel ~900px instead of the fixed ~548px overlay panel. Live-recipient highlight now uses the design's red #F17676; the node field is inset so names never collide with the top band or activity stack",
+  "mode": "auto",
+  "acceptanceCriteria": [
+    "count renders as a single all-white centered line over the panel",
+    "search pill uses gold-tint background and #998C5F border, top-left overlay",
+    "activity log renders as a vertical bottom-left stack with opacity fading upward (newest bottom, opacity 1)",
+    "names float directly on the panel background with no inner framed box, inset from the top band and activity stack",
+    "e2e regression test 'panel matches design frame B.7' fails without the fix and passes with it",
+    "existing live-board behaviors intact: keyboard pan/zoom, search filter opacity semantics, realtime ticker aria (4/4 e2e pass)",
+    "vitest, tsc --noEmit, eslint (changed files), next build all pass"
+  ],
+  "touchpoints": [
+    "app/_components/sun-kudos/spotlight-board-live.tsx",
+    "app/_components/sun-kudos/spotlight-canvas.tsx",
+    "e2e/sun-kudos-live-board.spec.ts"
+  ],
+  "blastRadius": [
+    "Spotlight Board panel layout and overlays",
+    "pan/zoom canvas interaction (keyboard + pointer)",
+    "realtime activity ticker rendering and live-note toasts",
+    "search filter node highlighting"
+  ],
+  "contracts": [
+    "SpotlightBoardLive props (initialCount, nodes, roster, initialActivity) unchanged",
+    "SpotlightCanvas props (nodes, query, liveNotes) unchanged",
+    "aria labels/roles unchanged (application role, search label, activity ticker label)"
+  ]
+}
